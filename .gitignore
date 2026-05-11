@@ -46,3 +46,10 @@ apps/api/src/generated/
 
 # TurboRepo (if added later)
 .turbo/
+
+# Prisma engines (binary, regenerated at build)
+apps/api/node_modules/
+apps/web/node_modules/
+packages/shared/node_modules/
+node_modules/
+.pnpm-store/
