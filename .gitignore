@@ -10,6 +10,7 @@ node_modules/
 dist/
 build/
 out/
+.next/
 
 # Environment files (never commit real values)
 .env
@@ -44,13 +45,8 @@ Thumbs.db
 # Prisma generated client (regenerated at build)
 apps/api/src/generated/
 
+# pnpm
+.pnpm-store/
+
 # TurboRepo (if added later)
 .turbo/
-
-# Prisma engines (binary, regenerated at build)
-apps/api/node_modules/
-apps/web/node_modules/
-packages/shared/node_modules/
-node_modules/
-.pnpm-store/
-.pnpm-store/
