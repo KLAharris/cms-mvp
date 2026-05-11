@@ -9,11 +9,12 @@ export class FakeUserRepository implements UserRepository {
     this.users.set(user.email.value, user);
   }
 
-  async findByEmail(email: Email): Promise<User | null> {
-    return this.users.get(email.value) ?? null;
+  findByEmail(email: Email): Promise<User | null> {
+    return Promise.resolve(this.users.get(email.value) ?? null);
   }
 
-  async save(user: User): Promise<void> {
+  save(user: User): Promise<void> {
     this.users.set(user.email.value, user);
+    return Promise.resolve();
   }
 }

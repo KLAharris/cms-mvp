@@ -9,14 +9,14 @@ export class FakeTokenSigner implements TokenSigner {
   readonly accessTokenPayloads: AccessTokenPayload[] = [];
   readonly refreshTokenPayloads: RefreshTokenPayload[] = [];
 
-  async signAccessToken(payload: AccessTokenPayload): Promise<string> {
+  signAccessToken(payload: AccessTokenPayload): Promise<string> {
     this.accessTokenPayloads.push(payload);
-    return `access:${payload.userId}:${payload.role}`;
+    return Promise.resolve(`access:${payload.userId}:${payload.role}`);
   }
 
-  async signRefreshToken(payload: RefreshTokenPayload): Promise<string> {
+  signRefreshToken(payload: RefreshTokenPayload): Promise<string> {
     this.refreshTokenPayloads.push(payload);
-    return `refresh:${payload.userId}`;
+    return Promise.resolve(`refresh:${payload.userId}`);
   }
 }
 

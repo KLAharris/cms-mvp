@@ -73,7 +73,9 @@ export class User {
     });
   }
 
-  recordSuccessfulLogin(_now: Date): User {
+  recordSuccessfulLogin(now: Date): User {
+    void now;
+
     return this.copy({
       failedLoginAttempts: 0,
       failedLoginWindowStartedAt: null,
