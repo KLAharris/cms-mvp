@@ -1,0 +1,48 @@
+# Private specification docs (not for public repo)
+docs/
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+out/
+
+# Environment files (never commit real values)
+.env
+.env.local
+.env.production
+.env.staging
+.env.*.local
+
+# Test & coverage output
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+pnpm-debug.log*
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Prisma generated client (regenerated at build)
+apps/api/src/generated/
+
+# TurboRepo (if added later)
+.turbo/

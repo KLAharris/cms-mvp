@@ -1,0 +1,20 @@
+{
+  "name": "cms-mvp",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.29.2",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "build": "pnpm -r run build",
+    "depcruise": "depcruise --config .dependency-cruiser.cjs apps packages"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "^16.4.0"
+  }
+}
