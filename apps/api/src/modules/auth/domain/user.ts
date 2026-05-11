@@ -1,4 +1,5 @@
 import { Email } from './email';
+import { DomainError } from './errors';
 import { Role } from './role';
 
 export type UserStatus = 'active' | 'locked';
@@ -30,11 +31,11 @@ export class User {
 
   constructor(props: UserProps) {
     if (props.id.trim() === '') {
-      throw new Error('User id is required');
+      throw new DomainError('User id is required');
     }
 
     if (props.passwordHash.trim() === '') {
-      throw new Error('Password hash is required');
+      throw new DomainError('Password hash is required');
     }
 
     this.id = props.id;
