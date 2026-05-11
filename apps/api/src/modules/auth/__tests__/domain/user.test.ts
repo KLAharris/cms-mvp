@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { Email } from '../../domain/email';
+import { DomainError } from '../../domain/errors';
 import { Role } from '../../domain/role';
 import { User } from '../../domain/user';
 
@@ -31,8 +32,8 @@ describe('User', () => {
   });
 
   it('rejects empty identity and password hash values', () => {
-    expect(() => createUser({ id: '' })).toThrow();
-    expect(() => createUser({ passwordHash: '' })).toThrow();
+    expect(() => createUser({ id: '' })).toThrow(DomainError);
+    expect(() => createUser({ passwordHash: '' })).toThrow(DomainError);
   });
 
   it('sets failedLoginWindowStartedAt on the first failed login', () => {
