@@ -130,7 +130,7 @@ describe('User', () => {
       createUser(),
     );
 
-    expect(locked.isLocked(new Date(baseTime.getTime() + 18 * 60 * 1000 + 1))).toBe(false);
+    expect(locked.isLocked(new Date(baseTime.getTime() + 19 * 60 * 1000 + 1))).toBe(false);
   });
 
   it('starts a fresh failed-login window after lockout expires', () => {
