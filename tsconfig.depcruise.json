@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@adapter/*": ["apps/api/src/modules/*/adapter"],
+      "@application/*": ["apps/api/src/modules/*/application"],
+      "@domain/*": ["apps/api/src/modules/*/domain"],
+      "@shared/*": ["apps/api/src/shared/*"]
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts"],
+  "exclude": ["**/dist/**", "**/node_modules/**"]
+}
