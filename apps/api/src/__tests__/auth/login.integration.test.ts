@@ -102,7 +102,7 @@ describe('POST /api/admin/auth/login', () => {
       .expect(400);
   });
 
-  it('returns 423 after five consecutive wrong passwords for the same account', async () => {
+  it('returns 401 after five consecutive wrong passwords for the same account', async () => {
     for (let attempt = 0; attempt < 5; attempt += 1) {
       await httpRequest()
         .post('/api/admin/auth/login')
@@ -113,7 +113,7 @@ describe('POST /api/admin/auth/login', () => {
     await httpRequest()
       .post('/api/admin/auth/login')
       .send({ email: 'author@cms.local', password: 'wrong-password' })
-      .expect(423);
+      .expect(401);
   });
 
   async function seedAuthor(): Promise<void> {

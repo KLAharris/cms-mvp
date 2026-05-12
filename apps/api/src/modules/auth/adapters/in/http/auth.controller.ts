@@ -101,7 +101,7 @@ export class AuthController {
     }
 
     if (error instanceof AccountLockedError) {
-      return new HttpException({ message: 'Account is locked' }, 423);
+      return new HttpException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
     }
 
     if (error instanceof InvalidEmailError) {
