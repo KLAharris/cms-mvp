@@ -120,6 +120,7 @@ describe('POST /api/admin/auth/login', () => {
     await prisma.user.create({
       data: {
         email: 'author@cms.local',
+        name: 'Test Author',
         passwordHash: await argon2.hash('password123'),
         role: Role.AUTHOR,
       },

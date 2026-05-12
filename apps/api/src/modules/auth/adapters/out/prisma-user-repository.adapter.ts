@@ -1,5 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Role as PrismaRole, User as PrismaUser } from '@prisma/client';
+import {
+  Role as PrismaRole,
+  User as PrismaUser,
+  UserStatus as PrismaUserStatus,
+} from '@prisma/client';
 
 import { UserRepository } from '../../application/ports/out/user-repository.port';
 import { Email } from '../../domain/email';
@@ -20,7 +24,10 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async save(user: User): Promise<void> {
-    const data = PrismaUserMapper.toPersistence(user);
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+    });
+    const data = PrismaUserMapper.toPersistence(user, existingUser);
 
     await this.prisma.user.upsert({
       where: { id: user.id },
@@ -32,6 +39,13 @@ export class PrismaUserRepository implements UserRepository {
 
 const PrismaUserMapper = {
   toDomain(user: PrismaUser): User {
+    const persistenceOnlyFields = {
+      name: user.name,
+      status: user.status,
+      lastLoginAt: user.lastLoginAt,
+    };
+    void persistenceOnlyFields;
+
     return new User({
       id: user.id,
       email: Email.create(user.email),
@@ -44,11 +58,14 @@ const PrismaUserMapper = {
     });
   },
 
-  toPersistence(user: User): {
+  toPersistence(user: User, existingUser: PrismaUser | null): {
     id: string;
     email: string;
+    name: string;
     passwordHash: string;
     role: PrismaRole;
+    status: PrismaUserStatus;
+    lastLoginAt: Date | null;
     failedLoginAttempts: number;
     failedLoginWindowStartedAt: Date | null;
     lockedUntil: Date | null;
@@ -56,8 +73,11 @@ const PrismaUserMapper = {
     return {
       id: user.id,
       email: user.email.value,
+      name: existingUser?.name ?? user.email.value,
       passwordHash: user.passwordHash,
       role: toPrismaRole(user.role),
+      status: existingUser?.status ?? PrismaUserStatus.ACTIVE,
+      lastLoginAt: existingUser?.lastLoginAt ?? null,
       failedLoginAttempts: user.failedLoginAttempts,
       failedLoginWindowStartedAt: user.failedLoginWindowStartedAt,
       lockedUntil: user.lockedUntil,

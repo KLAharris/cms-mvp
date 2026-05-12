@@ -10,10 +10,12 @@ async function main(): Promise<void> {
     where: { email: 'author@cms.local' },
     create: {
       email: 'author@cms.local',
+      name: 'Test Author',
       role: Role.AUTHOR,
       passwordHash,
     },
     update: {
+      name: 'Test Author',
       role: Role.AUTHOR,
       passwordHash,
       failedLoginAttempts: 0,
