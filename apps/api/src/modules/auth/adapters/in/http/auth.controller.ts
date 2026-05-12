@@ -12,10 +12,14 @@ import {
 import { z } from 'zod';
 
 import { LoginUseCase } from '../../../application/ports/in/login.port';
+import { Refresh } from '../../../application/use-cases/refresh';
+import { Logout } from '../../../application/use-cases/logout';
 import {
   AccountLockedError,
   InvalidCredentialsError,
   InvalidEmailError,
+  InvalidTokenError,
+  RateLimitExceededError,
 } from '../../../domain/errors';
 
 const loginBodySchema = z.object({
@@ -28,6 +32,7 @@ type LoginBody = z.infer<typeof loginBodySchema>;
 type LoginRequest = {
   ip?: string;
   headers: {
+    cookie?: string;
     'x-forwarded-for'?: string | string[];
   };
 };
@@ -44,11 +49,16 @@ type CookieResponse = {
       maxAge: number;
     },
   ): void;
+  clearCookie(name: string, options: { path: string }): void;
 };
 
 @Controller('api/admin/auth')
 export class AuthController {
-  constructor(@Inject('LOGIN_USE_CASE') private readonly login: LoginUseCase) {}
+  constructor(
+    @Inject('LOGIN_USE_CASE') private readonly login: LoginUseCase,
+    @Inject('REFRESH_USE_CASE') private readonly refresh: Refresh,
+    @Inject('LOGOUT_USE_CASE') private readonly logout: Logout,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -75,6 +85,55 @@ export class AuthController {
     } catch (error) {
       throw this.mapLoginError(error);
     }
+  }
+
+  @Post('refresh')
+  @HttpCode(200)
+  async refreshAccessToken(
+    @Req() request: LoginRequest,
+  ): Promise<{ accessToken: string }> {
+    const refreshToken = this.getCookie(request, 'refreshToken');
+
+    if (!refreshToken) {
+      throw new HttpException({ message: 'Invalid or expired token' }, HttpStatus.UNAUTHORIZED);
+    }
+
+    try {
+      const result = await this.refresh.execute({
+        refreshToken,
+        actorIp: this.getActorIp(request),
+      });
+
+      return { accessToken: result.accessToken };
+    } catch (error) {
+      if (error instanceof InvalidTokenError) {
+        throw new HttpException(
+          { message: 'Invalid or expired token' },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      throw error;
+    }
+  }
+
+  @Post('logout')
+  @HttpCode(204)
+  async logoutWithRefreshToken(
+    @Req() request: LoginRequest,
+    @Res({ passthrough: true }) response: CookieResponse,
+  ): Promise<void> {
+    const refreshToken = this.getCookie(request, 'refreshToken');
+
+    if (!refreshToken) {
+      return;
+    }
+
+    await this.logout.execute({
+      refreshToken,
+      actorIp: this.getActorIp(request),
+    });
+    response.clearCookie('refreshToken', { path: '/' });
   }
 
   private async handleLogin(
@@ -128,6 +187,24 @@ export class AuthController {
       return new HttpException({ message: 'Invalid email' }, HttpStatus.BAD_REQUEST);
     }
 
+    if (error instanceof RateLimitExceededError) {
+      return new HttpException({ message: 'Too many login attempts' }, HttpStatus.TOO_MANY_REQUESTS);
+    }
+
     throw error;
+  }
+
+  private getCookie(request: LoginRequest, name: string): string | undefined {
+    const cookieHeader = request.headers.cookie;
+
+    if (!cookieHeader) {
+      return undefined;
+    }
+
+    const cookies = cookieHeader.split(';').map((cookie) => cookie.trim());
+    const prefix = `${name}=`;
+    const cookie = cookies.find((candidate) => candidate.startsWith(prefix));
+
+    return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : undefined;
   }
 }
