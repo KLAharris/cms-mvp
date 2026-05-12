@@ -6,3 +6,21 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  ADMIN
+  EDITOR
+  AUTHOR
+}
+
+model User {
+  id                         String    @id @default(cuid())
+  email                      String    @unique
+  passwordHash               String
+  role                       Role
+  failedLoginAttempts        Int       @default(0)
+  failedLoginWindowStartedAt DateTime?
+  lockedUntil                DateTime?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+}
