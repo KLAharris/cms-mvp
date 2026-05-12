@@ -1,4 +1,13 @@
-import { Body, Controller, HttpException, HttpStatus, Inject, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { z } from 'zod';
 
 import { LoginUseCase } from '../../../application/ports/in/login.port';
@@ -34,6 +43,7 @@ export class AuthController {
   constructor(@Inject('LOGIN_USE_CASE') private readonly login: LoginUseCase) {}
 
   @Post('login')
+  @HttpCode(200)
   async loginWithPassword(
     @Body() body: unknown,
     @Res({ passthrough: true }) response: CookieResponse,
