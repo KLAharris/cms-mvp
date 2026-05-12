@@ -10,11 +10,18 @@ export class RedisRateLimiter implements RateLimiter {
 
   async check(key: string, limit: number, windowSeconds: number): Promise<void> {
     const redisKey = `ratelimit:${key}`;
-    const count = await this.redis.incr(redisKey);
 
-    if (count === 1) {
-      await this.redis.expire(redisKey, windowSeconds);
-    }
+    const luaScript = `
+      local count = redis.call('INCR', KEYS[1])
+      if count == 1 then
+        redis.call('EXPIRE', KEYS[1], ARGV[1])
+      end
+      return count
+    `;
+
+    const count = (await this.redis.eval(
+      luaScript, 1, redisKey, String(windowSeconds),
+    )) as number;
 
     if (count > limit) {
       throw new RateLimitExceededError();
