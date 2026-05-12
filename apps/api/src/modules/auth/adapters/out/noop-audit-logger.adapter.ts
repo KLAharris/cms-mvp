@@ -11,4 +11,12 @@ export class NoopAuditLogger implements AuditLogger {
   logLoginFailure(): Promise<void> {
     return Promise.resolve();
   }
+
+  logTokenRefresh(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  logLogout(): Promise<void> {
+    return Promise.resolve();
+  }
 }

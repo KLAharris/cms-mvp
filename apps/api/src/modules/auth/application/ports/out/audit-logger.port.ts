@@ -11,4 +11,16 @@ export interface AuditLogger {
     occurredAt: Date;
     reason: 'invalid_credentials' | 'account_locked';
   }): Promise<void>;
+
+  logTokenRefresh(params: {
+    userId: string;
+    actorIp: string;
+    occurredAt: Date;
+  }): Promise<void>;
+
+  logLogout(params: {
+    userId: string;
+    actorIp: string;
+    occurredAt: Date;
+  }): Promise<void>;
 }
