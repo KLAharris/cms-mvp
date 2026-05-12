@@ -3,6 +3,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { randomUUID } from 'node:crypto';
 
 import { HealthController } from './health/health.controller';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { HealthController } from './health/health.controller';
               },
       },
     }),
+    AuthModule,
   ],
   controllers: [HealthController],
 })
