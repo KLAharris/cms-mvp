@@ -4,6 +4,7 @@ import * as argon2 from 'argon2';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient, Role } from '@prisma/client';
+import Redis from 'ioredis';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { config as loadEnv } from 'dotenv';
@@ -25,6 +26,7 @@ const validLoginResponseSchema = z.object({
 describe('POST /api/admin/auth/login', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
+  let redis: Redis;
 
   beforeAll(async () => {
     loadEnv({ path: resolve(apiRoot, '.env') });
@@ -36,6 +38,7 @@ describe('POST /api/admin/auth/login', () => {
     }
 
     process.env.DATABASE_URL = testDatabaseUrl;
+    process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
 
     execFileSync('pnpm', ['exec', 'prisma', 'migrate', 'deploy'], {
       cwd: apiRoot,
@@ -47,6 +50,7 @@ describe('POST /api/admin/auth/login', () => {
     });
 
     prisma = new PrismaClient();
+    redis = createRedisClient(process.env.REDIS_URL);
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -58,11 +62,14 @@ describe('POST /api/admin/auth/login', () => {
   });
 
   beforeEach(async () => {
+    await redis.flushdb();
     await prisma.user.deleteMany();
     await seedAuthor();
   });
 
   afterAll(async () => {
+    redis.disconnect();
+    app.get<Redis>('REDIS_CLIENT').disconnect();
     await app.close();
     await prisma.$disconnect();
   });
@@ -116,6 +123,22 @@ describe('POST /api/admin/auth/login', () => {
       .expect(401);
   });
 
+  it('returns 429 after ten login attempts within sixty seconds from the same IP', async () => {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      await httpRequest()
+        .post('/api/admin/auth/login')
+        .set('x-forwarded-for', '198.51.100.10')
+        .send({ email: 'missing@cms.local', password: 'password123' })
+        .expect(401);
+    }
+
+    await httpRequest()
+      .post('/api/admin/auth/login')
+      .set('x-forwarded-for', '198.51.100.10')
+      .send({ email: 'missing@cms.local', password: 'password123' })
+      .expect(429);
+  });
+
   async function seedAuthor(): Promise<void> {
     await prisma.user.create({
       data: {
@@ -140,4 +163,16 @@ function readSetCookieHeader(response: request.Response): string {
   }
 
   return setCookie ?? '';
+}
+
+function createRedisClient(url: string): Redis {
+  const redis = new Redis(url, {
+    enableOfflineQueue: false,
+    maxRetriesPerRequest: 1,
+    retryStrategy: () => null,
+  });
+
+  redis.on('error', () => undefined);
+
+  return redis;
 }

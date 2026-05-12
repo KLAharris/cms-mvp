@@ -42,7 +42,6 @@ const PrismaUserMapper = {
     const persistenceOnlyFields = {
       name: user.name,
       status: user.status,
-      lastLoginAt: user.lastLoginAt,
     };
     void persistenceOnlyFields;
 
@@ -55,6 +54,7 @@ const PrismaUserMapper = {
       failedLoginAttempts: user.failedLoginAttempts,
       failedLoginWindowStartedAt: user.failedLoginWindowStartedAt,
       lockedUntil: user.lockedUntil,
+      lastLoginAt: user.lastLoginAt,
     });
   },
 
@@ -77,7 +77,7 @@ const PrismaUserMapper = {
       passwordHash: user.passwordHash,
       role: toPrismaRole(user.role),
       status: existingUser?.status ?? PrismaUserStatus.ACTIVE,
-      lastLoginAt: existingUser?.lastLoginAt ?? null,
+      lastLoginAt: user.lastLoginAt,
       failedLoginAttempts: user.failedLoginAttempts,
       failedLoginWindowStartedAt: user.failedLoginWindowStartedAt,
       lockedUntil: user.lockedUntil,

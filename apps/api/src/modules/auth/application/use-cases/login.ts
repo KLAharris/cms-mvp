@@ -6,6 +6,7 @@ import {
 import { AuditLogger } from '../ports/out/audit-logger.port';
 import { Clock } from '../ports/out/clock.port';
 import { PasswordHasher } from '../ports/out/password-hasher.port';
+import { RateLimiter } from '../ports/out/rate-limiter.port';
 import { TokenSigner } from '../ports/out/token-signer.port';
 import { UserRepository } from '../ports/out/user-repository.port';
 import { Email } from '../../domain/email';
@@ -18,9 +19,12 @@ export class Login implements LoginUseCase {
     private readonly tokens: TokenSigner,
     private readonly clock: Clock,
     private readonly auditLogger: AuditLogger,
+    private readonly rateLimiter: RateLimiter,
   ) {}
 
   async execute(command: LoginCommand): Promise<LoginResult> {
+    await this.rateLimiter.check(`login:${command.actorIp}`, 10, 60);
+
     const email = Email.create(command.email);
     const now = this.clock.now();
     const user = await this.users.findByEmail(email);
@@ -77,8 +81,8 @@ export class Login implements LoginUseCase {
     ]);
 
     return {
-      accessToken,
-      refreshToken,
+      accessToken: accessToken.token,
+      refreshToken: refreshToken.token,
       user: {
         id: loggedInUser.id,
         email: loggedInUser.email.value,

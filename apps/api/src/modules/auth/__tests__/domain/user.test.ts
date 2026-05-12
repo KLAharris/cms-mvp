@@ -17,6 +17,7 @@ function createUser(overrides: Partial<ConstructorParameters<typeof User>[0]> = 
     failedLoginAttempts: 0,
     failedLoginWindowStartedAt: null,
     lockedUntil: null,
+    lastLoginAt: null,
     ...overrides,
   });
 }

@@ -13,6 +13,7 @@ export type UserProps = {
   failedLoginAttempts: number;
   failedLoginWindowStartedAt: Date | null;
   lockedUntil: Date | null;
+  lastLoginAt: Date | null;
 };
 
 const FAILED_LOGIN_LIMIT = 5;
@@ -28,6 +29,7 @@ export class User {
   readonly failedLoginAttempts: number;
   readonly failedLoginWindowStartedAt: Date | null;
   readonly lockedUntil: Date | null;
+  readonly lastLoginAt: Date | null;
 
   constructor(props: UserProps) {
     if (props.id.trim() === '') {
@@ -46,6 +48,7 @@ export class User {
     this.failedLoginAttempts = props.failedLoginAttempts;
     this.failedLoginWindowStartedAt = props.failedLoginWindowStartedAt;
     this.lockedUntil = props.lockedUntil;
+    this.lastLoginAt = props.lastLoginAt;
   }
 
   recordFailedLogin(now: Date): User {
@@ -74,13 +77,12 @@ export class User {
   }
 
   recordSuccessfulLogin(now: Date): User {
-    void now;
-
     return this.copy({
       failedLoginAttempts: 0,
       failedLoginWindowStartedAt: null,
       lockedUntil: null,
       status: 'active',
+      lastLoginAt: now,
     });
   }
 
@@ -107,6 +109,7 @@ export class User {
       failedLoginAttempts: this.failedLoginAttempts,
       failedLoginWindowStartedAt: this.failedLoginWindowStartedAt,
       lockedUntil: this.lockedUntil,
+      lastLoginAt: this.lastLoginAt,
       ...overrides,
     });
   }

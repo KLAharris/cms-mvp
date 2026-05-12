@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
 import { Email } from '../../../domain/email';
-import { AccountLockedError, InvalidCredentialsError } from '../../../domain/errors';
+import {
+  AccountLockedError,
+  InvalidCredentialsError,
+  RateLimitExceededError,
+} from '../../../domain/errors';
 import { Role } from '../../../domain/role';
 import { User } from '../../../domain/user';
 import { Login } from '../../../application/use-cases/login';
 import { FakeAuditLogger } from '../../doubles/fake-audit-logger';
 import { FakeClock } from '../../doubles/fake-clock';
 import { FakePasswordHasher } from '../../doubles/fake-password-hasher';
+import { FakeRateLimiter } from '../../doubles/fake-rate-limiter';
 import { expectedAccessToken, FakeTokenSigner } from '../../doubles/fake-token-signer';
 import { FakeUserRepository } from '../../doubles/fake-user-repository';
 
@@ -24,15 +29,17 @@ function createUser(overrides: Partial<ConstructorParameters<typeof User>[0]> = 
     failedLoginAttempts: 0,
     failedLoginWindowStartedAt: null,
     lockedUntil: null,
+    lastLoginAt: null,
     ...overrides,
   });
 }
 
-function setup(user: User | null = createUser()): {
+function setup(user: User | null = createUser(), rateLimiter = new FakeRateLimiter()): {
   auditLogger: FakeAuditLogger;
   clock: FakeClock;
   login: Login;
   passwords: FakePasswordHasher;
+  rateLimiter: FakeRateLimiter;
   tokens: FakeTokenSigner;
   users: FakeUserRepository;
 } {
@@ -49,8 +56,9 @@ function setup(user: User | null = createUser()): {
   return {
     auditLogger,
     clock,
-    login: new Login(users, passwords, tokens, clock, auditLogger),
+    login: new Login(users, passwords, tokens, clock, auditLogger, rateLimiter),
     passwords,
+    rateLimiter,
     tokens,
     users,
   };
@@ -191,6 +199,37 @@ describe('Login', () => {
 
     expect(tokens.accessTokenPayloads).toEqual([{ userId: 'user-1', role: Role.EDITOR }]);
     expect(tokens.refreshTokenPayloads).toEqual([{ userId: 'user-1' }]);
+  });
+
+  it('throws RateLimitExceededError when the login rate limit is exceeded', async () => {
+    const { login } = setup(createUser(), new FakeRateLimiter(true));
+
+    await expect(
+      login.execute({ email: 'editor@example.com', password: 'correct-password', actorIp }),
+    ).rejects.toThrow(RateLimitExceededError);
+  });
+
+  it('checks the per-IP login rate limit', async () => {
+    const { login, rateLimiter } = setup();
+
+    await login.execute({ email: 'editor@example.com', password: 'correct-password', actorIp });
+
+    expect(rateLimiter.calls).toEqual([
+      {
+        key: `login:${actorIp}`,
+        limit: 10,
+        windowSeconds: 60,
+      },
+    ]);
+  });
+
+  it('successful login sets lastLoginAt and saves the user', async () => {
+    const { login, users } = setup();
+
+    await login.execute({ email: 'editor@example.com', password: 'correct-password', actorIp });
+
+    const saved = await users.findByEmail(Email.create('editor@example.com'));
+    expect(saved?.lastLoginAt).toEqual(baseTime);
   });
 
   it('allows login after lockout expires', async () => {
