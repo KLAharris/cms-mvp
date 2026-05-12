@@ -3,6 +3,7 @@ import {
   LoginResult,
   LoginUseCase,
 } from '../ports/in/login.port';
+import { AuditLogger } from '../ports/out/audit-logger.port';
 import { Clock } from '../ports/out/clock.port';
 import { PasswordHasher } from '../ports/out/password-hasher.port';
 import { TokenSigner } from '../ports/out/token-signer.port';
@@ -16,19 +17,31 @@ export class Login implements LoginUseCase {
     private readonly passwords: PasswordHasher,
     private readonly tokens: TokenSigner,
     private readonly clock: Clock,
+    private readonly auditLogger: AuditLogger,
   ) {}
 
   async execute(command: LoginCommand): Promise<LoginResult> {
     const email = Email.create(command.email);
+    const now = this.clock.now();
     const user = await this.users.findByEmail(email);
 
     if (!user) {
+      await this.auditLogger.logLoginFailure({
+        email: email.value,
+        actorIp: command.actorIp,
+        occurredAt: now,
+        reason: 'invalid_credentials',
+      });
       throw new InvalidCredentialsError();
     }
 
-    const now = this.clock.now();
-
     if (user.isLocked(now)) {
+      await this.auditLogger.logLoginFailure({
+        email: email.value,
+        actorIp: command.actorIp,
+        occurredAt: now,
+        reason: 'account_locked',
+      });
       throw new AccountLockedError();
     }
 
@@ -36,11 +49,22 @@ export class Login implements LoginUseCase {
 
     if (!passwordMatches) {
       await this.users.save(user.recordFailedLogin(now));
+      await this.auditLogger.logLoginFailure({
+        email: email.value,
+        actorIp: command.actorIp,
+        occurredAt: now,
+        reason: 'invalid_credentials',
+      });
       throw new InvalidCredentialsError();
     }
 
     const loggedInUser = user.recordSuccessfulLogin(now);
     await this.users.save(loggedInUser);
+    await this.auditLogger.logLoginSuccess({
+      userId: loggedInUser.id,
+      actorIp: command.actorIp,
+      occurredAt: now,
+    });
 
     const [accessToken, refreshToken] = await Promise.all([
       this.tokens.signAccessToken({

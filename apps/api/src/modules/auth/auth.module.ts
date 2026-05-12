@@ -6,8 +6,10 @@ import { Login } from './application/use-cases/login';
 import { AuthController } from './adapters/in/http/auth.controller';
 import { Argon2PasswordHasher } from './adapters/out/argon2-password-hasher.adapter';
 import { JoseJwtSigner } from './adapters/out/jose-jwt-signer.adapter';
+import { NoopAuditLogger } from './adapters/out/noop-audit-logger.adapter';
 import { PrismaUserRepository } from './adapters/out/prisma-user-repository.adapter';
 import { SystemClock } from './adapters/out/system-clock.adapter';
+import { AuditLogger } from './application/ports/out/audit-logger.port';
 import { Clock } from './application/ports/out/clock.port';
 import { PasswordHasher } from './application/ports/out/password-hasher.port';
 import { TokenSigner } from './application/ports/out/token-signer.port';
@@ -39,14 +41,19 @@ import { UserRepository } from './application/ports/out/user-repository.port';
       useClass: PrismaUserRepository,
     },
     {
+      provide: 'AUDIT_LOGGER',
+      useClass: NoopAuditLogger,
+    },
+    {
       provide: 'LOGIN_USE_CASE',
-      inject: ['USER_REPOSITORY', 'PASSWORD_HASHER', 'TOKEN_SIGNER', 'CLOCK'],
+      inject: ['USER_REPOSITORY', 'PASSWORD_HASHER', 'TOKEN_SIGNER', 'CLOCK', 'AUDIT_LOGGER'],
       useFactory: (
         users: UserRepository,
         passwords: PasswordHasher,
         tokens: TokenSigner,
         clock: Clock,
-      ): Login => new Login(users, passwords, tokens, clock),
+        auditLogger: AuditLogger,
+      ): Login => new Login(users, passwords, tokens, clock, auditLogger),
     },
   ],
 })

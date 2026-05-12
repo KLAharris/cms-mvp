@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Inject,
   Post,
+  Req,
   Res,
 } from '@nestjs/common';
 import { z } from 'zod';
@@ -23,6 +24,13 @@ const loginBodySchema = z.object({
 });
 
 type LoginBody = z.infer<typeof loginBodySchema>;
+
+type LoginRequest = {
+  ip?: string;
+  headers: {
+    'x-forwarded-for'?: string | string[];
+  };
+};
 
 type CookieResponse = {
   cookie(
@@ -46,6 +54,7 @@ export class AuthController {
   @HttpCode(200)
   async loginWithPassword(
     @Body() body: unknown,
+    @Req() request: LoginRequest,
     @Res({ passthrough: true }) response: CookieResponse,
   ): Promise<{
     accessToken: string;
@@ -62,7 +71,7 @@ export class AuthController {
     }
 
     try {
-      return await this.handleLogin(parsed.data, response);
+      return await this.handleLogin(parsed.data, this.getActorIp(request), response);
     } catch (error) {
       throw this.mapLoginError(error);
     }
@@ -70,6 +79,7 @@ export class AuthController {
 
   private async handleLogin(
     body: LoginBody,
+    actorIp: string,
     response: CookieResponse,
   ): Promise<{
     accessToken: string;
@@ -79,7 +89,10 @@ export class AuthController {
       role: string;
     };
   }> {
-    const result = await this.login.execute(body);
+    const result = await this.login.execute({
+      ...body,
+      actorIp,
+    });
 
     response.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
@@ -93,6 +106,13 @@ export class AuthController {
       accessToken: result.accessToken,
       user: result.user,
     };
+  }
+
+  private getActorIp(request: LoginRequest): string {
+    const forwardedFor = request.headers['x-forwarded-for'];
+    const firstForwardedFor = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
+
+    return firstForwardedFor?.split(',')[0]?.trim() || request.ip || 'unknown';
   }
 
   private mapLoginError(error: unknown): HttpException {
