@@ -22,3 +22,15 @@ export class AccountLockedError extends DomainError {
     super('Account is locked');
   }
 }
+
+export class InvalidTokenError extends DomainError {
+  constructor() {
+    super('Invalid or expired token');
+  }
+}
+
+export class RateLimitExceededError extends DomainError {
+  constructor() {
+    super('Rate limit exceeded');
+  }
+}

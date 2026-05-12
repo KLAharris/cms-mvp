@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 
 import {
   AccessTokenPayload,
   RefreshTokenPayload,
+  SignedToken,
   TokenSigner,
 } from '../../application/ports/out/token-signer.port';
 
@@ -14,21 +16,29 @@ export class JoseJwtSigner implements TokenSigner {
     this.secretKey = new TextEncoder().encode(jwtSecret);
   }
 
-  async signAccessToken(payload: AccessTokenPayload): Promise<string> {
+  async signAccessToken(payload: AccessTokenPayload): Promise<SignedToken> {
     const { SignJWT } = await import('jose');
+    const jti = randomUUID();
 
-    return new SignJWT({ sub: payload.userId, role: payload.role })
+    const token = await new SignJWT({ sub: payload.userId, role: payload.role })
       .setProtectedHeader({ alg: 'HS256' })
+      .setJti(jti)
       .setExpirationTime('15m')
       .sign(this.secretKey);
+
+    return { token, jti };
   }
 
-  async signRefreshToken(payload: RefreshTokenPayload): Promise<string> {
+  async signRefreshToken(payload: RefreshTokenPayload): Promise<SignedToken> {
     const { SignJWT } = await import('jose');
+    const jti = randomUUID();
 
-    return new SignJWT({ sub: payload.userId })
+    const token = await new SignJWT({ sub: payload.userId })
       .setProtectedHeader({ alg: 'HS256' })
+      .setJti(jti)
       .setExpirationTime('7d')
       .sign(this.secretKey);
+
+    return { token, jti };
   }
 }

@@ -2,6 +2,7 @@ import { Role } from '../../domain/role';
 import {
   AccessTokenPayload,
   RefreshTokenPayload,
+  SignedToken,
   TokenSigner,
 } from '../../application/ports/out/token-signer.port';
 
@@ -9,14 +10,20 @@ export class FakeTokenSigner implements TokenSigner {
   readonly accessTokenPayloads: AccessTokenPayload[] = [];
   readonly refreshTokenPayloads: RefreshTokenPayload[] = [];
 
-  signAccessToken(payload: AccessTokenPayload): Promise<string> {
+  signAccessToken(payload: AccessTokenPayload): Promise<SignedToken> {
     this.accessTokenPayloads.push(payload);
-    return Promise.resolve(`access:${payload.userId}:${payload.role}`);
+    return Promise.resolve({
+      token: `access:${payload.userId}:${payload.role ?? 'none'}`,
+      jti: `access-jti:${payload.userId}`,
+    });
   }
 
-  signRefreshToken(payload: RefreshTokenPayload): Promise<string> {
+  signRefreshToken(payload: RefreshTokenPayload): Promise<SignedToken> {
     this.refreshTokenPayloads.push(payload);
-    return Promise.resolve(`refresh:${payload.userId}`);
+    return Promise.resolve({
+      token: `refresh:${payload.userId}`,
+      jti: `refresh-jti:${payload.userId}`,
+    });
   }
 }
 
