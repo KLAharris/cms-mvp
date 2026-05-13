@@ -25,11 +25,24 @@ export type LogoutAuditCall = {
   occurredAt: Date;
 };
 
+export type AuditLogCall = {
+  action: string;
+  actorId: string;
+  targetId: string;
+  occurredAt: Date;
+};
+
 export class FakeAuditLogger implements AuditLogger {
+  readonly logCalls: AuditLogCall[] = [];
   readonly successCalls: LoginSuccessAuditCall[] = [];
   readonly failureCalls: LoginFailureAuditCall[] = [];
   readonly tokenRefreshCalls: TokenRefreshAuditCall[] = [];
   readonly logoutCalls: LogoutAuditCall[] = [];
+
+  log(params: AuditLogCall): Promise<void> {
+    this.logCalls.push(params);
+    return Promise.resolve();
+  }
 
   logLoginSuccess(params: LoginSuccessAuditCall): Promise<void> {
     this.successCalls.push(params);

@@ -4,6 +4,10 @@ import { AuditLogger } from '../../application/ports/out/audit-logger.port';
 
 @Injectable()
 export class NoopAuditLogger implements AuditLogger {
+  log(): Promise<void> {
+    return Promise.resolve();
+  }
+
   logLoginSuccess(): Promise<void> {
     return Promise.resolve();
   }
