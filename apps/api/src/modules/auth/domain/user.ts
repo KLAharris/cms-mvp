@@ -1,8 +1,12 @@
 import { Email } from './email';
-import { DomainError } from './errors';
+import {
+  AlreadyDeactivatedError,
+  DomainError,
+  InvalidTransitionError,
+} from './errors';
 import { Role } from './role';
 
-export type UserStatus = 'active' | 'locked';
+export type UserStatus = 'active' | 'locked' | 'invited' | 'deactivated';
 
 export type UserProps = {
   id: string;
@@ -14,6 +18,8 @@ export type UserProps = {
   failedLoginWindowStartedAt: Date | null;
   lockedUntil: Date | null;
   lastLoginAt: Date | null;
+  inviteTokenHash?: string | null;
+  inviteExpiresAt?: Date | null;
 };
 
 const FAILED_LOGIN_LIMIT = 5;
@@ -23,20 +29,22 @@ const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 export class User {
   readonly id: string;
   readonly email: Email;
-  readonly passwordHash: string;
-  readonly role: Role;
-  readonly status: UserStatus;
+  passwordHash: string;
+  role: Role;
+  status: UserStatus;
   readonly failedLoginAttempts: number;
   readonly failedLoginWindowStartedAt: Date | null;
   readonly lockedUntil: Date | null;
   readonly lastLoginAt: Date | null;
+  inviteTokenHash: string | null;
+  inviteExpiresAt: Date | null;
 
   constructor(props: UserProps) {
     if (props.id.trim() === '') {
       throw new DomainError('User id is required');
     }
 
-    if (props.passwordHash.trim() === '') {
+    if (props.passwordHash.trim() === '' && props.status !== 'invited') {
       throw new DomainError('Password hash is required');
     }
 
@@ -49,6 +57,33 @@ export class User {
     this.failedLoginWindowStartedAt = props.failedLoginWindowStartedAt;
     this.lockedUntil = props.lockedUntil;
     this.lastLoginAt = props.lastLoginAt;
+    this.inviteTokenHash = props.inviteTokenHash ?? null;
+    this.inviteExpiresAt = props.inviteExpiresAt ?? null;
+  }
+
+  static createInvited(
+    id: string,
+    email: Email,
+    name: string,
+    role: Role,
+    inviteTokenHash: string,
+    inviteExpiresAt: Date,
+  ): User {
+    void name;
+
+    return new User({
+      id,
+      email,
+      passwordHash: '',
+      role,
+      status: 'invited',
+      failedLoginAttempts: 0,
+      failedLoginWindowStartedAt: null,
+      lockedUntil: null,
+      lastLoginAt: null,
+      inviteTokenHash,
+      inviteExpiresAt,
+    });
   }
 
   recordFailedLogin(now: Date): User {
@@ -90,6 +125,55 @@ export class User {
     return this.lockedUntil !== null && this.lockedUntil > now;
   }
 
+  invite(tokenHash: string, expiresAt: Date): void {
+    if (
+      this.status === 'active' ||
+      this.status === 'locked' ||
+      this.status === 'deactivated'
+    ) {
+      throw new InvalidTransitionError();
+    }
+
+    this.status = 'invited';
+    this.inviteTokenHash = tokenHash;
+    this.inviteExpiresAt = expiresAt;
+  }
+
+  activate(passwordHash: string): void {
+    if (this.status !== 'invited') {
+      throw new InvalidTransitionError();
+    }
+
+    if (passwordHash.trim() === '') {
+      throw new DomainError('Password hash is required');
+    }
+
+    this.status = 'active';
+    this.passwordHash = passwordHash;
+    this.inviteTokenHash = null;
+    this.inviteExpiresAt = null;
+  }
+
+  deactivate(): void {
+    if (this.status === 'deactivated') {
+      throw new AlreadyDeactivatedError();
+    }
+
+    if (this.status === 'invited') {
+      throw new InvalidTransitionError();
+    }
+
+    this.status = 'deactivated';
+  }
+
+  changeRole(newRole: Role): void {
+    if (newRole === this.role) {
+      throw new InvalidTransitionError();
+    }
+
+    this.role = newRole;
+  }
+
   private withFreshFailedLoginWindow(now: Date): User {
     return this.copy({
       failedLoginAttempts: 1,
@@ -110,6 +194,8 @@ export class User {
       failedLoginWindowStartedAt: this.failedLoginWindowStartedAt,
       lockedUntil: this.lockedUntil,
       lastLoginAt: this.lastLoginAt,
+      inviteTokenHash: this.inviteTokenHash,
+      inviteExpiresAt: this.inviteExpiresAt,
       ...overrides,
     });
   }

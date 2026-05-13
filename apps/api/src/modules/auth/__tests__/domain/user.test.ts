@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { Email } from '../../domain/email';
-import { DomainError } from '../../domain/errors';
+import {
+  AlreadyDeactivatedError,
+  DomainError,
+  InvalidTransitionError,
+} from '../../domain/errors';
 import { Role } from '../../domain/role';
 import { User } from '../../domain/user';
 
@@ -164,5 +168,116 @@ describe('User', () => {
     expect(failed.failedLoginWindowStartedAt).toEqual(baseTime);
     expect(failed.lockedUntil).toBeNull();
     expect(failed.status).toBe('active');
+  });
+
+  it('invite() on active user throws InvalidTransitionError', () => {
+    const user = createUser({ status: 'active' });
+
+    expect(() => {
+      user.invite('invite-token-hash', baseTime);
+    }).toThrow(
+      InvalidTransitionError,
+    );
+  });
+
+  it('invite() on deactivated user throws InvalidTransitionError', () => {
+    const user = createUser({ status: 'deactivated' });
+
+    expect(() => {
+      user.invite('invite-token-hash', baseTime);
+    }).toThrow(
+      InvalidTransitionError,
+    );
+  });
+
+  it('invite() on invited user sets status, tokenHash, and expiresAt', () => {
+    const expiresAt = new Date('2026-05-18T10:00:00.000Z');
+    const user = User.createInvited(
+      'user-2',
+      Email.create('author@example.com'),
+      'Author User',
+      Role.AUTHOR,
+      'initial-token-hash',
+      baseTime,
+    );
+
+    user.invite('new-token-hash', expiresAt);
+
+    expect(user.status).toBe('invited');
+    expect(user.inviteTokenHash).toBe('new-token-hash');
+    expect(user.inviteExpiresAt).toEqual(expiresAt);
+  });
+
+  it('activate() on invited user sets active status, updates passwordHash, and clears invite fields', () => {
+    const user = User.createInvited(
+      'user-2',
+      Email.create('author@example.com'),
+      'Author User',
+      Role.AUTHOR,
+      'invite-token-hash',
+      baseTime,
+    );
+
+    user.activate('hashed:new-password');
+
+    expect(user.status).toBe('active');
+    expect(user.passwordHash).toBe('hashed:new-password');
+    expect(user.inviteTokenHash).toBeNull();
+    expect(user.inviteExpiresAt).toBeNull();
+  });
+
+  it('activate() on active user throws InvalidTransitionError', () => {
+    const user = createUser({ status: 'active' });
+
+    expect(() => {
+      user.activate('hashed:new-password');
+    }).toThrow(InvalidTransitionError);
+  });
+
+  it('deactivate() on active user sets status deactivated', () => {
+    const user = createUser({ status: 'active' });
+
+    user.deactivate();
+
+    expect(user.status).toBe('deactivated');
+  });
+
+  it('deactivate() on deactivated user throws AlreadyDeactivatedError', () => {
+    const user = createUser({ status: 'deactivated' });
+
+    expect(() => {
+      user.deactivate();
+    }).toThrow(AlreadyDeactivatedError);
+  });
+
+  it('deactivate() on invited user throws InvalidTransitionError', () => {
+    const user = User.createInvited(
+      'user-2',
+      Email.create('author@example.com'),
+      'Author User',
+      Role.AUTHOR,
+      'invite-token-hash',
+      baseTime,
+    );
+
+    expect(() => {
+      user.deactivate();
+    }).toThrow(InvalidTransitionError);
+  });
+
+  it('changeRole() to same role throws InvalidTransitionError', () => {
+    const user = createUser({ role: Role.EDITOR });
+
+    expect(() => {
+      user.changeRole(Role.EDITOR);
+    }).toThrow(InvalidTransitionError);
+  });
+
+  it('changeRole() to different role succeeds', () => {
+    const user = createUser({ role: Role.AUTHOR });
+
+    user.changeRole(Role.EDITOR);
+
+    expect(user.role).toBe(Role.EDITOR);
   });
 });
