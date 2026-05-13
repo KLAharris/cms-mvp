@@ -138,6 +138,6 @@ import { UserRepository } from './application/ports/out/user-repository.port';
       ): Logout => new Logout(tokenVerifier, tokenBlocklist, clock, auditLogger),
     },
   ],
-  exports: ['USER_REPOSITORY', 'PASSWORD_HASHER', 'CLOCK', 'AUDIT_LOGGER'],
+  exports: ['JWT_SECRET', 'USER_REPOSITORY', 'PASSWORD_HASHER', 'CLOCK', 'AUDIT_LOGGER'],
 })
 export class AuthModule {}

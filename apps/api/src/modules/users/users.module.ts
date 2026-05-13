@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { PrismaModule } from '../../shared/prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersController } from './adapters/in/http/users.controller';
@@ -22,6 +23,7 @@ import { UpdateUser } from './application/use-cases/update-user.use-case';
   imports: [forwardRef(() => AuthModule), ConfigModule, PrismaModule],
   controllers: [UsersController],
   providers: [
+    JwtAuthGuard,
     {
       provide: 'EMAIL_SENDER',
       useClass: NoopEmailSender,
