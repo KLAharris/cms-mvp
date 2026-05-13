@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class */
 import { LastAdminError } from '../errors';
 import { Role } from '../role';
-
-export type User = {
-  role: Role;
-};
+import { User } from '../user';
 
 export class LastAdminGuard {
   static assertNotLastAdmin(adminCount: number, targetUser: User): void {
