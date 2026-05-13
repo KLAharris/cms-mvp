@@ -4,6 +4,8 @@ export type DeactivateUserCommand = {
   userId: string;
 };
 
+// Exposed as POST /api/admin/users/{id}/deactivate (not PATCH)
+// Admin only
 export interface DeactivateUserUseCase {
   execute(cmd: DeactivateUserCommand, actorId: string, actorRole: Role): Promise<void>;
 }

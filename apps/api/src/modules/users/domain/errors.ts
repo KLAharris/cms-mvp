@@ -46,3 +46,11 @@ export class UserAlreadyExistsError extends DomainError {
     super('User already exists');
   }
 }
+
+export class WeakPasswordError extends DomainError {
+  constructor() {
+    super(
+      'Password must be at least 12 characters and contain at least one letter and one digit',
+    );
+  }
+}

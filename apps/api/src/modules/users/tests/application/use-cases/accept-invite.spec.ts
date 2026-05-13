@@ -8,6 +8,7 @@ import {
   InviteExpiredError,
   InvalidTransitionError,
   UserNotFoundError,
+  WeakPasswordError,
 } from '../../../domain/errors';
 import { Role } from '../../../domain/role';
 import { User } from '../../../domain/user';
@@ -52,11 +53,11 @@ describe('AcceptInvite', () => {
   it('Valid token and password activates user and updates passwordHash', async () => {
     const { acceptInvite, users } = setup(createInvited());
 
-    await acceptInvite.execute({ token, password: 'new-password' });
+    await acceptInvite.execute({ token, password: 'new-password1' });
 
     const saved = await users.findById('user-1');
     expect(saved?.status).toBe('active');
-    expect(saved?.passwordHash).toBe('hashed:new-password');
+    expect(saved?.passwordHash).toBe('hashed:new-password1');
     expect(saved?.inviteTokenHash).toBeNull();
     expect(saved?.inviteExpiresAt).toBeNull();
   });
@@ -65,7 +66,7 @@ describe('AcceptInvite', () => {
     const { acceptInvite } = setup();
 
     await expect(
-      acceptInvite.execute({ token: 'unknown-token', password: 'new-password' }),
+      acceptInvite.execute({ token: 'unknown-token', password: 'new-password1' }),
     ).rejects.toThrow(UserNotFoundError);
   });
 
@@ -73,7 +74,7 @@ describe('AcceptInvite', () => {
     const { acceptInvite } = setup(createInvited(new Date(baseTime.getTime() - 1)));
 
     await expect(
-      acceptInvite.execute({ token, password: 'new-password' }),
+      acceptInvite.execute({ token, password: 'new-password1' }),
     ).rejects.toThrow(InviteExpiredError);
   });
 
@@ -96,7 +97,41 @@ describe('AcceptInvite', () => {
     const { acceptInvite } = setup(undefined, repo);
 
     await expect(
-      acceptInvite.execute({ token, password: 'new-password' }),
+      acceptInvite.execute({ token, password: 'new-password1' }),
     ).rejects.toThrow(InvalidTransitionError);
+  });
+
+  it('Password shorter than 12 chars throws WeakPasswordError', async () => {
+    const { acceptInvite } = setup(createInvited());
+
+    await expect(
+      acceptInvite.execute({ token, password: 'short1' }),
+    ).rejects.toThrow(WeakPasswordError);
+  });
+
+  it('Password with no letters throws WeakPasswordError', async () => {
+    const { acceptInvite } = setup(createInvited());
+
+    await expect(
+      acceptInvite.execute({ token, password: '123456789012' }),
+    ).rejects.toThrow(WeakPasswordError);
+  });
+
+  it('Password with no digits throws WeakPasswordError', async () => {
+    const { acceptInvite } = setup(createInvited());
+
+    await expect(
+      acceptInvite.execute({ token, password: 'new-password' }),
+    ).rejects.toThrow(WeakPasswordError);
+  });
+
+  it('Valid password with 12+ chars, a letter, and a digit succeeds', async () => {
+    const { acceptInvite, users } = setup(createInvited());
+
+    await acceptInvite.execute({ token, password: 'valid-pass-1' });
+
+    const saved = await users.findById('user-1');
+    expect(saved?.status).toBe('active');
+    expect(saved?.passwordHash).toBe('hashed:valid-pass-1');
   });
 });

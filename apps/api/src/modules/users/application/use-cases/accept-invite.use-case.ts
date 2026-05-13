@@ -7,7 +7,11 @@ import {
 import { Clock } from '../ports/out/clock.port';
 import { PasswordHasher } from '../ports/out/password-hasher.port';
 import { UserRepository } from '../ports/out/user-repository.port';
-import { InviteExpiredError, UserNotFoundError } from '../../domain/errors';
+import {
+  InviteExpiredError,
+  UserNotFoundError,
+  WeakPasswordError,
+} from '../../domain/errors';
 
 export class AcceptInvite implements AcceptInviteUseCase {
   constructor(
@@ -26,6 +30,14 @@ export class AcceptInvite implements AcceptInviteUseCase {
 
     if (user.inviteExpiresAt !== null && user.inviteExpiresAt < this.clock.now()) {
       throw new InviteExpiredError();
+    }
+
+    const isLongEnough = cmd.password.length >= 12;
+    const hasLetter = /[a-zA-Z]/.test(cmd.password);
+    const hasDigit = /[0-9]/.test(cmd.password);
+
+    if (!isLongEnough || !hasLetter || !hasDigit) {
+      throw new WeakPasswordError();
     }
 
     const passwordHash = await this.passwordHasher.hash(cmd.password);
