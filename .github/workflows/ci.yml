@@ -52,6 +52,7 @@ jobs:
           TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           REDIS_URL: redis://localhost:6379
+          APP_BASE_URL: http://localhost:3000
 
       - name: Build
         run: pnpm run build

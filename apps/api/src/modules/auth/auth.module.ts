@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
 import { PrismaModule } from '../../shared/prisma/prisma.module';
+import { UsersModule } from '../users/users.module';
 import { Login } from './application/use-cases/login';
 import { Logout } from './application/use-cases/logout';
 import { Refresh } from './application/use-cases/refresh';
@@ -25,7 +26,7 @@ import { TokenVerifier } from './application/ports/out/token-verifier.port';
 import { UserRepository } from './application/ports/out/user-repository.port';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, forwardRef(() => UsersModule)],
   controllers: [AuthController],
   providers: [
     {
@@ -137,5 +138,6 @@ import { UserRepository } from './application/ports/out/user-repository.port';
       ): Logout => new Logout(tokenVerifier, tokenBlocklist, clock, auditLogger),
     },
   ],
+  exports: ['USER_REPOSITORY', 'PASSWORD_HASHER', 'CLOCK', 'AUDIT_LOGGER'],
 })
 export class AuthModule {}

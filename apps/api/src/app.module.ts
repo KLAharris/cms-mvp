@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 
 import { HealthController } from './health/health.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AuthModule } from './modules/auth/auth.module';
       },
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [HealthController],
 })

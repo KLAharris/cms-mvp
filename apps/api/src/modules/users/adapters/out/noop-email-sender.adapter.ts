@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { PinoLogger } from 'nestjs-pino';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 import { EmailSender } from '../../application/ports/out/email-sender.port';
 
 @Injectable()
 export class NoopEmailSender implements EmailSender {
-  constructor(private readonly logger: PinoLogger) {
-    this.logger.setContext(NoopEmailSender.name);
-  }
+  constructor(
+    @InjectPinoLogger(NoopEmailSender.name) private readonly logger: PinoLogger,
+  ) {}
 
   sendInvite(params: {
     to: string;
