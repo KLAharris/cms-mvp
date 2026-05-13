@@ -14,6 +14,14 @@ import { AppModule } from '../../app.module';
 import { ValidationPipe } from '../../shared/http/validation.pipe';
 
 const apiRoot = resolve(__dirname, '../../..');
+
+const cleanupRedis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+  enableOfflineQueue: false,
+  maxRetriesPerRequest: 1,
+  retryStrategy: () => null,
+});
+cleanupRedis.on('error', () => undefined);
+
 const adminEmail = 'admin@cms.local';
 const adminPassword = 'adminpassword123';
 const editorEmail = 'editor@cms.local';
@@ -22,7 +30,6 @@ const editorPassword = 'editorpassword123';
 describe('User management integration', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
-  let redis: Redis;
 
   beforeAll(async () => {
     loadEnv({ path: resolve(apiRoot, '.env') });
@@ -47,7 +54,6 @@ describe('User management integration', () => {
     });
 
     prisma = new PrismaClient();
-    redis = createRedisClient(process.env.REDIS_URL);
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -59,7 +65,7 @@ describe('User management integration', () => {
   });
 
   beforeEach(async () => {
-    await redis.flushdb();
+    await cleanupRedis.flushdb();
     await prisma.user.deleteMany();
     await seedUser({
       email: adminEmail,
@@ -70,9 +76,8 @@ describe('User management integration', () => {
   });
 
   afterAll(async () => {
-    redis.disconnect();
-    app.get<Redis>('REDIS_CLIENT').disconnect();
     await app.close();
+    await cleanupRedis.quit();
     await prisma.$disconnect();
   });
 
@@ -343,15 +348,3 @@ describe('User management integration', () => {
     return request(app.getHttpServer() as Parameters<typeof request>[0]);
   }
 });
-
-function createRedisClient(url: string): Redis {
-  const redis = new Redis(url, {
-    enableOfflineQueue: false,
-    maxRetriesPerRequest: 1,
-    retryStrategy: () => null,
-  });
-
-  redis.on('error', () => undefined);
-
-  return redis;
-}

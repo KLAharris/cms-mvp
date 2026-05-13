@@ -14,6 +14,14 @@ import { AppModule } from '../../app.module';
 import { ValidationPipe } from '../../shared/http/validation.pipe';
 
 const apiRoot = resolve(__dirname, '../../..');
+
+const cleanupRedis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+  enableOfflineQueue: false,
+  maxRetriesPerRequest: 1,
+  retryStrategy: () => null,
+});
+cleanupRedis.on('error', () => undefined);
+
 const refreshResponseSchema = z.object({
   accessToken: z.string(),
 });
@@ -21,7 +29,6 @@ const refreshResponseSchema = z.object({
 describe('POST /api/admin/auth/refresh', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
-  let redis: Redis;
 
   beforeAll(async () => {
     loadEnv({ path: resolve(apiRoot, '.env') });
@@ -45,7 +52,6 @@ describe('POST /api/admin/auth/refresh', () => {
     });
 
     prisma = new PrismaClient();
-    redis = createRedisClient(process.env.REDIS_URL);
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -57,15 +63,14 @@ describe('POST /api/admin/auth/refresh', () => {
   });
 
   beforeEach(async () => {
-    await redis.flushdb();
+    await cleanupRedis.flushdb();
     await prisma.user.deleteMany();
     await seedAuthor(prisma);
   });
 
   afterAll(async () => {
-    redis.disconnect();
-    app.get<Redis>('REDIS_CLIENT').disconnect();
     await app.close();
+    await cleanupRedis.quit();
     await prisma.$disconnect();
   });
 
@@ -138,16 +143,4 @@ function readRefreshCookie(response: request.Response): string {
   }
 
   return refreshCookie.split(';')[0] ?? refreshCookie;
-}
-
-function createRedisClient(url: string): Redis {
-  const redis = new Redis(url, {
-    enableOfflineQueue: false,
-    maxRetriesPerRequest: 1,
-    retryStrategy: () => null,
-  });
-
-  redis.on('error', () => undefined);
-
-  return redis;
 }
