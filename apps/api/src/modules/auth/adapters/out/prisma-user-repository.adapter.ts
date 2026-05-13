@@ -37,7 +37,7 @@ export class PrismaUserRepository implements UserRepository {
 
   async findMany(criteria: UserSearchCriteria): Promise<PagedUsers> {
     const page = criteria.page ?? 1;
-    const pageSize = criteria.pageSize ?? 25;
+    const pageSize = criteria.pageSize ?? 20;
     const where = {
       role: criteria.role === undefined ? undefined : toPrismaRole(criteria.role),
       status:
@@ -60,10 +60,15 @@ export class PrismaUserRepository implements UserRepository {
     };
   }
 
-  findInvitedByTokenHash(sha256Hash: string): Promise<User | null> {
-    void sha256Hash;
+  async findInvitedByTokenHash(sha256Hash: string): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        status: PrismaUserStatus.INVITED,
+        inviteTokenHash: sha256Hash,
+      },
+    });
 
-    return Promise.resolve(null);
+    return user ? PrismaUserMapper.toDomain(user) : null;
   }
 
   async countByRole(role: Role): Promise<number> {
@@ -73,10 +78,7 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async save(user: User): Promise<void> {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { id: user.id },
-    });
-    const data = PrismaUserMapper.toPersistence(user, existingUser);
+    const data = PrismaUserMapper.toPersistence(user);
 
     await this.prisma.user.upsert({
       where: { id: user.id },
@@ -88,12 +90,10 @@ export class PrismaUserRepository implements UserRepository {
 
 const PrismaUserMapper = {
   toDomain(user: PrismaUser): User {
-    const persistenceOnlyFields = { name: user.name };
-    void persistenceOnlyFields;
-
     return new User({
       id: user.id,
       email: Email.create(user.email),
+      name: user.name,
       passwordHash: user.passwordHash,
       role: toDomainRole(user.role),
       status:
@@ -104,12 +104,12 @@ const PrismaUserMapper = {
       failedLoginWindowStartedAt: user.failedLoginWindowStartedAt,
       lockedUntil: user.lockedUntil,
       lastLoginAt: user.lastLoginAt,
-      inviteTokenHash: null,
-      inviteExpiresAt: null,
+      inviteTokenHash: user.inviteTokenHash,
+      inviteExpiresAt: user.inviteExpiresAt,
     });
   },
 
-  toPersistence(user: User, existingUser: PrismaUser | null): {
+  toPersistence(user: User): {
     id: string;
     email: string;
     name: string;
@@ -120,11 +120,13 @@ const PrismaUserMapper = {
     failedLoginAttempts: number;
     failedLoginWindowStartedAt: Date | null;
     lockedUntil: Date | null;
+    inviteTokenHash: string | null;
+    inviteExpiresAt: Date | null;
   } {
     return {
       id: user.id,
       email: user.email.value,
-      name: existingUser?.name ?? user.email.value,
+      name: user.name,
       passwordHash: user.passwordHash,
       role: toPrismaRole(user.role),
       status: toPrismaUserStatus(user.status),
@@ -132,6 +134,8 @@ const PrismaUserMapper = {
       failedLoginAttempts: user.failedLoginAttempts,
       failedLoginWindowStartedAt: user.failedLoginWindowStartedAt,
       lockedUntil: user.lockedUntil,
+      inviteTokenHash: user.inviteTokenHash,
+      inviteExpiresAt: user.inviteExpiresAt,
     };
   },
 };

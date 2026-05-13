@@ -11,6 +11,7 @@ export type UserStatus = 'active' | 'locked' | 'invited' | 'deactivated';
 export type UserProps = {
   id: string;
   email: Email;
+  name?: string;
   passwordHash: string;
   role: Role;
   status: UserStatus;
@@ -29,6 +30,7 @@ const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 export class User {
   readonly id: string;
   readonly email: Email;
+  name: string;
   passwordHash: string;
   role: Role;
   status: UserStatus;
@@ -50,6 +52,7 @@ export class User {
 
     this.id = props.id;
     this.email = props.email;
+    this.name = props.name ?? props.email.value;
     this.passwordHash = props.passwordHash;
     this.role = props.role;
     this.status = props.status;
@@ -74,6 +77,7 @@ export class User {
     return new User({
       id,
       email,
+      name,
       passwordHash: '',
       role,
       status: 'invited',
@@ -187,6 +191,7 @@ export class User {
     return new User({
       id: this.id,
       email: this.email,
+      name: this.name,
       passwordHash: this.passwordHash,
       role: this.role,
       status: this.status,
