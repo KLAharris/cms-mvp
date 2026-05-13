@@ -53,6 +53,10 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           REDIS_URL: redis://localhost:6379
           APP_BASE_URL: http://localhost:3000
+          EMAIL_PROVIDER: console
+          EMAIL_FROM: no-reply@cms.example.com
+          EMAIL_FROM_NAME: CMS
+          PUBLIC_URL: http://localhost:5173
 
       - name: Build
         run: pnpm run build
