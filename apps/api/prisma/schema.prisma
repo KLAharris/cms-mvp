@@ -27,6 +27,8 @@ model User {
   role                       Role
   status                     UserStatus @default(ACTIVE)
   lastLoginAt                DateTime?
+  inviteTokenHash            String?
+  inviteExpiresAt            DateTime?
   failedLoginAttempts        Int       @default(0)
   failedLoginWindowStartedAt DateTime?
   lockedUntil                DateTime?
