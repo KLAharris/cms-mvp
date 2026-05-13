@@ -128,6 +128,14 @@ describe('Login', () => {
     ]);
   });
 
+  it('throws InvalidCredentialsError for a deactivated user', async () => {
+    const { login } = setup(createUser({ status: 'deactivated' }));
+
+    await expect(
+      login.execute({ email: 'editor@example.com', password: 'correct-password', actorIp }),
+    ).rejects.toThrow(InvalidCredentialsError);
+  });
+
   it('increments failed attempts after a wrong password', async () => {
     const { login, users } = setup();
 

@@ -86,6 +86,15 @@ describe('Refresh', () => {
     ).rejects.toThrow(InvalidTokenError);
   });
 
+  it('throws InvalidTokenError for a deactivated user refresh token', async () => {
+    const { refresh, users } = setup();
+    users.seed(createUser({ status: 'deactivated' }));
+
+    await expect(
+      refresh.execute({ refreshToken: 'valid-token', actorIp }),
+    ).rejects.toThrow(InvalidTokenError);
+  });
+
   it('logs token refresh audit details on success', async () => {
     const { auditLogger, refresh } = setup();
 
