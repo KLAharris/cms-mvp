@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  Optional,
   Post,
   Req,
   Res,
@@ -27,7 +28,17 @@ const loginBodySchema = z.object({
   password: z.string(),
 });
 
+const acceptInviteBodySchema = z.object({
+  token: z.string(),
+  password: z.string(),
+});
+
 type LoginBody = z.infer<typeof loginBodySchema>;
+type AcceptInviteBody = z.infer<typeof acceptInviteBodySchema>;
+
+type AcceptInviteUseCase = {
+  execute(command: AcceptInviteBody): Promise<void>;
+};
 
 type LoginRequest = {
   ip?: string;
@@ -58,6 +69,9 @@ export class AuthController {
     @Inject('LOGIN_USE_CASE') private readonly login: LoginUseCase,
     @Inject('REFRESH_USE_CASE') private readonly refresh: Refresh,
     @Inject('LOGOUT_USE_CASE') private readonly logout: Logout,
+    @Optional()
+    @Inject('ACCEPT_INVITE_USE_CASE')
+    private readonly acceptInvite: AcceptInviteUseCase | undefined,
   ) {}
 
   @Post('login')
@@ -136,6 +150,34 @@ export class AuthController {
     response.clearCookie('refreshToken', { path: '/' });
   }
 
+  @Post('accept-invite')
+  @HttpCode(204)
+  async acceptInviteWithPassword(@Body() body: unknown): Promise<void> {
+    const parsed = acceptInviteBodySchema.safeParse(body);
+
+    if (!parsed.success) {
+      throw this.error(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        'VALIDATION_ERROR',
+        'Invalid body',
+      );
+    }
+
+    try {
+      if (this.acceptInvite === undefined) {
+        throw this.error(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'INTERNAL_ERROR',
+          'Internal server error',
+        );
+      }
+
+      await this.acceptInvite.execute(parsed.data);
+    } catch (error) {
+      throw this.mapAcceptInviteError(error);
+    }
+  }
+
   private async handleLogin(
     body: LoginBody,
     actorIp: string,
@@ -192,6 +234,46 @@ export class AuthController {
     }
 
     throw error;
+  }
+
+  private mapAcceptInviteError(error: unknown): HttpException {
+    if (this.hasName(error, 'UserNotFoundError')) {
+      return this.error(HttpStatus.NOT_FOUND, 'USER_NOT_FOUND', 'User not found');
+    }
+
+    if (this.hasName(error, 'InviteExpiredError')) {
+      return this.error(HttpStatus.GONE, 'INVITE_EXPIRED', 'Invite has expired');
+    }
+
+    if (this.hasName(error, 'InvalidTransitionError')) {
+      return this.error(
+        HttpStatus.CONFLICT,
+        'INVALID_TRANSITION',
+        'Invalid transition',
+      );
+    }
+
+    if (this.hasName(error, 'WeakPasswordError')) {
+      return this.error(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        'WEAK_PASSWORD',
+        'Password must be at least 12 characters and contain at least one letter and one digit',
+      );
+    }
+
+    return this.error(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      'INTERNAL_ERROR',
+      'Internal server error',
+    );
+  }
+
+  private hasName(error: unknown, name: string): boolean {
+    return error instanceof Error && error.name === name;
+  }
+
+  private error(status: HttpStatus, code: string, message: string): HttpException {
+    return new HttpException({ error: { code, message } }, status);
   }
 
   private getCookie(request: LoginRequest, name: string): string | undefined {
