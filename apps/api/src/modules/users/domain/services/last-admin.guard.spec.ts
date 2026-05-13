@@ -1,23 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { Email } from '../../../auth/domain/email';
-import { LastAdminError } from '../../../auth/domain/errors';
-import { Role } from '../../../auth/domain/role';
-import { User } from '../../../auth/domain/user';
+import { LastAdminError } from '../errors';
+import { Role } from '../role';
 import { LastAdminGuard } from './last-admin.guard';
 
-function createUser(role: Role): User {
-  return new User({
-    id: 'user-1',
-    email: Email.create('admin@example.com'),
-    passwordHash: 'hashed:correct-password',
-    role,
-    status: 'active',
-    failedLoginAttempts: 0,
-    failedLoginWindowStartedAt: null,
-    lockedUntil: null,
-    lastLoginAt: null,
-  });
+function createUser(role: Role): { role: Role } {
+  return { role };
 }
 
 describe('LastAdminGuard', () => {

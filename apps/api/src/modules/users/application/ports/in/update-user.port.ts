@@ -1,4 +1,4 @@
-import { Role } from '../../../../auth/domain/role';
+import { Role } from '../../../domain/role';
 import { UserDto } from './list-users.port';
 
 export type UpdateUserCommand = {
