@@ -49,6 +49,10 @@ export class Login implements LoginUseCase {
       throw new AccountLockedError();
     }
 
+    if (user.status === 'deactivated') {
+      throw new InvalidCredentialsError();
+    }
+
     const passwordMatches = await this.passwords.verify(command.password, user.passwordHash);
 
     if (!passwordMatches) {

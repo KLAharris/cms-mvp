@@ -101,15 +101,30 @@ import { UserRepository } from './application/ports/out/user-repository.port';
     },
     {
       provide: 'REFRESH_USE_CASE',
-      inject: ['TOKEN_VERIFIER', 'TOKEN_SIGNER', 'TOKEN_BLOCKLIST', 'CLOCK', 'AUDIT_LOGGER'],
+      inject: [
+        'TOKEN_VERIFIER',
+        'TOKEN_SIGNER',
+        'TOKEN_BLOCKLIST',
+        'CLOCK',
+        'AUDIT_LOGGER',
+        'USER_REPOSITORY',
+      ],
       useFactory: (
         tokenVerifier: TokenVerifier,
         tokenSigner: TokenSigner,
         tokenBlocklist: TokenBlocklist,
         clock: Clock,
         auditLogger: AuditLogger,
+        userRepository: UserRepository,
       ): Refresh =>
-        new Refresh(tokenVerifier, tokenSigner, tokenBlocklist, clock, auditLogger),
+        new Refresh(
+          tokenVerifier,
+          tokenSigner,
+          tokenBlocklist,
+          clock,
+          auditLogger,
+          userRepository,
+        ),
     },
     {
       provide: 'LOGOUT_USE_CASE',

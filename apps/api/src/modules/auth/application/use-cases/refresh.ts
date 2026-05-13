@@ -3,6 +3,7 @@ import { Clock } from '../ports/out/clock.port';
 import { TokenBlocklist } from '../ports/out/token-blocklist.port';
 import { TokenSigner } from '../ports/out/token-signer.port';
 import { TokenVerifier } from '../ports/out/token-verifier.port';
+import { UserRepository } from '../ports/out/user-repository.port';
 import { InvalidTokenError } from '../../domain/errors';
 
 export type RefreshCommand = {
@@ -22,6 +23,7 @@ export class Refresh {
     private readonly tokenBlocklist: TokenBlocklist,
     private readonly clock: Clock,
     private readonly auditLogger: AuditLogger,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async execute(command: RefreshCommand): Promise<RefreshResult> {
@@ -29,6 +31,12 @@ export class Refresh {
     const revoked = await this.tokenBlocklist.has(payload.jti);
 
     if (revoked) {
+      throw new InvalidTokenError();
+    }
+
+    const user = await this.userRepository.findById(payload.sub);
+
+    if (user === null || user.status === 'deactivated') {
       throw new InvalidTokenError();
     }
 
