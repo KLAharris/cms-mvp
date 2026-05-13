@@ -21,6 +21,7 @@ export type UserProps = {
   lastLoginAt: Date | null;
   inviteTokenHash?: string | null;
   inviteExpiresAt?: Date | null;
+  createdAt?: Date;
 };
 
 const FAILED_LOGIN_LIMIT = 5;
@@ -40,6 +41,7 @@ export class User {
   readonly lastLoginAt: Date | null;
   inviteTokenHash: string | null;
   inviteExpiresAt: Date | null;
+  readonly createdAt: Date;
 
   constructor(props: UserProps) {
     if (props.id.trim() === '') {
@@ -62,6 +64,7 @@ export class User {
     this.lastLoginAt = props.lastLoginAt;
     this.inviteTokenHash = props.inviteTokenHash ?? null;
     this.inviteExpiresAt = props.inviteExpiresAt ?? null;
+    this.createdAt = props.createdAt ?? new Date(0);
   }
 
   static createInvited(
@@ -87,6 +90,7 @@ export class User {
       lastLoginAt: null,
       inviteTokenHash,
       inviteExpiresAt,
+      createdAt: new Date(inviteExpiresAt.getTime() - 7 * 24 * 60 * 60 * 1000),
     });
   }
 
@@ -201,6 +205,7 @@ export class User {
       lastLoginAt: this.lastLoginAt,
       inviteTokenHash: this.inviteTokenHash,
       inviteExpiresAt: this.inviteExpiresAt,
+      createdAt: this.createdAt,
       ...overrides,
     });
   }

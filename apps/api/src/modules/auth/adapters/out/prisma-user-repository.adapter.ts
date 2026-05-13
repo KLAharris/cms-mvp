@@ -106,6 +106,7 @@ const PrismaUserMapper = {
       lastLoginAt: user.lastLoginAt,
       inviteTokenHash: user.inviteTokenHash,
       inviteExpiresAt: user.inviteExpiresAt,
+      createdAt: user.createdAt,
     });
   },
 
