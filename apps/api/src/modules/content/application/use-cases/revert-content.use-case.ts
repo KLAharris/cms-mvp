@@ -48,7 +48,7 @@ export class RevertContentUseCase implements RevertContentPort {
         command.versionNo,
       );
       if (version === null) {
-        throw new ContentNotFoundError(`${command.contentId}:${command.versionNo}`);
+        throw new ContentNotFoundError(`${command.contentId}:${String(command.versionNo)}`);
       }
 
       const now = this.clock.now();

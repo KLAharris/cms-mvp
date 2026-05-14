@@ -8,10 +8,10 @@ import {
 describe('TransactionRunner port', () => {
   it('defines transaction runner contract and token', async () => {
     const runner: TransactionRunner = {
-      run: async (fn) => fn(),
+      run: (fn) => fn(),
     };
 
-    await expect(runner.run(async () => 'result')).resolves.toBe('result');
+    await expect(runner.run(() => Promise.resolve('result'))).resolves.toBe('result');
     expect(TRANSACTION_RUNNER.description).toBe('TransactionRunner');
   });
 });

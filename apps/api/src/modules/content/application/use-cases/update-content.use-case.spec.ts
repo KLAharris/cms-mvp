@@ -6,7 +6,6 @@ import { ContentForbiddenError } from '../../domain/errors/content-forbidden.err
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
 import { SlugConflictError } from '../../domain/errors/slug-conflict.error';
 import { ContentId } from '../../domain/value-objects/content-id.vo';
-import { ContentStatus } from '../../domain/value-objects/content-status.vo';
 import { ContentType } from '../../domain/value-objects/content-type.vo';
 import { SeoMetadata } from '../../domain/value-objects/seo-metadata.vo';
 import { Slug } from '../../domain/value-objects/slug.vo';
@@ -35,23 +34,24 @@ class FakeContents implements ContentRepository {
   entity: Content | null = content();
   slugResult: Content | null = null;
 
-  async save(contentEntity: Content): Promise<void> {
+  save(contentEntity: Content): Promise<void> {
     this.saved.push(contentEntity);
+    return Promise.resolve();
   }
 
-  async findById(_id: ContentId): Promise<Content | null> {
-    return this.entity;
+  findById(): Promise<Content | null> {
+    return Promise.resolve(this.entity);
   }
 
-  async findBySlug(_type: ContentType, _slug: Slug): Promise<Content | null> {
-    return this.slugResult;
+  findBySlug(): Promise<Content | null> {
+    return Promise.resolve(this.slugResult);
   }
 
-  async findMany(): Promise<PagedResult<Content>> {
+  findMany(): Promise<PagedResult<Content>> {
     throw new Error('not used');
   }
 
-  async delete(_id: ContentId): Promise<void> {
+  delete(): Promise<void> {
     throw new Error('not used');
   }
 }
@@ -59,20 +59,21 @@ class FakeContents implements ContentRepository {
 class FakeVersions implements ContentVersionRepository {
   saved: ContentVersion[] = [];
 
-  async save(version: ContentVersion): Promise<void> {
+  save(version: ContentVersion): Promise<void> {
     this.saved.push(version);
+    return Promise.resolve();
   }
 
-  async findByContentId(): Promise<ContentVersion[]> {
-    return [];
+  findByContentId(): Promise<ContentVersion[]> {
+    return Promise.resolve([]);
   }
 
-  async findByVersionNo(): Promise<ContentVersion | null> {
-    return null;
+  findByVersionNo(): Promise<ContentVersion | null> {
+    return Promise.resolve(null);
   }
 
-  async nextVersionNo(): Promise<number> {
-    return 2;
+  nextVersionNo(): Promise<number> {
+    return Promise.resolve(2);
   }
 }
 
@@ -86,7 +87,7 @@ function setup(contents = new FakeContents()) {
       versions,
       { generate: () => OTHER_ID },
       { now: () => NOW },
-      { run: async (fn) => fn() },
+      { run: (fn) => fn() },
     ),
   };
 }

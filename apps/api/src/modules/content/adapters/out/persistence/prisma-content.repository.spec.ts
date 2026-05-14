@@ -114,8 +114,8 @@ describe('PrismaContentRepository', () => {
     });
     expect(prisma.content.upsert).toHaveBeenCalledWith({
       where: { id: ID },
-      create: expect.objectContaining({ id: ID }),
-      update: expect.objectContaining({ id: ID }),
+      create: expect.objectContaining({ id: ID }) as Record<string, unknown>,
+      update: expect.objectContaining({ id: ID }) as Record<string, unknown>,
     });
     expect(prisma.content.findMany).toHaveBeenCalledWith({
       where: {

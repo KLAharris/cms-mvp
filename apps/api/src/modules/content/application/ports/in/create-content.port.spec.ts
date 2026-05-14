@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { ContentStatus } from '../../../domain/value-objects/content-status.vo';
 import { ContentType } from '../../../domain/value-objects/content-type.vo';
 import {
-  CreateContentCommand,
   CreateContentResult,
   CreateContentUseCase,
 } from './create-content.port';
@@ -11,7 +10,7 @@ import {
 describe('CreateContentUseCase port', () => {
   it('defines command and result contracts', async () => {
     const useCase: CreateContentUseCase = {
-      execute: async (_command: CreateContentCommand): Promise<CreateContentResult> => ({
+      execute: (): Promise<CreateContentResult> => Promise.resolve({
         contentId: 'content-1',
         slug: 'title',
         status: ContentStatus.Draft,

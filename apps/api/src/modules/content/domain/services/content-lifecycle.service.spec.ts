@@ -14,9 +14,9 @@ describe('ContentLifecycleService', () => {
     [ContentStatus.Unpublished, ContentStatus.Draft],
     [ContentStatus.Unpublished, ContentStatus.Archived],
   ])('allows %s to %s', (from, to) => {
-    expect(() =>
-      ContentLifecycleService.assertCanTransition(from, to),
-    ).not.toThrow();
+    expect(() => {
+      ContentLifecycleService.assertCanTransition(from, to);
+    }).not.toThrow();
   });
 
   it.each([
@@ -35,7 +35,7 @@ describe('ContentLifecycleService', () => {
     [ContentStatus.Archived, ContentStatus.Unpublished],
     [ContentStatus.Archived, ContentStatus.Archived],
   ])('throws for %s to %s', (from, to) => {
-    expect(() => ContentLifecycleService.assertCanTransition(from, to)).toThrow(
+    expect(() => { ContentLifecycleService.assertCanTransition(from, to); }).toThrow(
       InvalidTransitionError,
     );
   });

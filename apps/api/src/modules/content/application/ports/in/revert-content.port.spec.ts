@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { ContentStatus } from '../../../domain/value-objects/content-status.vo';
 import {
-  RevertContentCommand,
   RevertContentResult,
   RevertContentUseCase,
 } from './revert-content.port';
@@ -10,7 +9,7 @@ import {
 describe('RevertContentUseCase port', () => {
   it('defines command and result contracts', async () => {
     const useCase: RevertContentUseCase = {
-      execute: async (_command: RevertContentCommand): Promise<RevertContentResult> => ({
+      execute: (): Promise<RevertContentResult> => Promise.resolve({
         contentId: 'content-1',
         status: ContentStatus.Draft,
         newVersionNo: 2,

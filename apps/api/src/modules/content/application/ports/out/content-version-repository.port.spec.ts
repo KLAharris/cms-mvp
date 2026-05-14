@@ -16,10 +16,10 @@ describe('ContentVersionRepository port', () => {
       createdAt: new Date('2026-05-14T00:00:00.000Z'),
     });
     const repository: ContentVersionRepository = {
-      save: async (_version) => undefined,
-      findByContentId: async (_contentId) => [version],
-      findByVersionNo: async (_contentId, _versionNo) => version,
-      nextVersionNo: async (_contentId) => 2,
+      save: () => Promise.resolve(),
+      findByContentId: () => Promise.resolve([version]),
+      findByVersionNo: () => Promise.resolve(version),
+      nextVersionNo: () => Promise.resolve(2),
     };
 
     await expect(repository.save(version)).resolves.toBeUndefined();

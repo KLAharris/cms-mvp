@@ -38,10 +38,12 @@ export class PublishContentUseCase implements PublishContentPort {
       await this.contents.save(content);
       await this.events.publishAll(content.pullDomainEvents());
 
+      const publishedAt = content.publishedAt;
+      if (publishedAt === null) throw new Error('Invariant: publishedAt is null after publish');
       return {
         contentId: content.id.value,
         status: content.status,
-        publishedAt: content.publishedAt!,
+        publishedAt,
       };
     });
   }

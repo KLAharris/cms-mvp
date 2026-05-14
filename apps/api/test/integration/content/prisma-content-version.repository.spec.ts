@@ -8,7 +8,6 @@ import { PrismaContentVersionRepository } from '../../../src/modules/content/ada
 import { Content } from '../../../src/modules/content/domain/entities/content.entity';
 import { ContentVersion } from '../../../src/modules/content/domain/entities/content-version.entity';
 import { ContentId } from '../../../src/modules/content/domain/value-objects/content-id.vo';
-import { ContentStatus } from '../../../src/modules/content/domain/value-objects/content-status.vo';
 import { ContentType } from '../../../src/modules/content/domain/value-objects/content-type.vo';
 import { SeoMetadata } from '../../../src/modules/content/domain/value-objects/seo-metadata.vo';
 import { Slug } from '../../../src/modules/content/domain/value-objects/slug.vo';
@@ -61,19 +60,17 @@ describe.skipIf(!hasDatabase)('PrismaContentVersionRepository', () => {
   });
 
   afterAll(async () => {
-    if (prisma !== undefined) {
-      await prisma.$disconnect();
-    }
+    await prisma.$disconnect();
   });
 
   function version(versionNo: number): ContentVersion {
     return ContentVersion.create({
-      id: `version-${versionNo}`,
+      id: `version-${String(versionNo)}`,
       contentId: ContentId.create(CONTENT_ID),
       versionNo,
       snapshot: {
-        title: `Version ${versionNo}`,
-        slug: Slug.create(`version-${versionNo}`),
+        title: `Version ${String(versionNo)}`,
+        slug: Slug.create(`version-${String(versionNo)}`),
         body: null,
         featuredImageId: null,
         socialImageId: null,

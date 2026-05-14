@@ -41,11 +41,11 @@ function content(authorId = 'author-1'): Content {
 
 class FakeContents implements ContentRepository {
   entity: Content | null = content();
-  async save(): Promise<void> { throw new Error('not used'); }
-  async findById(): Promise<Content | null> { return this.entity; }
-  async findBySlug(): Promise<Content | null> { return null; }
-  async findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
-  async delete(): Promise<void> { throw new Error('not used'); }
+  save(): Promise<void> { throw new Error('not used'); }
+  findById(): Promise<Content | null> { return Promise.resolve(this.entity); }
+  findBySlug(): Promise<Content | null> { return Promise.resolve(null); }
+  findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
+  delete(): Promise<void> { throw new Error('not used'); }
 }
 
 class FakeVersions implements ContentVersionRepository {
@@ -67,14 +67,14 @@ class FakeVersions implements ContentVersionRepository {
       createdAt: new Date('2026-06-02T00:00:00.000Z'),
     }),
   ];
-  async save(): Promise<void> { throw new Error('not used'); }
-  async findByContentId(): Promise<ContentVersion[]> { return this.rows; }
-  async findByVersionNo(): Promise<ContentVersion | null> { return null; }
-  async nextVersionNo(): Promise<number> { return 1; }
+  save(): Promise<void> { throw new Error('not used'); }
+  findByContentId(): Promise<ContentVersion[]> { return Promise.resolve(this.rows); }
+  findByVersionNo(): Promise<ContentVersion | null> { return Promise.resolve(null); }
+  nextVersionNo(): Promise<number> { return Promise.resolve(1); }
 }
 
 function setup(contents = new FakeContents(), versions = new FakeVersions()) {
-  return new ListVersionsUseCase(contents, versions, { run: async (fn) => fn() });
+  return new ListVersionsUseCase(contents, versions, { run: (fn) => fn() });
 }
 
 describe('ListVersionsUseCase', () => {

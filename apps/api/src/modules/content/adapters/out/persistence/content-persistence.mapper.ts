@@ -40,7 +40,7 @@ function richTextFromJson(value: Prisma.JsonValue | undefined): RichTextBody | n
 
 function tagsFromJson(value: Prisma.JsonValue | undefined): Tag[] {
   return Array.isArray(value)
-    ? value.filter((tag): tag is string => typeof tag === 'string').map(Tag.create)
+    ? value.filter((tag): tag is string => typeof tag === 'string').map((t) => Tag.create(t))
     : [];
 }
 
@@ -108,8 +108,8 @@ function snapshotToPersistence(snapshot: object): Prisma.InputJsonObject {
   };
 }
 
-export class ContentPersistenceMapper {
-  static toDomain(row: PrismaContent): Content {
+export const ContentPersistenceMapper = {
+  toDomain(row: PrismaContent): Content {
     return Content.reconstitute({
       id: ContentId.create(row.id),
       type: row.type as ContentType,
@@ -121,7 +121,7 @@ export class ContentPersistenceMapper {
       featuredImageId: row.featuredImageId,
       socialImageId: row.socialImageId,
       seoMetadata: SeoMetadata.create(row.seoTitle, row.seoDescription),
-      tags: row.tags.map(Tag.create),
+      tags: row.tags.map((t) => Tag.create(t)),
       category: row.category,
       parentId: row.parentId,
       scheduledAt: row.scheduledAt,
@@ -130,9 +130,9 @@ export class ContentPersistenceMapper {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
-  }
+  },
 
-  static toPersistence(content: Content): Prisma.ContentUncheckedCreateInput {
+  toPersistence(content: Content): Prisma.ContentUncheckedCreateInput {
     return {
       id: content.id.value,
       type: content.type,
@@ -157,11 +157,11 @@ export class ContentPersistenceMapper {
       createdAt: content.createdAt,
       updatedAt: content.updatedAt,
     };
-  }
-}
+  },
+};
 
-export class ContentVersionPersistenceMapper {
-  static toDomain(row: PrismaContentVersion): ContentVersion {
+export const ContentVersionPersistenceMapper = {
+  toDomain(row: PrismaContentVersion): ContentVersion {
     return ContentVersion.create({
       id: row.id,
       contentId: ContentId.create(row.contentId),
@@ -170,9 +170,9 @@ export class ContentVersionPersistenceMapper {
       editorId: row.editorId,
       createdAt: row.createdAt,
     });
-  }
+  },
 
-  static toPersistence(
+  toPersistence(
     version: ContentVersion,
   ): Prisma.ContentVersionUncheckedCreateInput {
     return {
@@ -183,5 +183,5 @@ export class ContentVersionPersistenceMapper {
       editorId: version.editorId,
       createdAt: version.createdAt,
     };
-  }
-}
+  },
+};

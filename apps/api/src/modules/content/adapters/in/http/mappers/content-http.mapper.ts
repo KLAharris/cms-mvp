@@ -5,8 +5,8 @@ import {
   ContentSummaryResponse,
 } from '../dto/content.response';
 
-export class ContentHttpMapper {
-  static toSummary(item: ContentListItem): ContentSummaryResponse {
+export const ContentHttpMapper = {
+  toSummary(item: ContentListItem): ContentSummaryResponse {
     return {
       id: item.id,
       type: item.type,
@@ -17,9 +17,9 @@ export class ContentHttpMapper {
       publishedAt: item.publishedAt?.toISOString() ?? null,
       updatedAt: item.updatedAt.toISOString(),
     };
-  }
+  },
 
-  static toDetail(item: GetContentResult): ContentDetailResponse {
+  toDetail(item: GetContentResult): ContentDetailResponse {
     return {
       id: item.contentId,
       type: item.type,
@@ -40,5 +40,5 @@ export class ContentHttpMapper {
       scheduledAt: item.scheduledAt?.toISOString() ?? null,
       createdAt: item.createdAt.toISOString(),
     };
-  }
-}
+  },
+};

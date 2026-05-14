@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { ContentStatus } from '../../../domain/value-objects/content-status.vo';
 import {
-  UpdateContentCommand,
   UpdateContentResult,
   UpdateContentUseCase,
 } from './update-content.port';
@@ -11,7 +10,7 @@ describe('UpdateContentUseCase port', () => {
   it('defines command and result contracts', async () => {
     const updatedAt = new Date('2026-05-14T00:00:00.000Z');
     const useCase: UpdateContentUseCase = {
-      execute: async (_command: UpdateContentCommand): Promise<UpdateContentResult> => ({
+      execute: (): Promise<UpdateContentResult> => Promise.resolve({
         contentId: 'content-1',
         status: ContentStatus.Draft,
         updatedAt,

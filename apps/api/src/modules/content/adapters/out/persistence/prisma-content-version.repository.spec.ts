@@ -86,8 +86,8 @@ describe('PrismaContentVersionRepository', () => {
           versionNo: 2,
         },
       },
-      create: expect.objectContaining({ contentId: CONTENT_ID.value, versionNo: 2 }),
-      update: expect.objectContaining({ contentId: CONTENT_ID.value, versionNo: 2 }),
+      create: expect.objectContaining({ contentId: CONTENT_ID.value, versionNo: 2 }) as Record<string, unknown>,
+      update: expect.objectContaining({ contentId: CONTENT_ID.value, versionNo: 2 }) as Record<string, unknown>,
     });
     expect(prisma.contentVersion.findMany).toHaveBeenCalledWith({
       where: { contentId: CONTENT_ID.value },

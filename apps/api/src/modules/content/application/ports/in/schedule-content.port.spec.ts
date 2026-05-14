@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { ContentStatus } from '../../../domain/value-objects/content-status.vo';
 import {
-  ScheduleContentCommand,
   ScheduleContentResult,
   ScheduleContentUseCase,
 } from './schedule-content.port';
@@ -11,9 +10,7 @@ describe('ScheduleContentUseCase port', () => {
   it('defines command and result contracts', async () => {
     const scheduledAt = new Date('2026-05-15T00:00:00.000Z');
     const useCase: ScheduleContentUseCase = {
-      execute: async (
-        _command: ScheduleContentCommand,
-      ): Promise<ScheduleContentResult> => ({
+      execute: (): Promise<ScheduleContentResult> => Promise.resolve({
         contentId: 'content-1',
         status: ContentStatus.Draft,
         scheduledAt,

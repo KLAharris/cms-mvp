@@ -42,7 +42,7 @@ export class PrismaContentVersionRepository implements ContentVersionRepository 
       orderBy: { versionNo: 'desc' },
     });
 
-    return rows.map(ContentVersionPersistenceMapper.toDomain);
+    return rows.map((row) => ContentVersionPersistenceMapper.toDomain(row));
   }
 
   async findByVersionNo(

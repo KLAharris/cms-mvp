@@ -43,7 +43,7 @@ export class CreateContentUseCase implements CreateContentPort {
 
       content.update(
         {
-          tags: command.tags?.map(Tag.create) ?? [],
+          tags: command.tags?.map((t) => Tag.create(t)) ?? [],
           category: command.category ?? null,
           parentId: command.parentId ?? null,
         },
@@ -74,8 +74,8 @@ export class CreateContentUseCase implements CreateContentPort {
     const base = Slug.fromTitle(command.title).value;
     let suffix = 1;
 
-    while (true) {
-      const value = suffix === 1 ? base : `${base}-${suffix}`;
+    for (;;) {
+      const value = suffix === 1 ? base : `${base}-${String(suffix)}`;
       const slug = Slug.create(value);
       const existing = await this.contents.findBySlug(command.type, slug);
 

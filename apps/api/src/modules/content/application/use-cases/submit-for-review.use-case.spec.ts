@@ -41,15 +41,15 @@ function content(status = ContentStatus.Draft, authorId = 'author-1'): Content {
 class FakeContents implements ContentRepository {
   saved: Content[] = [];
   entity: Content | null = content();
-  async save(entity: Content): Promise<void> { this.saved.push(entity); }
-  async findById(): Promise<Content | null> { return this.entity; }
-  async findBySlug(): Promise<Content | null> { return null; }
-  async findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
-  async delete(): Promise<void> { throw new Error('not used'); }
+  save(entity: Content): Promise<void> { this.saved.push(entity); return Promise.resolve(); }
+  findById(): Promise<Content | null> { return Promise.resolve(this.entity); }
+  findBySlug(): Promise<Content | null> { return Promise.resolve(null); }
+  findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
+  delete(): Promise<void> { throw new Error('not used'); }
 }
 
 function useCase(contents = new FakeContents()) {
-  return new SubmitForReviewUseCase(contents, { now: () => NOW }, { run: async (fn) => fn() });
+  return new SubmitForReviewUseCase(contents, { now: () => NOW }, { run: (fn) => fn() });
 }
 
 describe('SubmitForReviewUseCase', () => {

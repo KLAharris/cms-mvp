@@ -26,15 +26,15 @@ function content(status = ContentStatus.Draft, authorId = 'author-1', deletedAt:
 
 class FakeContents implements ContentRepository {
   entity: Content | null = content();
-  async save(): Promise<void> { throw new Error('not used'); }
-  async findById(): Promise<Content | null> { return this.entity; }
-  async findBySlug(): Promise<Content | null> { return null; }
-  async findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
-  async delete(): Promise<void> { throw new Error('not used'); }
+  save(): Promise<void> { throw new Error('not used'); }
+  findById(): Promise<Content | null> { return Promise.resolve(this.entity); }
+  findBySlug(): Promise<Content | null> { return Promise.resolve(null); }
+  findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
+  delete(): Promise<void> { throw new Error('not used'); }
 }
 
 function setup(contents = new FakeContents()) {
-  return new GetContentUseCase(contents, { run: async (fn) => fn() });
+  return new GetContentUseCase(contents, { run: (fn) => fn() });
 }
 
 describe('GetContentUseCase', () => {

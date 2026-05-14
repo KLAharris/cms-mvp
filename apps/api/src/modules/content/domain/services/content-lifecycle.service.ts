@@ -1,8 +1,8 @@
 import { InvalidTransitionError } from '../errors/invalid-transition.error';
 import { ContentStatus } from '../value-objects/content-status.vo';
 
-export class ContentLifecycleService {
-  static assertCanTransition(from: ContentStatus, to: ContentStatus): void {
+export const ContentLifecycleService = {
+  assertCanTransition(from: ContentStatus, to: ContentStatus): void {
     const allowed = new Set<string>([
       `${ContentStatus.Draft}:${ContentStatus.InReview}`,
       `${ContentStatus.Draft}:${ContentStatus.Published}`,
@@ -16,5 +16,5 @@ export class ContentLifecycleService {
     if (!allowed.has(`${from}:${to}`)) {
       throw new InvalidTransitionError(from, to);
     }
-  }
-}
+  },
+};

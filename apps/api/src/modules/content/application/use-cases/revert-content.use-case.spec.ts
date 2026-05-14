@@ -46,11 +46,11 @@ function snapshot(): ContentSnapshot {
 class FakeContents implements ContentRepository {
   saved: Content[] = [];
   entity: Content | null = content();
-  async save(entity: Content): Promise<void> { this.saved.push(entity); }
-  async findById(): Promise<Content | null> { return this.entity; }
-  async findBySlug(): Promise<Content | null> { return null; }
-  async findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
-  async delete(): Promise<void> { throw new Error('not used'); }
+  save(entity: Content): Promise<void> { this.saved.push(entity); return Promise.resolve(); }
+  findById(): Promise<Content | null> { return Promise.resolve(this.entity); }
+  findBySlug(): Promise<Content | null> { return Promise.resolve(null); }
+  findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
+  delete(): Promise<void> { throw new Error('not used'); }
 }
 
 class FakeVersions implements ContentVersionRepository {
@@ -63,14 +63,14 @@ class FakeVersions implements ContentVersionRepository {
     editorId: 'author-1',
     createdAt: NOW,
   });
-  async save(version: ContentVersion): Promise<void> { this.saved.push(version); }
-  async findByContentId(): Promise<ContentVersion[]> { return this.version === null ? [] : [this.version]; }
-  async findByVersionNo(): Promise<ContentVersion | null> { return this.version; }
-  async nextVersionNo(): Promise<number> { return 3; }
+  save(version: ContentVersion): Promise<void> { this.saved.push(version); return Promise.resolve(); }
+  findByContentId(): Promise<ContentVersion[]> { return Promise.resolve(this.version === null ? [] : [this.version]); }
+  findByVersionNo(): Promise<ContentVersion | null> { return Promise.resolve(this.version); }
+  nextVersionNo(): Promise<number> { return Promise.resolve(3); }
 }
 
 function setup(contents = new FakeContents(), versions = new FakeVersions()) {
-  return { contents, versions, useCase: new RevertContentUseCase(contents, versions, { generate: () => VERSION_ID }, { now: () => NOW }, { run: async (fn) => fn() }) };
+  return { contents, versions, useCase: new RevertContentUseCase(contents, versions, { generate: () => VERSION_ID }, { now: () => NOW }, { run: (fn) => fn() }) };
 }
 
 describe('RevertContentUseCase', () => {

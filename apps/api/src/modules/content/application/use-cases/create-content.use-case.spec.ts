@@ -16,22 +16,23 @@ const IDS = [
   '123e4567-e89b-42d3-a456-426614174000',
   '223e4567-e89b-42d3-a456-426614174000',
   '323e4567-e89b-42d3-a456-426614174000',
-];
+] as const;
 
 class FakeContents implements ContentRepository {
   saved: Content[] = [];
   existingSlugs = new Set<string>();
 
-  async save(content: Content): Promise<void> {
+  save(content: Content): Promise<void> {
     this.saved.push(content);
+    return Promise.resolve();
   }
 
-  async findById(_id: ContentId): Promise<Content | null> {
-    return null;
+  findById(): Promise<Content | null> {
+    return Promise.resolve(null);
   }
 
-  async findBySlug(_type: ContentType, slug: Slug): Promise<Content | null> {
-    return this.existingSlugs.has(slug.value)
+  findBySlug(_type: ContentType, slug: Slug): Promise<Content | null> {
+    return Promise.resolve(this.existingSlugs.has(slug.value)
       ? Content.create({
           id: ContentId.create('323e4567-e89b-42d3-a456-426614174000'),
           type: ContentType.Article,
@@ -41,14 +42,14 @@ class FakeContents implements ContentRepository {
           seoMetadata: SeoMetadata.create('', ''),
           createdAt: NOW,
         })
-      : null;
+      : null);
   }
 
-  async findMany(): Promise<never> {
+  findMany(): Promise<never> {
     throw new Error('not used');
   }
 
-  async delete(_id: ContentId): Promise<void> {
+  delete(): Promise<void> {
     throw new Error('not used');
   }
 }
@@ -56,20 +57,21 @@ class FakeContents implements ContentRepository {
 class FakeVersions implements ContentVersionRepository {
   saved: ContentVersion[] = [];
 
-  async save(version: ContentVersion): Promise<void> {
+  save(version: ContentVersion): Promise<void> {
     this.saved.push(version);
+    return Promise.resolve();
   }
 
-  async findByContentId(): Promise<ContentVersion[]> {
-    return [];
+  findByContentId(): Promise<ContentVersion[]> {
+    return Promise.resolve([]);
   }
 
-  async findByVersionNo(): Promise<ContentVersion | null> {
-    return null;
+  findByVersionNo(): Promise<ContentVersion | null> {
+    return Promise.resolve(null);
   }
 
-  async nextVersionNo(): Promise<number> {
-    return 1;
+  nextVersionNo(): Promise<number> {
+    return Promise.resolve(1);
   }
 }
 
@@ -81,7 +83,7 @@ function useCase(contents = new FakeContents(), versions = new FakeVersions()) {
     useCase: new CreateContentUseCase(
       contents,
       versions,
-      { generate: () => IDS[index++] ?? IDS[0]! },
+      { generate: () => IDS[index++] ?? IDS[0] },
       { now: () => NOW },
       { run: async (fn) => fn() },
     ),

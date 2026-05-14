@@ -83,7 +83,7 @@ describe('Content', () => {
     ContentStatus.Published,
     ContentStatus.Archived,
   ])('submit() throws from %s', (status) => {
-    expect(() => reconstitute(status).submit('actor-1', now)).toThrow(
+    expect(() => { reconstitute(status).submit('actor-1', now); }).toThrow(
       InvalidTransitionError,
     );
   });
@@ -115,7 +115,7 @@ describe('Content', () => {
     ContentStatus.Unpublished,
     ContentStatus.Archived,
   ])('publish() throws from %s', (status) => {
-    expect(() => reconstitute(status).publish('actor-1', now)).toThrow(
+    expect(() => { reconstitute(status).publish('actor-1', now); }).toThrow(
       InvalidTransitionError,
     );
   });
@@ -135,7 +135,7 @@ describe('Content', () => {
     ContentStatus.Unpublished,
     ContentStatus.Archived,
   ])('reject() throws from %s', (status) => {
-    expect(() => reconstitute(status).reject('actor-1', now)).toThrow(
+    expect(() => { reconstitute(status).reject('actor-1', now); }).toThrow(
       InvalidTransitionError,
     );
   });
@@ -152,7 +152,7 @@ describe('Content', () => {
   it.each([ContentStatus.Draft, ContentStatus.InReview, ContentStatus.Archived])(
     'unpublish() throws from %s',
     (status) => {
-      expect(() => reconstitute(status).unpublish('actor-1', now)).toThrow(
+      expect(() => { reconstitute(status).unpublish('actor-1', now); }).toThrow(
         InvalidTransitionError,
       );
     },
@@ -169,7 +169,7 @@ describe('Content', () => {
   it.each([ContentStatus.Draft, ContentStatus.Published, ContentStatus.InReview])(
     'archive() throws from %s',
     (status) => {
-      expect(() => reconstitute(status).archive('actor-1', now)).toThrow(
+      expect(() => { reconstitute(status).archive('actor-1', now); }).toThrow(
         InvalidTransitionError,
       );
     },
@@ -192,7 +192,7 @@ describe('Content', () => {
 
     content.softDelete('actor-1', now);
 
-    expect(() => content.softDelete('actor-1', now)).toThrow(
+    expect(() => { content.softDelete('actor-1', now); }).toThrow(
       InvalidTransitionError,
     );
   });
@@ -213,13 +213,9 @@ describe('Content', () => {
     new Date('2026-05-14T01:00:00.000Z'),
     new Date('2026-05-14T00:59:59.999Z'),
   ])('schedulePublish() throws when scheduledAt is not future', (scheduledAt) => {
-    expect(() =>
-      reconstitute(ContentStatus.Draft).schedulePublish(
-        scheduledAt,
-        'actor-1',
-        now,
-      ),
-    ).toThrow(ScheduledAtInPastError);
+    expect(() => {
+      reconstitute(ContentStatus.Draft).schedulePublish(scheduledAt, 'actor-1', now);
+    }).toThrow(ScheduledAtInPastError);
   });
 
   it.each([
@@ -227,13 +223,9 @@ describe('Content', () => {
     ContentStatus.Unpublished,
     ContentStatus.Archived,
   ])('schedulePublish() throws from %s', (status) => {
-    expect(() =>
-      reconstitute(status).schedulePublish(
-        new Date('2026-05-15T00:00:00.000Z'),
-        'actor-1',
-        now,
-      ),
-    ).toThrow(InvalidTransitionError);
+    expect(() => {
+      reconstitute(status).schedulePublish(new Date('2026-05-15T00:00:00.000Z'), 'actor-1', now);
+    }).toThrow(InvalidTransitionError);
   });
 
   it('update() updates fields, leaves unprovided fields unchanged, and sets updatedAt', () => {
@@ -286,7 +278,7 @@ describe('Content', () => {
     ContentStatus.Published,
     ContentStatus.Archived,
   ])('update() throws from %s', (status) => {
-    expect(() => reconstitute(status).update({ title: 'Updated' }, now)).toThrow(
+    expect(() => { reconstitute(status).update({ title: 'Updated' }, now); }).toThrow(
       InvalidTransitionError,
     );
   });
@@ -333,9 +325,9 @@ describe('Content', () => {
       scheduledAt: null,
     };
 
-    expect(() =>
-      reconstitute(status).applyVersionSnapshot(snapshot, 'editor-1', now),
-    ).toThrow(InvalidTransitionError);
+    expect(() => {
+      reconstitute(status).applyVersionSnapshot(snapshot, 'editor-1', now);
+    }).toThrow(InvalidTransitionError);
   });
 
   it('pullDomainEvents() returns accumulated events and clears them', () => {

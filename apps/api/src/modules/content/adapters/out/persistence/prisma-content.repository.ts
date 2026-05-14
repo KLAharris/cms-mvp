@@ -79,7 +79,7 @@ export class PrismaContentRepository implements ContentRepository {
     ]);
 
     return {
-      items: rows.map(ContentPersistenceMapper.toDomain),
+      items: rows.map((row) => ContentPersistenceMapper.toDomain(row)),
       total,
       page: criteria.page,
       pageSize: criteria.pageSize,

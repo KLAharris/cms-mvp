@@ -43,16 +43,16 @@ function content(status = ContentStatus.InReview, overrides: Partial<{ title: st
 class FakeContents implements ContentRepository {
   saved: Content[] = [];
   entity: Content | null = content();
-  async save(entity: Content): Promise<void> { this.saved.push(entity); }
-  async findById(): Promise<Content | null> { return this.entity; }
-  async findBySlug(): Promise<Content | null> { return null; }
-  async findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
-  async delete(): Promise<void> { throw new Error('not used'); }
+  save(entity: Content): Promise<void> { this.saved.push(entity); return Promise.resolve(); }
+  findById(): Promise<Content | null> { return Promise.resolve(this.entity); }
+  findBySlug(): Promise<Content | null> { return Promise.resolve(null); }
+  findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
+  delete(): Promise<void> { throw new Error('not used'); }
 }
 
 function setup(contents = new FakeContents()) {
-  const events = { publishAll: vi.fn(async () => undefined) };
-  return { events, useCase: new PublishContentUseCase(contents, { now: () => NOW }, events, { run: async (fn) => fn() }) };
+  const events = { publishAll: vi.fn(() => Promise.resolve()) };
+  return { events, useCase: new PublishContentUseCase(contents, { now: () => NOW }, events, { run: (fn) => fn() }) };
 }
 
 describe('PublishContentUseCase', () => {

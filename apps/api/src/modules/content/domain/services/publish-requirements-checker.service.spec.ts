@@ -39,53 +39,53 @@ function content(overrides: {
 
 describe('PublishRequirementsCheckerService', () => {
   it('passes valid content ready for publish', () => {
-    expect(() => PublishRequirementsCheckerService.check(content())).not.toThrow();
+    expect(() => { PublishRequirementsCheckerService.check(content()); }).not.toThrow();
   });
 
   it.each(['', '   '])('throws if title is blank', (title) => {
-    expect(() => PublishRequirementsCheckerService.check(content({ title }))).toThrow(
+    expect(() => { PublishRequirementsCheckerService.check(content({ title })); }).toThrow(
       PublishValidationError,
     );
   });
 
   it('throws if body is null', () => {
-    expect(() =>
-      PublishRequirementsCheckerService.check(content({ body: null })),
-    ).toThrow(PublishValidationError);
+    expect(() => {
+      PublishRequirementsCheckerService.check(content({ body: null }));
+    }).toThrow(PublishValidationError);
   });
 
   it('throws if body is empty', () => {
-    expect(() =>
+    expect(() => {
       PublishRequirementsCheckerService.check(
         content({ body: RichTextBody.create({}) }),
-      ),
-    ).toThrow(PublishValidationError);
+      );
+    }).toThrow(PublishValidationError);
   });
 
   it('throws if slug is invalid at publish time', () => {
-    expect(() =>
-      PublishRequirementsCheckerService.check({
-        ...content(),
-        slug: { value: 'invalid slug' },
-      } as Content),
-    ).toThrow(PublishValidationError);
+    const c = content();
+    expect(() => {
+      PublishRequirementsCheckerService.check(
+        Object.assign(c, { slug: { value: 'invalid slug' } }),
+      );
+    }).toThrow(PublishValidationError);
   });
 
   it.each(['', '   '])('throws if seo description is blank', (description) => {
-    expect(() =>
-      PublishRequirementsCheckerService.check({
-        ...content(),
-        seoMetadata: { title: '', description },
-      } as Content),
-    ).toThrow(PublishValidationError);
+    const c = content();
+    expect(() => {
+      PublishRequirementsCheckerService.check(
+        Object.assign(c, { seoMetadata: { title: '', description } }),
+      );
+    }).toThrow(PublishValidationError);
   });
 
   it('throws if seo description is longer than 160 chars', () => {
-    expect(() =>
-      PublishRequirementsCheckerService.check({
-        ...content(),
-        seoMetadata: { title: '', description: 'a'.repeat(161) },
-      } as Content),
-    ).toThrow(PublishValidationError);
+    const c = content();
+    expect(() => {
+      PublishRequirementsCheckerService.check(
+        Object.assign(c, { seoMetadata: { title: '', description: 'a'.repeat(161) } }),
+      );
+    }).toThrow(PublishValidationError);
   });
 });

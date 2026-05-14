@@ -22,18 +22,18 @@ function content(): Content {
 
 class FakeContents implements ContentRepository {
   criteria: ContentSearchCriteria | null = null;
-  async save(): Promise<void> { throw new Error('not used'); }
-  async findById(): Promise<Content | null> { return null; }
-  async findBySlug(): Promise<Content | null> { return null; }
-  async findMany(criteria: ContentSearchCriteria): Promise<PagedResult<Content>> {
+  save(): Promise<void> { throw new Error('not used'); }
+  findById(): Promise<Content | null> { return Promise.resolve(null); }
+  findBySlug(): Promise<Content | null> { return Promise.resolve(null); }
+  findMany(criteria: ContentSearchCriteria): Promise<PagedResult<Content>> {
     this.criteria = criteria;
-    return { items: [content()], total: 1, page: criteria.page, pageSize: criteria.pageSize, totalPages: 1 };
+    return Promise.resolve({ items: [content()], total: 1, page: criteria.page, pageSize: criteria.pageSize, totalPages: 1 });
   }
-  async delete(): Promise<void> { throw new Error('not used'); }
+  delete(): Promise<void> { throw new Error('not used'); }
 }
 
 function setup(contents = new FakeContents()) {
-  return { contents, useCase: new ListContentUseCase(contents, { run: async (fn) => fn() }) };
+  return { contents, useCase: new ListContentUseCase(contents, { run: (fn) => fn() }) };
 }
 
 describe('ListContentUseCase', () => {

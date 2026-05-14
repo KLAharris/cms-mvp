@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { ContentStatus } from '../../../domain/value-objects/content-status.vo';
 import {
-  UnpublishContentCommand,
   UnpublishContentResult,
   UnpublishContentUseCase,
 } from './unpublish-content.port';
@@ -10,9 +9,7 @@ import {
 describe('UnpublishContentUseCase port', () => {
   it('defines command and result contracts', async () => {
     const useCase: UnpublishContentUseCase = {
-      execute: async (
-        _command: UnpublishContentCommand,
-      ): Promise<UnpublishContentResult> => ({
+      execute: (): Promise<UnpublishContentResult> => Promise.resolve({
         contentId: 'content-1',
         status: ContentStatus.Unpublished,
       }),

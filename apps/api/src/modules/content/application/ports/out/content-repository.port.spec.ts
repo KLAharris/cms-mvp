@@ -8,7 +8,6 @@ import { SeoMetadata } from '../../../domain/value-objects/seo-metadata.vo';
 import { Slug } from '../../../domain/value-objects/slug.vo';
 import {
   ContentRepository,
-  ContentSearchCriteria,
   PagedResult,
 } from './content-repository.port';
 
@@ -31,11 +30,11 @@ describe('ContentRepository port', () => {
       totalPages: 1,
     };
     const repository: ContentRepository = {
-      save: async (_content) => undefined,
-      findById: async (_id) => content,
-      findBySlug: async (_type, _slug) => content,
-      findMany: async (_criteria: ContentSearchCriteria) => page,
-      delete: async (_id) => undefined,
+      save: () => Promise.resolve(),
+      findById: () => Promise.resolve(content),
+      findBySlug: () => Promise.resolve(content),
+      findMany: () => Promise.resolve(page),
+      delete: () => Promise.resolve(),
     };
 
     await expect(repository.findById(content.id)).resolves.toBe(content);

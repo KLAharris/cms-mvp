@@ -24,7 +24,7 @@ const IDS = [
   '123e4567-e89b-42d3-a456-426614174000',
   '223e4567-e89b-42d3-a456-426614174000',
   '323e4567-e89b-42d3-a456-426614174000',
-];
+] as const;
 
 describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   let prisma: PrismaClient;
@@ -76,7 +76,7 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   });
 
   function makeContent(
-    id = IDS[0]!,
+    id = IDS[0],
     title = 'Title',
     authorId = 'author-1',
     status = ContentStatus.Draft,
@@ -121,7 +121,7 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
     const persistence = ContentPersistenceMapper.toPersistence(content);
     expect(
       ContentPersistenceMapper.toDomain({
-        id: persistence.id ?? IDS[0]!,
+        id: persistence.id ?? IDS[0],
         type: ContentType.Article,
         title: persistence.title,
         slug: persistence.slug,
@@ -148,9 +148,9 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   });
 
   it('findMany filters, paginates, excludes soft-deleted rows, and enforces slug uniqueness', async () => {
-    await repository.save(makeContent(IDS[0]!, 'Alpha Title', 'author-1', ContentStatus.Draft));
-    await repository.save(makeContent(IDS[1]!, 'Beta Title', 'author-2', ContentStatus.Published));
-    await repository.save(makeContent(IDS[2]!, 'Deleted Title', 'author-1', ContentStatus.Draft, NOW));
+    await repository.save(makeContent(IDS[0], 'Alpha Title', 'author-1', ContentStatus.Draft));
+    await repository.save(makeContent(IDS[1], 'Beta Title', 'author-2', ContentStatus.Published));
+    await repository.save(makeContent(IDS[2], 'Deleted Title', 'author-1', ContentStatus.Draft, NOW));
 
     await expect(repository.findMany({ status: ContentStatus.Draft, page: 1, pageSize: 10 })).resolves.toMatchObject({ total: 1 });
     await expect(repository.findMany({ authorId: 'author-2', page: 1, pageSize: 10 })).resolves.toMatchObject({ total: 1 });

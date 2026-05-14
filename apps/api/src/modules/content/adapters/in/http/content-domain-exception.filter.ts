@@ -36,7 +36,6 @@ export class ContentDomainExceptionFilter implements ExceptionFilter {
       const body = exception.getResponse();
       const errorBody =
         typeof body === 'object' &&
-        body !== null &&
         'error' in body &&
         typeof body.error === 'object' &&
         body.error !== null
@@ -44,7 +43,7 @@ export class ContentDomainExceptionFilter implements ExceptionFilter {
           : {
               error: {
                 code:
-                  exception.getStatus() === HttpStatus.UNAUTHORIZED
+                  exception.getStatus() === 401
                     ? 'UNAUTHORIZED'
                     : 'HTTP_ERROR',
                 message: exception.message,

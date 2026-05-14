@@ -36,9 +36,11 @@ export class DeleteContentUseCase implements DeleteContentPort {
       await this.contents.save(content);
       await this.events.publishAll(content.pullDomainEvents());
 
+      const deletedAt = content.deletedAt;
+      if (deletedAt === null) throw new Error('Invariant: deletedAt is null after softDelete');
       return {
         contentId: content.id.value,
-        deletedAt: content.deletedAt!,
+        deletedAt,
       };
     });
   }

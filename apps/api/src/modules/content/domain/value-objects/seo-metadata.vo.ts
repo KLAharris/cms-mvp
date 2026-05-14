@@ -1,10 +1,6 @@
 import { DomainError } from '../errors/domain.error';
 
-export class InvalidSeoMetadataError extends DomainError {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export class InvalidSeoMetadataError extends DomainError {}
 
 export class SeoMetadata {
   private constructor(

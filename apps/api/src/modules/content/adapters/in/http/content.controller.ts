@@ -95,7 +95,7 @@ export class ContentController {
     });
 
     return {
-      data: result.items.map(ContentHttpMapper.toSummary),
+      data: result.items.map((item) => ContentHttpMapper.toSummary(item)),
       pagination: {
         page: result.page,
         page_size: result.pageSize,

@@ -3,8 +3,8 @@ import { PublishValidationError } from '../errors/publish-validation.error';
 
 const SLUG_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-export class PublishRequirementsCheckerService {
-  static check(content: Content): void {
+export const PublishRequirementsCheckerService = {
+  check(content: Content): void {
     if (content.title.trim() === '') {
       throw new PublishValidationError('Title is required');
     }
@@ -30,5 +30,5 @@ export class PublishRequirementsCheckerService {
         'SEO description must be 160 characters or fewer',
       );
     }
-  }
-}
+  },
+};

@@ -27,16 +27,16 @@ class FakeContents implements ContentRepository {
   saved: Content[] = [];
   deleted: ContentId[] = [];
   entity: Content | null = content();
-  async save(entity: Content): Promise<void> { this.saved.push(entity); }
-  async findById(): Promise<Content | null> { return this.entity; }
-  async findBySlug(): Promise<Content | null> { return null; }
-  async findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
-  async delete(id: ContentId): Promise<void> { this.deleted.push(id); }
+  save(entity: Content): Promise<void> { this.saved.push(entity); return Promise.resolve(); }
+  findById(): Promise<Content | null> { return Promise.resolve(this.entity); }
+  findBySlug(): Promise<Content | null> { return Promise.resolve(null); }
+  findMany(): Promise<PagedResult<Content>> { throw new Error('not used'); }
+  delete(id: ContentId): Promise<void> { this.deleted.push(id); return Promise.resolve(); }
 }
 
 function setup(contents = new FakeContents()) {
-  const events = { publishAll: vi.fn(async () => undefined) };
-  return { contents, events, useCase: new DeleteContentUseCase(contents, { now: () => NOW }, events, { run: async (fn) => fn() }) };
+  const events = { publishAll: vi.fn(() => Promise.resolve()) };
+  return { contents, events, useCase: new DeleteContentUseCase(contents, { now: () => NOW }, events, { run: (fn) => fn() }) };
 }
 
 describe('DeleteContentUseCase', () => {

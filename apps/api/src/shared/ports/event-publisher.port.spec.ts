@@ -11,8 +11,9 @@ describe('DomainEventPublisher port', () => {
     const occurredAt = new Date('2026-05-14T00:00:00.000Z');
     const events: DomainEvent[] = [{ occurredAt }];
     const publisher: DomainEventPublisher = {
-      publishAll: async (publishedEvents) => {
+      publishAll: (publishedEvents) => {
         expect(publishedEvents).toBe(events);
+        return Promise.resolve();
       },
     };
 

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  GetContentCommand,
   GetContentResult,
   GetContentUseCase,
 } from './get-content.port';
@@ -31,8 +30,7 @@ describe('GetContentUseCase port', () => {
       updatedAt: new Date('2026-05-14T00:00:00.000Z'),
     };
     const useCase: GetContentUseCase = {
-      execute: async (_command: GetContentCommand): Promise<GetContentResult> =>
-        result,
+      execute: (): Promise<GetContentResult> => Promise.resolve(result),
     };
 
     await expect(

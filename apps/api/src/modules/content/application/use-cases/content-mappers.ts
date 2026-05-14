@@ -42,7 +42,7 @@ export function updateFieldsFromCommand(
       command.seoMetadata.description,
     );
   }
-  if (command.tags !== undefined) fields.tags = command.tags.map(Tag.create);
+  if (command.tags !== undefined) fields.tags = command.tags.map((t) => Tag.create(t));
   if (command.category !== undefined) fields.category = command.category;
   if (command.parentId !== undefined) fields.parentId = command.parentId;
   if (command.featuredImageId !== undefined) {

@@ -13,9 +13,8 @@ export class RichTextBody {
 
   static create(nodes: object): RichTextBody {
     if (
-      nodes === null ||
-      Object.getPrototypeOf(nodes) !== Object.prototype ||
-      Array.isArray(nodes)
+      Object.prototype.toString.call(nodes) !== '[object Object]' ||
+      Object.getPrototypeOf(nodes) !== Object.prototype
     ) {
       throw new InvalidRichTextBodyError();
     }

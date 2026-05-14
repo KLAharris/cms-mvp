@@ -99,8 +99,8 @@ describe('ContentDomainExceptionFilter', () => {
   });
 
   it('rethrows unknown errors', () => {
-    expect(() =>
-      new ContentDomainExceptionFilter().catch(new Error('unknown'), host().argumentsHost),
-    ).toThrow('unknown');
+    expect(() => {
+      new ContentDomainExceptionFilter().catch(new Error('unknown'), host().argumentsHost);
+    }).toThrow('unknown');
   });
 });

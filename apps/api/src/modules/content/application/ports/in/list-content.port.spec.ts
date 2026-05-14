@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ContentListItem,
-  ListContentCommand,
   ListContentResult,
   ListContentUseCase,
 } from './list-content.port';
@@ -22,7 +21,7 @@ describe('ListContentUseCase port', () => {
       updatedAt: new Date('2026-05-14T00:00:00.000Z'),
     };
     const useCase: ListContentUseCase = {
-      execute: async (_command: ListContentCommand): Promise<ListContentResult> => ({
+      execute: (): Promise<ListContentResult> => Promise.resolve({
         items: [item],
         total: 1,
         page: 1,
