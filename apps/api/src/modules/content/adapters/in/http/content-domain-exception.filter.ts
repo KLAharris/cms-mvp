@@ -12,6 +12,7 @@ import { InvalidTransitionError } from '../../../domain/errors/invalid-transitio
 import { PublishValidationError } from '../../../domain/errors/publish-validation.error';
 import { ScheduledAtInPastError } from '../../../domain/errors/scheduled-at-in-past.error';
 import { SlugConflictError } from '../../../domain/errors/slug-conflict.error';
+import { InvalidContentIdError } from '../../../domain/value-objects/content-id.vo';
 
 type ResponseLike = {
   status(statusCode: number): {
@@ -70,6 +71,14 @@ export class ContentDomainExceptionFilter implements ExceptionFilter {
   private map(
     exception: unknown,
   ): { status: HttpStatus; code: string; message: string } | null {
+    if (exception instanceof InvalidContentIdError) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        code: 'INVALID_CONTENT_ID',
+        message: exception.message,
+      };
+    }
+
     if (exception instanceof ContentNotFoundError) {
       return {
         status: HttpStatus.NOT_FOUND,
