@@ -20,11 +20,11 @@ loadEnv({ path: resolve(apiRoot, '.env') });
 
 const hasDatabase = process.env.TEST_DATABASE_URL !== undefined;
 const NOW = new Date('2026-06-01T00:00:00.000Z');
-const IDS = [
+const IDS: [string, string, string] = [
   '123e4567-e89b-42d3-a456-426614174000',
   '223e4567-e89b-42d3-a456-426614174000',
   '323e4567-e89b-42d3-a456-426614174000',
-] as const;
+];
 
 describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   let prisma: PrismaClient;
