@@ -64,6 +64,8 @@ describe('POST /api/admin/auth/refresh', () => {
 
   beforeEach(async () => {
     await cleanupRedis.flushdb();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
     await prisma.user.deleteMany();
     await seedAuthor(prisma);
   });

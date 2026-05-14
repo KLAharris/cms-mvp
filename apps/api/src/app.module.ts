@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { validateEnv } from './config/env.validation';
 import { HealthController } from './health/health.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { ContentModule } from './modules/content/content.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -33,6 +34,7 @@ import { UsersModule } from './modules/users/users.module';
     }),
     AuthModule,
     UsersModule,
+    ContentModule,
   ],
   controllers: [HealthController],
 })

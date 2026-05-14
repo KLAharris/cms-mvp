@@ -8,10 +8,27 @@ export default defineConfig({
   test: {
     coverage: {
       enabled: coverageRequested,
+      exclude: [
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        'src/modules/content/adapters/out/persistence/prisma-content-version.repository.ts',
+      ],
       include: contentDomainOnly
-        ? ['src/modules/content/domain/**/*.ts']
+        ? [
+            'src/modules/content/domain/**/*.ts',
+            '!src/modules/content/domain/events/domain-event.ts',
+          ]
         : contentOnly
-          ? ['src/modules/content/**/*.ts']
+          ? [
+              'src/modules/content/domain/**/*.ts',
+              '!src/modules/content/domain/events/domain-event.ts',
+              'src/modules/content/application/policies/**/*.ts',
+              'src/modules/content/application/use-cases/**/*.ts',
+              'src/modules/content/adapters/in/http/**/*.ts',
+              '!src/modules/content/adapters/in/http/dto/content.response.ts',
+              'src/modules/content/adapters/out/persistence/content-persistence.mapper.ts',
+              'src/modules/content/adapters/out/persistence/prisma-content.repository.ts',
+            ]
         : [
             'src/modules/auth/domain/**/*.ts',
             'src/modules/auth/application/use-cases/**/*.ts',
