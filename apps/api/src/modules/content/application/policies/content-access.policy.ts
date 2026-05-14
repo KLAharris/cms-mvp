@@ -11,7 +11,7 @@ export const ContentAccessPolicy = {
   },
 
   canDelete(role: string): boolean {
-    return role === 'admin' || role === 'editor';
+    return role === 'admin';
   },
 
   canEdit(

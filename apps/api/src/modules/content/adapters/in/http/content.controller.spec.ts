@@ -408,9 +408,9 @@ describe('ContentController', () => {
     await request(server()).post(`/api/admin/content/${IDS[0]}/schedule`).set('Authorization', `Bearer ${editorToken}`).send({ scheduledAt: NOW.toISOString() }).expect(422);
     await request(server()).post(`/api/admin/content/${IDS[0]}/schedule`).set('Authorization', `Bearer ${editorToken}`).send({}).expect(400);
 
-    await request(server()).delete(`/api/admin/content/${IDS[0]}`).set('Authorization', `Bearer ${editorToken}`).expect(204);
+    await request(server()).delete(`/api/admin/content/${IDS[0]}`).set('Authorization', `Bearer ${adminToken}`).expect(204);
     await request(server()).delete(`/api/admin/content/${IDS[1]}`).set('Authorization', `Bearer ${authorToken}`).expect(403);
-    await request(server()).delete(`/api/admin/content/${IDS[5]}`).set('Authorization', `Bearer ${editorToken}`).expect(404);
+    await request(server()).delete(`/api/admin/content/${IDS[5]}`).set('Authorization', `Bearer ${adminToken}`).expect(404);
     await request(server()).post(`/api/admin/content/${IDS[0]}/submit`).expect(401);
   });
 

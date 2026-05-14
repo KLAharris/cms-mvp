@@ -40,9 +40,14 @@ export class Refresh {
       throw new InvalidTokenError();
     }
 
-    const accessToken = await this.tokenSigner.signAccessToken({ userId: payload.sub });
+    const accessToken = await this.tokenSigner.signAccessToken({
+      userId: user.id,
+      role: user.role,
+    });
+    const expiresAt = new Date(payload.exp * 1000);
     const occurredAt = this.clock.now();
 
+    await this.tokenBlocklist.add(payload.jti, expiresAt);
     await this.auditLogger.logTokenRefresh({
       userId: payload.sub,
       actorIp: command.actorIp,

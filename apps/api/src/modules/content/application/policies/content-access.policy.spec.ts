@@ -44,9 +44,15 @@ describe('ContentAccessPolicy', () => {
     expect(ContentAccessPolicy.canSchedule('author')).toBe(false);
   });
 
-  it('canDelete allows admin and editor only', () => {
+  it('canDelete returns true for admin', () => {
     expect(ContentAccessPolicy.canDelete('admin')).toBe(true);
-    expect(ContentAccessPolicy.canDelete('editor')).toBe(true);
+  });
+
+  it('canDelete returns false for editor', () => {
+    expect(ContentAccessPolicy.canDelete('editor')).toBe(false);
+  });
+
+  it('canDelete returns false for author', () => {
     expect(ContentAccessPolicy.canDelete('author')).toBe(false);
   });
 

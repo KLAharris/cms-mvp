@@ -91,7 +91,11 @@ export class AuthController {
     const parsed = loginBodySchema.safeParse(body);
 
     if (!parsed.success) {
-      throw new HttpException({ message: 'Invalid login request' }, HttpStatus.BAD_REQUEST);
+      throw this.error(
+        HttpStatus.BAD_REQUEST,
+        'VALIDATION_ERROR',
+        'Invalid login request',
+      );
     }
 
     try {
@@ -109,7 +113,11 @@ export class AuthController {
     const refreshToken = this.getCookie(request, 'refreshToken');
 
     if (!refreshToken) {
-      throw new HttpException({ message: 'Invalid or expired token' }, HttpStatus.UNAUTHORIZED);
+      throw this.error(
+        HttpStatus.UNAUTHORIZED,
+        'INVALID_TOKEN',
+        'Invalid or expired token',
+      );
     }
 
     try {
@@ -121,9 +129,10 @@ export class AuthController {
       return { accessToken: result.accessToken };
     } catch (error) {
       if (error instanceof InvalidTokenError) {
-        throw new HttpException(
-          { message: 'Invalid or expired token' },
+        throw this.error(
           HttpStatus.UNAUTHORIZED,
+          'INVALID_TOKEN',
+          'Invalid or expired token',
         );
       }
 
@@ -197,7 +206,7 @@ export class AuthController {
 
     response.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -218,19 +227,31 @@ export class AuthController {
 
   private mapLoginError(error: unknown): HttpException {
     if (error instanceof InvalidCredentialsError) {
-      return new HttpException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
+      return this.error(
+        HttpStatus.UNAUTHORIZED,
+        'INVALID_CREDENTIALS',
+        'Invalid credentials',
+      );
     }
 
     if (error instanceof AccountLockedError) {
-      return new HttpException({ message: 'Invalid credentials' }, HttpStatus.UNAUTHORIZED);
+      return this.error(
+        HttpStatus.UNAUTHORIZED,
+        'INVALID_CREDENTIALS',
+        'Invalid credentials',
+      );
     }
 
     if (error instanceof InvalidEmailError) {
-      return new HttpException({ message: 'Invalid email' }, HttpStatus.BAD_REQUEST);
+      return this.error(HttpStatus.BAD_REQUEST, 'INVALID_EMAIL', 'Invalid email');
     }
 
     if (error instanceof RateLimitExceededError) {
-      return new HttpException({ message: 'Too many login attempts' }, HttpStatus.TOO_MANY_REQUESTS);
+      return this.error(
+        HttpStatus.TOO_MANY_REQUESTS,
+        'RATE_LIMIT_EXCEEDED',
+        'Too many login attempts',
+      );
     }
 
     throw error;

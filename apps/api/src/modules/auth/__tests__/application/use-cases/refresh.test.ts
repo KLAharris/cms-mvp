@@ -64,9 +64,20 @@ describe('Refresh', () => {
     const result = await refresh.execute({ refreshToken: 'valid-token', actorIp });
 
     expect(result).toEqual({
-      accessToken: 'access:user-1:none',
+      accessToken: 'access:user-1:EDITOR',
       accessTokenJti: 'access-jti:user-1',
     });
+  });
+
+  it('revokes the consumed refresh token after successful use', async () => {
+    const { blocklist, refresh } = setup();
+
+    await refresh.execute({ refreshToken: 'valid-token', actorIp });
+
+    await expect(
+      refresh.execute({ refreshToken: 'valid-token', actorIp }),
+    ).rejects.toThrow(InvalidTokenError);
+    await expect(blocklist.has('refresh-jti-1')).resolves.toBe(true);
   });
 
   it('throws InvalidTokenError for an invalid refresh token', async () => {

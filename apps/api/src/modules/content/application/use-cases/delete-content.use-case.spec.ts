@@ -42,10 +42,10 @@ function setup(contents = new FakeContents()) {
 describe('DeleteContentUseCase', () => {
   it('soft-deletes without hard delete and publishes event', async () => {
     const state = setup();
-    await expect(state.useCase.execute({ contentId: ID, actorId: 'editor-1', actorRole: 'editor' })).resolves.toEqual({ contentId: ID, deletedAt: NOW });
+    await expect(state.useCase.execute({ contentId: ID, actorId: 'admin-1', actorRole: 'admin' })).resolves.toEqual({ contentId: ID, deletedAt: NOW });
     expect(state.contents.saved[0]?.deletedAt).toBe(NOW);
     expect(state.contents.deleted).toEqual([]);
-    expect(state.events.publishAll).toHaveBeenCalledWith([expect.objectContaining({ actorId: 'editor-1' })]);
+    expect(state.events.publishAll).toHaveBeenCalledWith([expect.objectContaining({ actorId: 'admin-1' })]);
   });
 
   it('throws ContentNotFoundError if not found', async () => {
@@ -61,6 +61,6 @@ describe('DeleteContentUseCase', () => {
   it('throws InvalidTransitionError if already deleted', async () => {
     const contents = new FakeContents();
     contents.entity = content(NOW);
-    await expect(setup(contents).useCase.execute({ contentId: ID, actorId: 'editor-1', actorRole: 'editor' })).rejects.toThrow(InvalidTransitionError);
+    await expect(setup(contents).useCase.execute({ contentId: ID, actorId: 'admin-1', actorRole: 'admin' })).rejects.toThrow(InvalidTransitionError);
   });
 });
