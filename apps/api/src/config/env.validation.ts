@@ -15,6 +15,11 @@ const envSchema = z
       .optional(),
     RESEND_API_KEY: z.string().optional(),
     PUBLIC_URL: z.string().url(),
+    WORKER_SCHEDULED_PUBLISH_INTERVAL_SEC: z.coerce
+      .number()
+      .int()
+      .min(10)
+      .default(30),
   })
   .superRefine((data, ctx) => {
     if (['ses', 'smtp'].includes(data.EMAIL_PROVIDER)) {

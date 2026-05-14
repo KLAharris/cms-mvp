@@ -11,6 +11,9 @@ import { PrismaService } from '../../shared/prisma/prisma.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { AuthModule } from '../auth/auth.module';
 import { ContentController } from './adapters/in/http/content.controller';
+import { ScheduledPublishJob } from './adapters/in/scheduler/scheduled-publish.job';
+import { SoftDeleteCleanupJob } from './adapters/in/scheduler/soft-delete-cleanup.job';
+import { VersionPruningJob } from './adapters/in/scheduler/version-pruning.job';
 import { PrismaContentRepository } from './adapters/out/persistence/prisma-content.repository';
 import { PrismaContentVersionRepository } from './adapters/out/persistence/prisma-content-version.repository';
 import { ContentRepository } from './application/ports/out/content-repository.port';
@@ -50,6 +53,9 @@ export const CONTENT_VERSION_REPOSITORY = Symbol('ContentVersionRepository');
     { provide: DOMAIN_EVENT_PUBLISHER, useClass: InProcessEventPublisher },
     { provide: TRANSACTION_RUNNER, useClass: NoopTransactionRunner },
     JwtAuthGuard,
+    ScheduledPublishJob,
+    SoftDeleteCleanupJob,
+    VersionPruningJob,
     {
       provide: 'CREATE_CONTENT_USE_CASE',
       inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER],
