@@ -7,6 +7,7 @@ export interface SubmitForReviewUseCase {
 export type SubmitForReviewCommand = {
   contentId: string;
   actorId: string;
+  actorRole: string;
 };
 
 export type SubmitForReviewResult = {

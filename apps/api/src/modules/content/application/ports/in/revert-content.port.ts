@@ -8,10 +8,11 @@ export type RevertContentCommand = {
   contentId: string;
   versionNo: number;
   actorId: string;
+  actorRole: string;
 };
 
 export type RevertContentResult = {
   contentId: string;
   status: ContentStatus;
-  versionNo: number;
+  newVersionNo: number;
 };

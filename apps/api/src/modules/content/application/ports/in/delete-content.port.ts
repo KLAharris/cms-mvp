@@ -5,6 +5,7 @@ export interface DeleteContentUseCase {
 export type DeleteContentCommand = {
   contentId: string;
   actorId: string;
+  actorRole: string;
 };
 
 export type DeleteContentResult = {

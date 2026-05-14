@@ -13,6 +13,7 @@ describe('CreateContentUseCase port', () => {
     const useCase: CreateContentUseCase = {
       execute: async (_command: CreateContentCommand): Promise<CreateContentResult> => ({
         contentId: 'content-1',
+        slug: 'title',
         status: ContentStatus.Draft,
       }),
     };
@@ -21,8 +22,13 @@ describe('CreateContentUseCase port', () => {
       useCase.execute({
         type: ContentType.Article,
         title: 'Title',
-        authorId: 'author-1',
+        actorId: 'author-1',
+        actorRole: 'author',
       }),
-    ).resolves.toEqual({ contentId: 'content-1', status: ContentStatus.Draft });
+    ).resolves.toEqual({
+      contentId: 'content-1',
+      slug: 'title',
+      status: ContentStatus.Draft,
+    });
   });
 });

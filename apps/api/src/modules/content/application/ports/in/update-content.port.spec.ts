@@ -19,7 +19,12 @@ describe('UpdateContentUseCase port', () => {
     };
 
     await expect(
-      useCase.execute({ contentId: 'content-1', actorId: 'actor-1', title: 'New' }),
+      useCase.execute({
+        contentId: 'content-1',
+        actorId: 'actor-1',
+        actorRole: 'author',
+        title: 'New',
+      }),
     ).resolves.toEqual({
       contentId: 'content-1',
       status: ContentStatus.Draft,

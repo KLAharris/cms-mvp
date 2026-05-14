@@ -8,10 +8,15 @@ export interface CreateContentUseCase {
 export type CreateContentCommand = {
   type: ContentType;
   title: string;
-  authorId: string;
+  actorId: string;
+  actorRole: string;
+  tags?: string[];
+  category?: string | null;
+  parentId?: string | null;
 };
 
 export type CreateContentResult = {
   contentId: string;
+  slug: string;
   status: ContentStatus;
 };

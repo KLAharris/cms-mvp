@@ -7,10 +7,14 @@ export interface UpdateContentUseCase {
 export type UpdateContentCommand = {
   contentId: string;
   actorId: string;
+  actorRole: string;
   title?: string;
+  slug?: string;
   body?: object | null;
-  seoTitle?: string;
-  seoDescription?: string;
+  seoMetadata?: {
+    title: string;
+    description: string;
+  };
   tags?: string[];
   category?: string | null;
   parentId?: string | null;

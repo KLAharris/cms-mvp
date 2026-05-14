@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 const coverageRequested = process.argv.includes('--coverage');
 const contentDomainOnly = process.argv.includes('src/modules/content/domain');
+const contentOnly = process.argv.includes('src/modules/content');
 
 export default defineConfig({
   test: {
@@ -9,6 +10,8 @@ export default defineConfig({
       enabled: coverageRequested,
       include: contentDomainOnly
         ? ['src/modules/content/domain/**/*.ts']
+        : contentOnly
+          ? ['src/modules/content/**/*.ts']
         : [
             'src/modules/auth/domain/**/*.ts',
             'src/modules/auth/application/use-cases/**/*.ts',

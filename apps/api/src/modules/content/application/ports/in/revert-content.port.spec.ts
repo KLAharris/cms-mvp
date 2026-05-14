@@ -13,16 +13,21 @@ describe('RevertContentUseCase port', () => {
       execute: async (_command: RevertContentCommand): Promise<RevertContentResult> => ({
         contentId: 'content-1',
         status: ContentStatus.Draft,
-        versionNo: 2,
+        newVersionNo: 2,
       }),
     };
 
     await expect(
-      useCase.execute({ contentId: 'content-1', versionNo: 2, actorId: 'actor-1' }),
+      useCase.execute({
+        contentId: 'content-1',
+        versionNo: 2,
+        actorId: 'actor-1',
+        actorRole: 'author',
+      }),
     ).resolves.toEqual({
       contentId: 'content-1',
       status: ContentStatus.Draft,
-      versionNo: 2,
+      newVersionNo: 2,
     });
   });
 });

@@ -19,7 +19,11 @@ describe('SubmitForReviewUseCase port', () => {
     };
 
     await expect(
-      useCase.execute({ contentId: 'content-1', actorId: 'actor-1' }),
+      useCase.execute({
+        contentId: 'content-1',
+        actorId: 'actor-1',
+        actorRole: 'author',
+      }),
     ).resolves.toEqual({
       contentId: 'content-1',
       status: ContentStatus.InReview,
