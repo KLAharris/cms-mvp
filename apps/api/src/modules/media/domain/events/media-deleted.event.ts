@@ -1,0 +1,14 @@
+import { DomainEvent } from '../../../../shared/ports/event-publisher.port';
+
+export class MediaDeletedEvent implements DomainEvent {
+  readonly name = 'media.deleted';
+  readonly occurredAt: Date;
+
+  constructor(
+    readonly mediaId: string,
+    readonly storageKey: string,
+    readonly deletedBy: string,
+  ) {
+    this.occurredAt = new Date();
+  }
+}
