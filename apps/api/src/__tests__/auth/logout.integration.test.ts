@@ -61,6 +61,7 @@ describe('POST /api/admin/auth/logout', () => {
     await cleanupRedis.flushdb();
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany();
     await seedAuthor(prisma);
   });
