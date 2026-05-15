@@ -16,7 +16,6 @@ function repository(media: MediaItem | null): MediaRepository {
     findById: vi.fn<MediaRepository['findById']>().mockResolvedValue(media),
     findAll: vi.fn<MediaRepository['findAll']>(),
     delete: vi.fn<MediaRepository['delete']>(),
-    countReferences: vi.fn<MediaRepository['countReferences']>(),
   };
 }
 

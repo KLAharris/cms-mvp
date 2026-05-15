@@ -22,7 +22,6 @@ function repository(): MediaRepository {
     findById: vi.fn<MediaRepository['findById']>(),
     findAll: vi.fn<MediaRepository['findAll']>(),
     delete: vi.fn<MediaRepository['delete']>(),
-    countReferences: vi.fn<MediaRepository['countReferences']>(),
   };
 }
 

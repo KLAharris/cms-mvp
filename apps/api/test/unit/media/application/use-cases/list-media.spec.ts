@@ -33,7 +33,6 @@ describe('ListMediaUseCase', () => {
       findById: vi.fn<MediaRepository['findById']>(),
       findAll: vi.fn<MediaRepository['findAll']>().mockResolvedValue(paged),
       delete: vi.fn<MediaRepository['delete']>(),
-      countReferences: vi.fn<MediaRepository['countReferences']>(),
     };
 
     const result = await new ListMediaUseCase(repo).execute({
