@@ -8,10 +8,16 @@ import { MediaRepository } from '../../../../../src/modules/media/application/po
 
 const mediaId = '11111111-1111-4111-8111-111111111111';
 
+function filenameFor(mimeType: string): string {
+  if (mimeType === 'application/pdf') return 'doc.pdf';
+  if (mimeType === 'image/svg+xml') return 'image.svg';
+  return 'hero.png';
+}
+
 function createMedia(mimeType = 'image/png'): MediaItem {
   return MediaItem.create({
     id: mediaId,
-    filename: mimeType === 'application/pdf' ? 'doc.pdf' : 'hero.png',
+    filename: filenameFor(mimeType),
     mimeType,
     sizeBytes: 100,
     maxSizeBytes: 1000,
@@ -48,6 +54,24 @@ describe('FinalizeMediaUseCase', () => {
 
   it('enqueues image variant generation and keeps pending status', async () => {
     const media = createMedia();
+    const repo = repoWith(media);
+    const jobs: JobEnqueuer = { enqueue: vi.fn<JobEnqueuer['enqueue']>() };
+
+    await new FinalizeMediaUseCase(repo, jobs).execute({
+      mediaId,
+      requestedBy: 'user-1',
+    });
+
+    expect(media.status).toBe('pending');
+    expect(jobs.enqueue).toHaveBeenCalledWith(MEDIA_VARIANT_QUEUE, {
+      type: 'generate-variants',
+      data: { mediaId },
+    });
+    expect(repo.save).toHaveBeenCalledWith(media);
+  });
+
+  it('enqueues SVG sanitization job and does not mark ready immediately', async () => {
+    const media = createMedia('image/svg+xml');
     const repo = repoWith(media);
     const jobs: JobEnqueuer = { enqueue: vi.fn<JobEnqueuer['enqueue']>() };
 

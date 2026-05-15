@@ -26,15 +26,13 @@ export class FinalizeMediaUseCase implements FinalizeMediaPort {
       throw new MediaAlreadyFinalizedError(command.mediaId);
     }
 
-    if (
-      !AllowedMimeType.isImage(media.mimeType) &&
-      media.mimeType !== AllowedMimeType.IMAGE_SVG
-    ) {
+    if (media.mimeType === AllowedMimeType.APPLICATION_PDF) {
       media.markReady(new Map([[MediaVariant.ORIGINAL, media.storageKey]]));
       await this.media.save(media);
       return;
     }
 
+    // All images and SVG go through the worker (SVG requires sanitization per SEC-05)
     await this.jobs.enqueue(MEDIA_VARIANT_QUEUE, {
       type: 'generate-variants',
       data: { mediaId: media.id.value },
