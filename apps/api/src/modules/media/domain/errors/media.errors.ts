@@ -20,9 +20,10 @@ export class MediaReferencedError extends DomainError {
 }
 
 export class UnsupportedMediaTypeError extends DomainError {
-  constructor(mimeType: string) {
+  constructor(mimeType: string, customMessage?: string) {
     super(
-      `Media type '${mimeType}' is not supported. Allowed: PNG, JPEG, WEBP, GIF, SVG, PDF`,
+      customMessage ??
+        `Media type '${mimeType}' is not supported. Allowed: PNG, JPEG, WEBP, GIF, SVG, PDF`,
     );
   }
 }

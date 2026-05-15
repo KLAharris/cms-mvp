@@ -1,5 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { S3Client } from '@aws-sdk/client-s3';
+
+import { MediaController } from './adapters/in/http/media.controller';
+import { ImageVariantWorker } from './adapters/in/scheduler';
+import { AuthModule } from '../auth/auth.module';
 
 import { BullMQJobEnqueuer } from '../../shared/adapters/bullmq-job-enqueuer.adapter';
 import { InProcessEventPublisher } from '../../shared/adapters/in-process-event-publisher.adapter';
@@ -15,11 +20,13 @@ import {
   ContentMediaRefAdapter,
   PrismaMediaRepository,
 } from './adapters/out/persistence';
+import { SharpImageProcessorAdapter } from './adapters/out/processing';
 import { S3ObjectStorageAdapter } from './adapters/out/storage';
 import {
   DeleteMediaUseCase,
   FinalizeMediaUseCase,
   GenerateMediaVariantsUseCase,
+  GetMediaUseCase,
   ListMediaUseCase,
   MAX_UPLOAD_BYTES,
   PRESIGN_TTL_SECONDS,
@@ -32,17 +39,19 @@ import {
   MediaRepository,
   ObjectStorage,
 } from './application/ports/out';
+import {
+  IMAGE_PROCESSOR,
+  MEDIA_REFERENCE_CHECKER,
+  MEDIA_REPOSITORY,
+  OBJECT_STORAGE,
+} from './media-tokens';
 
-export const MEDIA_REPOSITORY = Symbol('MediaRepository');
-export const MEDIA_REFERENCE_CHECKER = Symbol('MediaReferenceChecker');
-export const OBJECT_STORAGE = Symbol('ObjectStorage');
-export const IMAGE_PROCESSOR = Symbol('ImageProcessor');
-
-class NoopImageProcessor implements ImageProcessor {
-  generateVariants(): Promise<{ variants: []; width?: number; height?: number }> {
-    return Promise.resolve({ variants: [] });
-  }
-}
+export {
+  IMAGE_PROCESSOR,
+  MEDIA_REFERENCE_CHECKER,
+  MEDIA_REPOSITORY,
+  OBJECT_STORAGE,
+} from './media-tokens';
 
 function redisConnectionFromUrl(redisUrl: string): { host: string; port: number } {
   const parsed = new URL(redisUrl);
@@ -53,7 +62,8 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
 }
 
 @Module({
-  imports: [ConfigModule, PrismaModule],
+  imports: [AuthModule, ConfigModule, PrismaModule],
+  controllers: [MediaController],
   providers: [
     {
       provide: MEDIA_REPOSITORY,
@@ -68,20 +78,28 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
         new ContentMediaRefAdapter(prisma),
     },
     {
-      provide: OBJECT_STORAGE,
+      provide: 'S3_CLIENT',
       inject: [ConfigService],
-      useFactory: (config: ConfigService): ObjectStorage =>
-        new S3ObjectStorageAdapter({
+      useFactory: (config: ConfigService): S3Client =>
+        new S3Client({
           endpoint: config.getOrThrow<string>('OBJECT_STORAGE_ENDPOINT'),
           region: config.getOrThrow<string>('OBJECT_STORAGE_REGION'),
-          bucket: config.getOrThrow<string>('OBJECT_STORAGE_BUCKET'),
-          accessKeyId: config.getOrThrow<string>('OBJECT_STORAGE_ACCESS_KEY'),
-          secretAccessKey: config.getOrThrow<string>('OBJECT_STORAGE_SECRET_KEY'),
-          publicUrl: config.getOrThrow<string>('OBJECT_STORAGE_PUBLIC_URL'),
-          forcePathStyle:
-            config.getOrThrow<string>('OBJECT_STORAGE_ENDPOINT') !==
-            'https://s3.amazonaws.com',
+          credentials: {
+            accessKeyId: config.getOrThrow<string>('OBJECT_STORAGE_ACCESS_KEY'),
+            secretAccessKey: config.getOrThrow<string>('OBJECT_STORAGE_SECRET_KEY'),
+          },
+          forcePathStyle: true,
         }),
+    },
+    {
+      provide: OBJECT_STORAGE,
+      inject: ['S3_CLIENT', ConfigService],
+      useFactory: (s3: S3Client, config: ConfigService): ObjectStorage =>
+        new S3ObjectStorageAdapter(
+          s3,
+          config.getOrThrow<string>('OBJECT_STORAGE_BUCKET'),
+          config.getOrThrow<string>('OBJECT_STORAGE_PUBLIC_URL'),
+        ),
     },
     {
       provide: JOB_ENQUEUER,
@@ -94,7 +112,16 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
     { provide: ID_GENERATOR, useClass: UuidV4Generator },
     { provide: CLOCK, useClass: SystemClock },
     { provide: DOMAIN_EVENT_PUBLISHER, useClass: InProcessEventPublisher },
-    { provide: IMAGE_PROCESSOR, useClass: NoopImageProcessor },
+    {
+      provide: IMAGE_PROCESSOR,
+      inject: ['S3_CLIENT', ConfigService],
+      useFactory: (s3: S3Client, config: ConfigService): ImageProcessor =>
+        new SharpImageProcessorAdapter(
+          s3,
+          config.getOrThrow<string>('OBJECT_STORAGE_BUCKET'),
+          config.getOrThrow<string>('OBJECT_STORAGE_REGION'),
+        ),
+    },
     {
       provide: MAX_UPLOAD_BYTES,
       inject: [ConfigService],
@@ -180,6 +207,24 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
       ): DeleteMediaUseCase =>
         new DeleteMediaUseCase(media, references, storage, events),
     },
+    {
+      provide: 'GET_MEDIA_USE_CASE',
+      inject: [MEDIA_REPOSITORY],
+      useFactory: (media: MediaRepository): GetMediaUseCase =>
+        new GetMediaUseCase(media),
+    },
+    {
+      provide: ImageVariantWorker,
+      inject: ['GENERATE_MEDIA_VARIANTS_USE_CASE', ConfigService],
+      useFactory: (
+        generateVariants: GenerateMediaVariantsUseCase,
+        config: ConfigService,
+      ): ImageVariantWorker =>
+        new ImageVariantWorker(
+          generateVariants,
+          redisConnectionFromUrl(config.getOrThrow<string>('REDIS_URL')),
+        ),
+    },
   ],
   exports: [
     MEDIA_REPOSITORY,
@@ -191,6 +236,7 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
     'FINALIZE_MEDIA_USE_CASE',
     'GENERATE_MEDIA_VARIANTS_USE_CASE',
     'DELETE_MEDIA_USE_CASE',
+    'GET_MEDIA_USE_CASE',
   ],
 })
 export class MediaModule {}
