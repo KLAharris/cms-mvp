@@ -32,7 +32,7 @@ export class PresignUploadUseCase implements PresignUploadPort {
     FileSize.create(command.sizeBytes, this.maxUploadBytes);
 
     const mediaId = MediaId.create(this.ids.generate());
-    const storageKey = StorageKey.generate(mediaId, command.filename);
+    const storageKey = StorageKey.generate(mediaId, command.filename, this.clock.now().getTime());
     const presigned = await this.storage.presignUpload({
       storageKey: storageKey.value,
       mimeType,

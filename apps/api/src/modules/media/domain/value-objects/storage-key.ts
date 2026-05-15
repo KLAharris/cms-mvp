@@ -12,7 +12,7 @@ export class StorageKey {
     return new StorageKey(value);
   }
 
-  static generate(mediaId: MediaId, filename: string): StorageKey {
+  static generate(mediaId: MediaId, filename: string, now: number): StorageKey {
     const sanitizedFilename = filename
       .trim()
       .toLowerCase()
@@ -21,7 +21,7 @@ export class StorageKey {
       .replace(/^-+|-+$/g, '');
 
     return StorageKey.create(
-      `media/${mediaId.value}/${String(Date.now())}-${sanitizedFilename}`,
+      `media/${mediaId.value}/${String(now)}-${sanitizedFilename}`,
     );
   }
 }
