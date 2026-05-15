@@ -36,8 +36,19 @@ export default defineConfig({
           ],
     },
     environment: 'node',
+    env: {
+      PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK: '1',
+    },
     fileParallelism: false,
     globals: false,
     include: ['test/**/*.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts'],
+    maxWorkers: 1,
+    minWorkers: 1,
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
   },
 });
