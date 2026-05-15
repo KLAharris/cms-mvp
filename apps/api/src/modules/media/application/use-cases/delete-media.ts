@@ -31,6 +31,13 @@ export class DeleteMediaUseCase implements DeleteMediaPort {
       throw new MediaNotFoundError(command.mediaId);
     }
 
+    if (
+      command.requestedByRole === 'AUTHOR' &&
+      !media.isOwnedBy(command.requestedBy)
+    ) {
+      throw new MediaForbiddenError('Authors can only delete their own media');
+    }
+
     const referenceCount = await this.references.countReferences(media.id);
     if (referenceCount > 0) {
       if (command.force === true && command.requestedByRole !== 'ADMIN') {
@@ -39,13 +46,6 @@ export class DeleteMediaUseCase implements DeleteMediaPort {
       if (command.force !== true) {
         throw new MediaReferencedError(command.mediaId, referenceCount);
       }
-    }
-
-    if (
-      command.requestedByRole === 'AUTHOR' &&
-      !media.isOwnedBy(command.requestedBy)
-    ) {
-      throw new MediaForbiddenError('Authors can only delete their own media');
     }
 
     await this.storage.deleteObject(media.storageKey.value);
