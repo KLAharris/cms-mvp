@@ -12,30 +12,12 @@ import {
   SignedDownloadUrl,
 } from '../../../application/ports/out';
 
-export interface S3ObjectStorageConfig {
-  endpoint: string;
-  region: string;
-  bucket: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  publicUrl: string;
-  forcePathStyle: boolean;
-}
-
 export class S3ObjectStorageAdapter implements ObjectStorage {
-  private readonly client: S3Client;
-
-  constructor(private readonly config: S3ObjectStorageConfig) {
-    this.client = new S3Client({
-      endpoint: config.endpoint,
-      region: config.region,
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
-      forcePathStyle: config.forcePathStyle,
-    });
-  }
+  constructor(
+    private readonly client: S3Client,
+    private readonly bucket: string,
+    private readonly publicUrl: string,
+  ) {}
 
   async presignUpload(params: {
     storageKey: string;
@@ -45,7 +27,7 @@ export class S3ObjectStorageAdapter implements ObjectStorage {
   }): Promise<PresignedUpload> {
     void params.maxBytes;
     const command = new PutObjectCommand({
-      Bucket: this.config.bucket,
+      Bucket: this.bucket,
       Key: params.storageKey,
       ContentType: params.mimeType,
     });
@@ -65,7 +47,7 @@ export class S3ObjectStorageAdapter implements ObjectStorage {
     ttlSeconds: number;
   }): Promise<SignedDownloadUrl> {
     const command = new GetObjectCommand({
-      Bucket: this.config.bucket,
+      Bucket: this.bucket,
       Key: params.storageKey,
     });
     const url = await getSignedUrl(this.client, command, {
@@ -81,7 +63,7 @@ export class S3ObjectStorageAdapter implements ObjectStorage {
   async deleteObject(storageKey: string): Promise<void> {
     await this.client.send(
       new DeleteObjectCommand({
-        Bucket: this.config.bucket,
+        Bucket: this.bucket,
         Key: storageKey,
       }),
     );
