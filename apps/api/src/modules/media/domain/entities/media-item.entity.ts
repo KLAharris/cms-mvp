@@ -27,6 +27,22 @@ export type MediaItemCreateProps = {
   caption?: string;
 };
 
+export type MediaItemReconstituteProps = {
+  id: MediaId;
+  filename: string;
+  mimeType: AllowedMimeType;
+  size: FileSize;
+  storageKey: StorageKey;
+  altText: AltText;
+  caption: Caption;
+  uploadedBy: string;
+  uploadedAt: Date;
+  status: MediaStatus;
+  variants: Map<MediaVariant, StorageKey>;
+  width?: number;
+  height?: number;
+};
+
 export class MediaItem {
   readonly id: MediaId;
   readonly filename: string;
@@ -84,6 +100,13 @@ export class MediaItem {
       status: 'pending',
       variants: new Map(),
     });
+  }
+
+  static reconstitute(props: MediaItemReconstituteProps): MediaItem {
+    const media = new MediaItem(props);
+    media.width = props.width;
+    media.height = props.height;
+    return media;
   }
 
   markReady(variants: Map<MediaVariant, StorageKey>, dimensions?: { width: number; height: number }): void {
