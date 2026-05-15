@@ -1,12 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
-import { PrismaService } from '../../../../../shared/prisma/prisma.service';
 import { MediaReferenceChecker } from '../../../application/ports/out';
 import { MediaId } from '../../../domain/value-objects';
 
+type PrismaMediaReferenceClient = {
+  contentMediaRef: {
+    count(args: Prisma.ContentMediaRefCountArgs): Promise<number>;
+  };
+  content: {
+    count(args: Prisma.ContentCountArgs): Promise<number>;
+  };
+};
+
 @Injectable()
 export class ContentMediaRefAdapter implements MediaReferenceChecker {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaMediaReferenceClient) {}
 
   async countReferences(mediaId: MediaId): Promise<number> {
     const [embedCount, featuredCount, socialCount] = await Promise.all([
