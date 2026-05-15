@@ -3,7 +3,7 @@ import {
   MEDIA_VARIANT_QUEUE,
 } from '../../../../shared/ports/job-enqueuer.port';
 
-import { MediaNotFoundError, MediaAlreadyFinalizedError } from '../../domain/errors';
+import { MediaNotFoundError, MediaAlreadyFinalizedError, MediaForbiddenError } from '../../domain/errors';
 import { AllowedMimeType, MediaId, MediaVariant } from '../../domain/value-objects';
 import {
   FinalizeMediaCommand,
@@ -27,14 +27,19 @@ export class FinalizeMediaUseCase implements FinalizeMediaPort {
     }
 
     if (
-      !AllowedMimeType.isImage(media.mimeType) &&
-      media.mimeType !== AllowedMimeType.IMAGE_SVG
+      command.requestedByRole === 'AUTHOR' &&
+      !media.isOwnedBy(command.requestedBy)
     ) {
+      throw new MediaForbiddenError('Authors can only finalize their own uploads');
+    }
+
+    if (media.mimeType === AllowedMimeType.APPLICATION_PDF) {
       media.markReady(new Map([[MediaVariant.ORIGINAL, media.storageKey]]));
       await this.media.save(media);
       return;
     }
 
+    // All images and SVG go through the worker (SVG requires sanitization per SEC-05)
     await this.jobs.enqueue(MEDIA_VARIANT_QUEUE, {
       type: 'generate-variants',
       data: { mediaId: media.id.value },

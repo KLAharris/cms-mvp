@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { MediaId, StorageKey } from '../../../../../src/modules/media/domain';
 
@@ -8,10 +8,9 @@ describe('StorageKey', () => {
   });
 
   it('generates keys with media id and sanitized filename', () => {
-    vi.spyOn(Date, 'now').mockReturnValue(123);
     const mediaId = MediaId.create('11111111-1111-4111-8111-111111111111');
 
-    expect(StorageKey.generate(mediaId, 'Hero Image @ 2X.PNG').value).toBe(
+    expect(StorageKey.generate(mediaId, 'Hero Image @ 2X.PNG', 123).value).toBe(
       'media/11111111-1111-4111-8111-111111111111/123-hero-image-2x.png',
     );
   });

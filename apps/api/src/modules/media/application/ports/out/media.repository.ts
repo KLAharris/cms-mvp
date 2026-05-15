@@ -17,5 +17,4 @@ export interface MediaRepository {
   findById(id: MediaId): Promise<MediaItem | null>;
   findAll(query: FindMediaQuery): Promise<PagedResult<MediaItem>>;
   delete(id: MediaId): Promise<void>;
-  countReferences(id: MediaId): Promise<number>;
 }

@@ -40,7 +40,6 @@ function dependencies(referenceCount: number) {
     findById: vi.fn<MediaRepository['findById']>().mockResolvedValue(media),
     findAll: vi.fn<MediaRepository['findAll']>(),
     delete: vi.fn<MediaRepository['delete']>(),
-    countReferences: vi.fn<MediaRepository['countReferences']>(),
   };
   const refs: MediaReferenceChecker = {
     countReferences: vi.fn<MediaReferenceChecker['countReferences']>().mockResolvedValue(referenceCount),

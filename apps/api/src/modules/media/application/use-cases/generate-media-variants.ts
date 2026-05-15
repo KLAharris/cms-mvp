@@ -26,7 +26,7 @@ export class GenerateMediaVariantsUseCase implements GenerateMediaVariantsPort {
     }
 
     try {
-      const generated = await this.images.generateVariants({
+      const { variants: generated, width, height } = await this.images.generateVariants({
         originalStorageKey: media.storageKey.value,
         mediaId: media.id.value,
         mimeType: media.mimeType,
@@ -36,7 +36,7 @@ export class GenerateMediaVariantsUseCase implements GenerateMediaVariantsPort {
       );
       variants.set(MediaVariant.ORIGINAL, media.storageKey);
 
-      media.markReady(variants);
+      media.markReady(variants, width && height ? { width, height } : undefined);
       await this.media.save(media);
       await this.events.publishAll([
         new MediaUploadedEvent(

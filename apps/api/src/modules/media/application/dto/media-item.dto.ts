@@ -13,6 +13,8 @@ export interface MediaItemDto {
   status: 'pending' | 'ready' | 'failed';
   variants: Record<string, string>;
   requiresSanitization: boolean;
+  width?: number;
+  height?: number;
 }
 
 export function toMediaItemDto(media: MediaItem): MediaItemDto {
@@ -33,5 +35,7 @@ export function toMediaItemDto(media: MediaItem): MediaItemDto {
       ]),
     ),
     requiresSanitization: AllowedMimeType.requiresSanitization(media.mimeType),
+    width: media.width,
+    height: media.height,
   };
 }
