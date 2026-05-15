@@ -39,6 +39,8 @@ export class MediaItem {
   readonly uploadedAt: Date;
   status: MediaStatus;
   variants: Map<MediaVariant, StorageKey>;
+  width: number | undefined;
+  height: number | undefined;
 
   private constructor(props: {
     id: MediaId;
@@ -64,6 +66,8 @@ export class MediaItem {
     this.uploadedAt = props.uploadedAt;
     this.status = props.status;
     this.variants = props.variants;
+    this.width = undefined;
+    this.height = undefined;
   }
 
   static create(props: MediaItemCreateProps): MediaItem {
@@ -82,7 +86,7 @@ export class MediaItem {
     });
   }
 
-  markReady(variants: Map<MediaVariant, StorageKey>): void {
+  markReady(variants: Map<MediaVariant, StorageKey>, dimensions?: { width: number; height: number }): void {
     this.assertPending();
 
     if (
@@ -93,6 +97,11 @@ export class MediaItem {
         this.id.value,
         'Image media requires thumbnail and medium variants',
       );
+    }
+
+    if (dimensions) {
+      this.width = dimensions.width;
+      this.height = dimensions.height;
     }
 
     this.status = 'ready';

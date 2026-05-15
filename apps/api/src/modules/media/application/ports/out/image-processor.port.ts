@@ -10,5 +10,5 @@ export interface ImageProcessor {
     originalStorageKey: string;
     mediaId: string;
     mimeType: string;
-  }): Promise<VariantResult[]>;
+  }): Promise<{ variants: VariantResult[]; width?: number; height?: number }>;
 }

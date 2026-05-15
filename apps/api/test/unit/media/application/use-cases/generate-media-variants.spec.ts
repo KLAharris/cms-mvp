@@ -42,10 +42,14 @@ describe('GenerateMediaVariantsUseCase', () => {
     const media = mediaItem();
     const repo = repoWith(media);
     const images: ImageProcessor = {
-      generateVariants: vi.fn<ImageProcessor['generateVariants']>().mockResolvedValue([
-        { variant: MediaVariant.THUMBNAIL, storageKey: StorageKey.create('thumb') },
-        { variant: MediaVariant.MEDIUM, storageKey: StorageKey.create('medium') },
-      ]),
+      generateVariants: vi.fn<ImageProcessor['generateVariants']>().mockResolvedValue({
+        variants: [
+          { variant: MediaVariant.THUMBNAIL, storageKey: StorageKey.create('thumb') },
+          { variant: MediaVariant.MEDIUM, storageKey: StorageKey.create('medium') },
+        ],
+        width: 1920,
+        height: 1080,
+      }),
     };
     const events: DomainEventPublisher = {
       publishAll: vi.fn<DomainEventPublisher['publishAll']>(),
