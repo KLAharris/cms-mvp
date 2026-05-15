@@ -103,4 +103,18 @@ describe('UpdateMediaMetadataUseCase', () => {
       }),
     ).resolves.toBeDefined();
   });
+
+  it('allows EDITOR to update metadata for any media', async () => {
+    const media = createMedia('user-1');
+    const repo = repository(media);
+
+    await expect(
+      new UpdateMediaMetadataUseCase(repo).execute({
+        mediaId,
+        altText: 'Editor caption',
+        requestedBy: 'editor-1',
+        requestedByRole: 'EDITOR',
+      }),
+    ).resolves.toBeDefined();
+  });
 });

@@ -96,4 +96,37 @@ describe('MediaItem', () => {
     expect(media.isOwnedBy('user-1')).toBe(true);
     expect(media.isOwnedBy('user-2')).toBe(false);
   });
+
+  it('markFailed() on a ready item throws MediaAlreadyFinalizedError', () => {
+    const media = createMedia({
+      filename: 'doc.pdf',
+      mimeType: 'application/pdf',
+      storageKey: 'media/doc.pdf',
+    });
+    media.markReady(new Map());
+
+    expect(() => { media.markFailed('something went wrong'); }).toThrow(
+      MediaAlreadyFinalizedError,
+    );
+  });
+
+  it('markFailed() on an already-failed item throws MediaAlreadyFinalizedError', () => {
+    const media = createMedia();
+    media.markFailed('first failure');
+
+    expect(() => { media.markFailed('second failure'); }).toThrow(
+      MediaAlreadyFinalizedError,
+    );
+  });
+
+  it('markReady() on a ready item throws MediaAlreadyFinalizedError', () => {
+    const media = createMedia({
+      filename: 'doc.pdf',
+      mimeType: 'application/pdf',
+      storageKey: 'media/doc.pdf',
+    });
+    media.markReady(new Map());
+
+    expect(() => { media.markReady(new Map()); }).toThrow(MediaAlreadyFinalizedError);
+  });
 });
