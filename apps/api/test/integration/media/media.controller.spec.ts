@@ -36,6 +36,8 @@ describe('MediaController integration', () => {
   let prisma: PrismaClient;
   let adminToken: string;
   let authorToken: string;
+  let adminId: string;
+  let authorId: string;
 
   const mockStorage = {
     presignUpload: vi.fn().mockImplementation(
@@ -94,10 +96,13 @@ describe('MediaController integration', () => {
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany({ where: { email: { in: [adminEmail, authorEmail] } } });
 
-    await prisma.user.create({
+    const adminUser = await prisma.user.create({
       data: {
         email: adminEmail,
         name: 'Media Admin',
@@ -106,7 +111,9 @@ describe('MediaController integration', () => {
         status: UserStatus.ACTIVE,
       },
     });
-    await prisma.user.create({
+    adminId = adminUser.id;
+
+    const authorUser = await prisma.user.create({
       data: {
         email: authorEmail,
         name: 'Media Author',
@@ -115,12 +122,16 @@ describe('MediaController integration', () => {
         status: UserStatus.ACTIVE,
       },
     });
+    authorId = authorUser.id;
 
     adminToken = await loginAndGetToken(adminEmail, adminPassword);
     authorToken = await loginAndGetToken(authorEmail, authorPassword);
-  });
+  }, 30000);
 
   afterAll(async () => {
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany({ where: { email: { in: [adminEmail, authorEmail] } } });
     await app.close();
@@ -130,7 +141,12 @@ describe('MediaController integration', () => {
 
   beforeEach(async () => {
     await cleanupRedis.flushdb();
-    await prisma.mediaItem.deleteMany();
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany({
+      where: { uploadedBy: { in: [adminId, authorId] } },
+    });
   });
 
   // ── POST /api/admin/media/presign ─────────────────────────────────────────

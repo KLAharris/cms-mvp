@@ -48,6 +48,7 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   });
 
   beforeEach(async () => {
+    await prisma.contentMediaRef.deleteMany();
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();

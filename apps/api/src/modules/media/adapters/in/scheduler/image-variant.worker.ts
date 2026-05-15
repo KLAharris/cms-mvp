@@ -28,6 +28,10 @@ export class ImageVariantWorker implements OnModuleInit, OnModuleDestroy {
       },
     );
 
+    this.worker.on('error', (err) => {
+      this.logger.error(`Media variant worker error: ${err.message}`, err.stack);
+    });
+
     this.worker.on('failed', (job, err) => {
       // Log failure only — use case already marks entity as failed
       // Do NOT rethrow — BullMQ retry is not needed since domain handles the failed state
