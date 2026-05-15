@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { S3Client } from '@aws-sdk/client-s3';
 
+import { MediaController } from './adapters/in/http/media.controller';
+import { ImageVariantWorker } from './adapters/in/scheduler';
+import { AuthModule } from '../auth/auth.module';
+
 import { BullMQJobEnqueuer } from '../../shared/adapters/bullmq-job-enqueuer.adapter';
 import { InProcessEventPublisher } from '../../shared/adapters/in-process-event-publisher.adapter';
 import { UuidV4Generator } from '../../shared/adapters/uuid-v4-generator.adapter';
@@ -22,6 +26,7 @@ import {
   DeleteMediaUseCase,
   FinalizeMediaUseCase,
   GenerateMediaVariantsUseCase,
+  GetMediaUseCase,
   ListMediaUseCase,
   MAX_UPLOAD_BYTES,
   PRESIGN_TTL_SECONDS,
@@ -34,11 +39,19 @@ import {
   MediaRepository,
   ObjectStorage,
 } from './application/ports/out';
+import {
+  IMAGE_PROCESSOR,
+  MEDIA_REFERENCE_CHECKER,
+  MEDIA_REPOSITORY,
+  OBJECT_STORAGE,
+} from './media-tokens';
 
-export const MEDIA_REPOSITORY = Symbol('MediaRepository');
-export const MEDIA_REFERENCE_CHECKER = Symbol('MediaReferenceChecker');
-export const OBJECT_STORAGE = Symbol('ObjectStorage');
-export const IMAGE_PROCESSOR = Symbol('ImageProcessor');
+export {
+  IMAGE_PROCESSOR,
+  MEDIA_REFERENCE_CHECKER,
+  MEDIA_REPOSITORY,
+  OBJECT_STORAGE,
+} from './media-tokens';
 
 function redisConnectionFromUrl(redisUrl: string): { host: string; port: number } {
   const parsed = new URL(redisUrl);
@@ -49,7 +62,8 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
 }
 
 @Module({
-  imports: [ConfigModule, PrismaModule],
+  imports: [AuthModule, ConfigModule, PrismaModule],
+  controllers: [MediaController],
   providers: [
     {
       provide: MEDIA_REPOSITORY,
@@ -193,6 +207,24 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
       ): DeleteMediaUseCase =>
         new DeleteMediaUseCase(media, references, storage, events),
     },
+    {
+      provide: 'GET_MEDIA_USE_CASE',
+      inject: [MEDIA_REPOSITORY],
+      useFactory: (media: MediaRepository): GetMediaUseCase =>
+        new GetMediaUseCase(media),
+    },
+    {
+      provide: ImageVariantWorker,
+      inject: ['GENERATE_MEDIA_VARIANTS_USE_CASE', ConfigService],
+      useFactory: (
+        generateVariants: GenerateMediaVariantsUseCase,
+        config: ConfigService,
+      ): ImageVariantWorker =>
+        new ImageVariantWorker(
+          generateVariants,
+          redisConnectionFromUrl(config.getOrThrow<string>('REDIS_URL')),
+        ),
+    },
   ],
   exports: [
     MEDIA_REPOSITORY,
@@ -204,6 +236,7 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
     'FINALIZE_MEDIA_USE_CASE',
     'GENERATE_MEDIA_VARIANTS_USE_CASE',
     'DELETE_MEDIA_USE_CASE',
+    'GET_MEDIA_USE_CASE',
   ],
 })
 export class MediaModule {}
