@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { JobEnqueuer, MEDIA_VARIANT_QUEUE } from '../../../../../src/shared/ports/job-enqueuer.port';
-import { MediaForbiddenError, MediaItem } from '../../../../../src/modules/media/domain';
+import {
+  MediaAlreadyFinalizedError,
+  MediaForbiddenError,
+  MediaItem,
+  MediaNotFoundError,
+} from '../../../../../src/modules/media/domain';
 import { FinalizeMediaUseCase } from '../../../../../src/modules/media/application/use-cases';
 import { MediaRepository } from '../../../../../src/modules/media/application/ports/out';
 
@@ -129,6 +134,68 @@ describe('FinalizeMediaUseCase', () => {
         mediaId,
         requestedBy: 'admin-1',
         requestedByRole: 'ADMIN',
+      }),
+    ).resolves.toBeUndefined();
+  });
+
+  it('throws MediaNotFoundError when findById returns null', async () => {
+    const repo: MediaRepository = {
+      save: vi.fn<MediaRepository['save']>(),
+      findById: vi.fn<MediaRepository['findById']>().mockResolvedValue(null),
+      findAll: vi.fn<MediaRepository['findAll']>(),
+      delete: vi.fn<MediaRepository['delete']>(),
+    };
+    const jobs: JobEnqueuer = { enqueue: vi.fn<JobEnqueuer['enqueue']>() };
+
+    await expect(
+      new FinalizeMediaUseCase(repo, jobs).execute({
+        mediaId,
+        requestedBy: 'user-1',
+        requestedByRole: 'AUTHOR',
+      }),
+    ).rejects.toThrow(MediaNotFoundError);
+  });
+
+  it('throws MediaAlreadyFinalizedError when media status is ready', async () => {
+    const media = createMedia('application/pdf');
+    media.markReady(new Map());
+    const repo = repoWith(media);
+    const jobs: JobEnqueuer = { enqueue: vi.fn<JobEnqueuer['enqueue']>() };
+
+    await expect(
+      new FinalizeMediaUseCase(repo, jobs).execute({
+        mediaId,
+        requestedBy: 'user-1',
+        requestedByRole: 'AUTHOR',
+      }),
+    ).rejects.toThrow(MediaAlreadyFinalizedError);
+  });
+
+  it('throws MediaAlreadyFinalizedError when media status is failed', async () => {
+    const media = createMedia();
+    media.markFailed('processing error');
+    const repo = repoWith(media);
+    const jobs: JobEnqueuer = { enqueue: vi.fn<JobEnqueuer['enqueue']>() };
+
+    await expect(
+      new FinalizeMediaUseCase(repo, jobs).execute({
+        mediaId,
+        requestedBy: 'user-1',
+        requestedByRole: 'AUTHOR',
+      }),
+    ).rejects.toThrow(MediaAlreadyFinalizedError);
+  });
+
+  it('allows EDITOR to finalize any upload', async () => {
+    const media = createMedia('image/png', 'user-1');
+    const repo = repoWith(media);
+    const jobs: JobEnqueuer = { enqueue: vi.fn<JobEnqueuer['enqueue']>() };
+
+    await expect(
+      new FinalizeMediaUseCase(repo, jobs).execute({
+        mediaId,
+        requestedBy: 'editor-1',
+        requestedByRole: 'EDITOR',
       }),
     ).resolves.toBeUndefined();
   });
