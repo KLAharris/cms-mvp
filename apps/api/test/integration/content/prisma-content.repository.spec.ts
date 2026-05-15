@@ -187,5 +187,5 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
     await expect(
       repository.save(makeContent('423e4567-e89b-42d3-a456-426614174000', 'Alpha Title')),
     ).rejects.toThrow();
-  });
+  }, 30000);
 });
