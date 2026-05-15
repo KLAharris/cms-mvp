@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 import { DomainError } from '../errors';
 
 const UUID_REGEX =
@@ -15,7 +13,7 @@ export class MediaId {
   private constructor(readonly value: string) {}
 
   static create(id?: string): MediaId {
-    const value = id?.trim() ?? randomUUID();
+    const value = id?.trim() ?? generateUuidV4();
 
     if (!UUID_REGEX.test(value)) {
       throw new InvalidMediaIdError();
@@ -27,4 +25,12 @@ export class MediaId {
   equals(other: MediaId): boolean {
     return this.value === other.value;
   }
+}
+
+function generateUuidV4(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    const value = char === 'x' ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
 }

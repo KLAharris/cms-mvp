@@ -1,6 +1,4 @@
-import { DomainEvent } from '../../../../shared/ports/event-publisher.port';
-
-export class MediaDeletedEvent implements DomainEvent {
+export class MediaDeletedEvent {
   readonly name = 'media.deleted';
   readonly occurredAt: Date;
 

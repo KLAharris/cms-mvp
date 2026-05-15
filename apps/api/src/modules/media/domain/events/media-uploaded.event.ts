@@ -1,6 +1,4 @@
-import { DomainEvent } from '../../../../shared/ports/event-publisher.port';
-
-export class MediaUploadedEvent implements DomainEvent {
+export class MediaUploadedEvent {
   readonly name = 'media.uploaded';
   readonly occurredAt: Date;
 
