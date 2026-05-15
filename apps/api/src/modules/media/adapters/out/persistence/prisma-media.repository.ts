@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { MediaItem as PrismaMediaItem, Prisma } from '@prisma/client';
 
 import { PagedResult } from '../../../../../shared/kernel/paged-result';
-import { PrismaService } from '../../../../../shared/prisma/prisma.service';
 import {
   FindMediaQuery,
   MediaRepository,
@@ -11,9 +10,19 @@ import { MediaItem } from '../../../domain/entities';
 import { MediaId } from '../../../domain/value-objects';
 import { MediaPersistenceMapper } from './media-persistence.mapper';
 
+type PrismaMediaClient = {
+  mediaItem: {
+    upsert(args: Prisma.MediaItemUpsertArgs): Promise<unknown>;
+    findUnique(args: Prisma.MediaItemFindUniqueArgs): Promise<PrismaMediaItem | null>;
+    findMany(args: Prisma.MediaItemFindManyArgs): Promise<PrismaMediaItem[]>;
+    count(args: Prisma.MediaItemCountArgs): Promise<number>;
+    delete(args: Prisma.MediaItemDeleteArgs): Promise<unknown>;
+  };
+};
+
 @Injectable()
 export class PrismaMediaRepository implements MediaRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaMediaClient) {}
 
   async save(media: MediaItem): Promise<void> {
     const data = MediaPersistenceMapper.toRecord(media);
