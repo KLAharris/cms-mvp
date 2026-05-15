@@ -3,7 +3,7 @@ import {
   MEDIA_VARIANT_QUEUE,
 } from '../../../../shared/ports/job-enqueuer.port';
 
-import { MediaNotFoundError, MediaAlreadyFinalizedError } from '../../domain/errors';
+import { MediaNotFoundError, MediaAlreadyFinalizedError, MediaForbiddenError } from '../../domain/errors';
 import { AllowedMimeType, MediaId, MediaVariant } from '../../domain/value-objects';
 import {
   FinalizeMediaCommand,
@@ -24,6 +24,13 @@ export class FinalizeMediaUseCase implements FinalizeMediaPort {
     }
     if (media.status !== 'pending') {
       throw new MediaAlreadyFinalizedError(command.mediaId);
+    }
+
+    if (
+      command.requestedByRole === 'AUTHOR' &&
+      !media.isOwnedBy(command.requestedBy)
+    ) {
+      throw new MediaForbiddenError('Authors can only finalize their own uploads');
     }
 
     if (media.mimeType === AllowedMimeType.APPLICATION_PDF) {
