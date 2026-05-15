@@ -25,6 +25,8 @@ const IDS: [string, string, string] = [
   '223e4567-e89b-42d3-a456-426614174000',
   '323e4567-e89b-42d3-a456-426614174000',
 ];
+const FEATURED_IMAGE_ID = '11111111-1111-4111-8111-111111111111';
+const SOCIAL_IMAGE_ID = '22222222-2222-4222-8222-222222222222';
 
 describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   let prisma: PrismaClient;
@@ -48,6 +50,7 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   beforeEach(async () => {
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany();
     await prisma.user.create({
       data: {
@@ -68,6 +71,30 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
         role: Role.AUTHOR,
         status: UserStatus.ACTIVE,
       },
+    });
+    await prisma.mediaItem.createMany({
+      data: [
+        {
+          id: FEATURED_IMAGE_ID,
+          storageKey: 'content-test/featured.jpg',
+          filename: 'featured.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 1000n,
+          status: 'ready',
+          uploadedBy: 'author-1',
+          uploadedAt: NOW,
+        },
+        {
+          id: SOCIAL_IMAGE_ID,
+          storageKey: 'content-test/social.jpg',
+          filename: 'social.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 1000n,
+          status: 'ready',
+          uploadedBy: 'author-1',
+          uploadedAt: NOW,
+        },
+      ],
     });
   });
 
@@ -90,8 +117,8 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
       body: RichTextBody.create({ type: 'doc' }),
       status,
       authorId,
-      featuredImageId: '11111111-1111-4111-8111-111111111111',
-      socialImageId: '22222222-2222-4222-8222-222222222222',
+      featuredImageId: FEATURED_IMAGE_ID,
+      socialImageId: SOCIAL_IMAGE_ID,
       seoMetadata: SeoMetadata.create('SEO', 'Description'),
       tags: [Tag.create('tech')],
       category: 'News',

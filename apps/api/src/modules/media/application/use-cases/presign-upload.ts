@@ -17,6 +17,7 @@ import {
 import { MediaRepository, ObjectStorage } from '../ports/out';
 
 export const MAX_UPLOAD_BYTES = Symbol('MAX_UPLOAD_BYTES');
+export const PRESIGN_TTL_SECONDS = Symbol('PRESIGN_TTL_SECONDS');
 
 export class PresignUploadUseCase implements PresignUploadPort {
   constructor(
@@ -25,6 +26,7 @@ export class PresignUploadUseCase implements PresignUploadPort {
     private readonly ids: IdGenerator,
     private readonly clock: Clock,
     private readonly maxUploadBytes: number = DEFAULT_MAX_UPLOAD_BYTES,
+    private readonly presignTtlSeconds: number = 300,
   ) {}
 
   async execute(command: PresignUploadCommand): Promise<PresignUploadResult> {
@@ -37,7 +39,7 @@ export class PresignUploadUseCase implements PresignUploadPort {
       storageKey: storageKey.value,
       mimeType,
       maxBytes: this.maxUploadBytes,
-      ttlSeconds: 300,
+      ttlSeconds: this.presignTtlSeconds,
     });
 
     const media = MediaItem.create({

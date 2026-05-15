@@ -15,6 +15,14 @@ const envSchema = z
       .optional(),
     RESEND_API_KEY: z.string().optional(),
     PUBLIC_URL: z.string().url(),
+    OBJECT_STORAGE_ENDPOINT: z.string().url(),
+    OBJECT_STORAGE_REGION: z.string().min(1),
+    OBJECT_STORAGE_BUCKET: z.string().min(1),
+    OBJECT_STORAGE_ACCESS_KEY: z.string().min(1),
+    OBJECT_STORAGE_SECRET_KEY: z.string().min(1),
+    OBJECT_STORAGE_PUBLIC_URL: z.string().url(),
+    MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(20971520),
+    PRESIGN_TTL_SECONDS: z.coerce.number().int().positive().default(300),
     WORKER_SCHEDULED_PUBLISH_INTERVAL_SEC: z.coerce
       .number()
       .int()

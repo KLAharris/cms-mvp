@@ -20,21 +20,22 @@ enum UserStatus {
 }
 
 model User {
-  id                         String    @id @default(cuid())
-  email                      String    @unique
+  id                         String      @id @default(cuid())
+  email                      String      @unique
   name                       String
   passwordHash               String
   role                       Role
-  status                     UserStatus @default(ACTIVE)
+  status                     UserStatus  @default(ACTIVE)
   lastLoginAt                DateTime?
   inviteTokenHash            String?
   inviteExpiresAt            DateTime?
-  failedLoginAttempts        Int       @default(0)
+  failedLoginAttempts        Int         @default(0)
   failedLoginWindowStartedAt DateTime?
   lockedUntil                DateTime?
-  createdAt                  DateTime  @default(now())
-  updatedAt                  DateTime  @updatedAt
+  createdAt                  DateTime    @default(now())
+  updatedAt                  DateTime    @updatedAt
   contents                   Content[]
+  uploadedMedia              MediaItem[] @relation("UploadedMedia")
 }
 
 enum ContentType {
@@ -71,8 +72,11 @@ model Content {
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
-  author   User             @relation(fields: [authorId], references: [id])
-  versions ContentVersion[]
+  author        User              @relation(fields: [authorId], references: [id])
+  featuredImage MediaItem?        @relation("FeaturedImage", fields: [featuredImageId], references: [id], onDelete: SetNull)
+  socialImage   MediaItem?        @relation("SocialImage", fields: [socialImageId], references: [id], onDelete: SetNull)
+  versions      ContentVersion[]
+  mediaRefs     ContentMediaRef[]
 
   @@unique([type, slug])
   @@index([status, publishedAt(sort: Desc)])
@@ -92,4 +96,39 @@ model ContentVersion {
 
   @@unique([contentId, versionNo])
   @@map("content_version")
+}
+
+model MediaItem {
+  id         String   @id @default(uuid())
+  storageKey String   @unique @map("storage_key")
+  filename   String
+  mimeType   String   @map("mime_type")
+  sizeBytes  BigInt   @map("size_bytes")
+  width      Int?
+  height     Int?
+  altText    String?  @map("alt_text")
+  caption    String?
+  status     String   @default("pending")
+  variants   Json?
+  uploadedBy String   @map("uploaded_by")
+  uploadedAt DateTime @map("uploaded_at")
+
+  uploadedByUser           User              @relation("UploadedMedia", fields: [uploadedBy], references: [id])
+  contentFeaturedImageRefs Content[]         @relation("FeaturedImage")
+  contentSocialImageRefs   Content[]         @relation("SocialImage")
+  mediaRefs                ContentMediaRef[]
+
+  @@map("media_items")
+}
+
+model ContentMediaRef {
+  id          String @id @default(uuid())
+  contentId   String @map("content_id")
+  mediaItemId String @map("media_item_id")
+
+  content   Content   @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  mediaItem MediaItem @relation(fields: [mediaItemId], references: [id], onDelete: Restrict)
+
+  @@unique([contentId, mediaItemId])
+  @@map("content_media_refs")
 }

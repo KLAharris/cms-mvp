@@ -61,6 +61,12 @@ jobs:
           EMAIL_FROM: no-reply@cms.example.com
           EMAIL_FROM_NAME: CMS
           PUBLIC_URL: http://localhost:5173
+          OBJECT_STORAGE_ENDPOINT: ${{ secrets.OBJECT_STORAGE_ENDPOINT }}
+          OBJECT_STORAGE_REGION: ${{ secrets.OBJECT_STORAGE_REGION }}
+          OBJECT_STORAGE_BUCKET: ${{ secrets.OBJECT_STORAGE_BUCKET }}
+          OBJECT_STORAGE_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY }}
+          OBJECT_STORAGE_SECRET_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_KEY }}
+          OBJECT_STORAGE_PUBLIC_URL: ${{ secrets.OBJECT_STORAGE_PUBLIC_URL }}
 
       - name: Build
         run: pnpm run build
