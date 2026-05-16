@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ApiKey as PrismaApiKey, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../../../../shared/prisma/prisma.service';
@@ -17,7 +17,10 @@ type PrismaApiKeyClient = {
 
 @Injectable()
 export class PrismaApiKeyRepository implements IApiKeyRepository {
-  constructor(private readonly prisma: PrismaService & PrismaApiKeyClient) {}
+  constructor(
+    @Inject(PrismaService)
+    private readonly prisma: PrismaService & PrismaApiKeyClient,
+  ) {}
 
   async save(apiKey: ApiKey): Promise<void> {
     await this.prisma.apiKey.create({
