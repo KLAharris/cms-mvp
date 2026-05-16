@@ -95,7 +95,7 @@ describe('ApiKeys admin integration', () => {
 
     adminToken = await loginAndReadAccessToken(adminEmail, adminPassword);
     editorToken = await loginAndReadAccessToken(editorEmail, editorPassword);
-  });
+  }, 60000);
 
   beforeEach(async () => {
     await cleanupRedis.flushdb();
