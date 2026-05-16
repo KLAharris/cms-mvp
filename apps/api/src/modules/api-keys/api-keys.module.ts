@@ -7,8 +7,10 @@ import {
   DOMAIN_EVENT_PUBLISHER,
   DomainEventPublisher,
 } from '../../shared/ports/event-publisher.port';
+import { RolesGuard } from '../../shared/guards/roles.guard';
 import { ID_GENERATOR, IdGenerator } from '../../shared/ports/id-generator.port';
 import { PrismaModule } from '../../shared/prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
 import { SystemClock } from '../auth/adapters/out/system-clock.adapter';
 import {
   ApiKeyGuard,
@@ -31,7 +33,7 @@ import {
 } from './application/ports/tokens';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [AuthModule, PrismaModule],
   controllers: [ApiKeysController],
   providers: [
     { provide: API_KEY_REPOSITORY, useClass: PrismaApiKeyRepository },
@@ -73,6 +75,7 @@ import {
       ): LookupApiKeyUseCase => new LookupApiKeyUseCase(apiKeys, clock),
     },
     ApiKeyGuard,
+    RolesGuard,
   ],
   exports: [LOOKUP_API_KEY, ApiKeyGuard],
 })

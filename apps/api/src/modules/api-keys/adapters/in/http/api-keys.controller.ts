@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,6 +9,7 @@ import {
   Post,
   UseFilters,
   UseGuards,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../shared/decorators/current-user.decorator';
@@ -102,8 +102,8 @@ export class ApiKeysController {
     };
   }
 
-  private validationError(): BadRequestException {
-    return new BadRequestException({
+  private validationError(): UnprocessableEntityException {
+    return new UnprocessableEntityException({
       error: { code: 'VALIDATION_ERROR', message: 'Invalid request' },
     });
   }
