@@ -1,9 +1,6 @@
 import { ApiKeyAlreadyRevokedError, ApiKeyDomainError } from '../errors';
 import { ApiKeyId, HashedKey, KeyName } from '../value-objects';
 
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 export type ApiKeyCreateProps = {
   id: string;
   name: string;
@@ -42,8 +39,8 @@ export class ApiKey {
   static create(props: ApiKeyCreateProps): ApiKey {
     const createdById = props.createdById.trim();
 
-    if (!UUID_REGEX.test(createdById)) {
-      throw new ApiKeyDomainError('ApiKey creator id must be a valid UUID', 'API_KEY_INVALID');
+    if (createdById.length === 0) {
+      throw new ApiKeyDomainError('ApiKey creator id cannot be empty', 'API_KEY_INVALID');
     }
 
     return new ApiKey({

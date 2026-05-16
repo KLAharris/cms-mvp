@@ -137,11 +137,11 @@ model ContentMediaRef {
 model ApiKey {
   id          String    @id @default(uuid())
   name        String
-  keyHash     String    @unique
-  lastUsedAt  DateTime?
-  revokedAt   DateTime?
-  createdById String
-  createdAt   DateTime  @default(now())
+  keyHash     String    @unique @map("key_hash")
+  lastUsedAt  DateTime? @map("last_used_at")
+  revokedAt   DateTime? @map("revoked_at")
+  createdById String    @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   createdBy User @relation(fields: [createdById], references: [id])
 

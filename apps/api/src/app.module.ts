@@ -20,6 +20,13 @@ import { UsersModule } from './modules/users/users.module';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
+        redact: {
+          paths: [
+            'req.headers["x-api-key"]',
+            'req.headers.authorization',
+          ],
+          censor: '[REDACTED]',
+        },
         genReqId: (request) => {
           const requestId = request.headers['x-request-id'];
           return (Array.isArray(requestId) ? requestId[0] : requestId) ?? randomUUID();
