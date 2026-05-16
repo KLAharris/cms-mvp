@@ -36,6 +36,7 @@ model User {
   updatedAt                  DateTime    @updatedAt
   contents                   Content[]
   uploadedMedia              MediaItem[] @relation("UploadedMedia")
+  apiKeys                    ApiKey[]
 }
 
 enum ContentType {
@@ -131,4 +132,18 @@ model ContentMediaRef {
 
   @@unique([contentId, mediaItemId])
   @@map("content_media_refs")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  name        String
+  keyHash     String    @unique
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@map("api_keys")
 }
