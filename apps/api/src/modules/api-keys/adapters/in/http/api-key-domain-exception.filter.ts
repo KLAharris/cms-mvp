@@ -25,16 +25,19 @@ type ErrorEnvelope = {
   };
 };
 
+type ErrorResponseBody = Partial<{
+  error: unknown;
+}>;
+
 @Catch()
 export class ApiKeyDomainExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<ResponseLike>();
 
     if (exception instanceof HttpException) {
-      const body = exception.getResponse();
+      const body = exception.getResponse() as string | ErrorResponseBody;
       const errorBody =
         typeof body === 'object' &&
-        body !== null &&
         'error' in body &&
         typeof body.error === 'object' &&
         body.error !== null

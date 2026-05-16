@@ -103,9 +103,9 @@ describe('ApiKeys admin integration', () => {
   });
 
   afterAll(async () => {
-    await app?.close();
-    cleanupRedis?.disconnect();
-    await prisma?.$disconnect();
+    await app.close();
+    cleanupRedis.disconnect();
+    await prisma.$disconnect();
   });
 
   it('GET /api/admin/api-keys: No JWT returns 401', async () => {
@@ -191,12 +191,13 @@ describe('ApiKeys admin integration', () => {
     const body = response.body as Record<string, unknown>;
 
     expect(body.rawKey).toEqual(expect.stringMatching(/^[0-9a-f]{64}$/));
-    expect(body).toMatchObject({
-      id: expect.any(String),
+    const expectedBody: Record<string, unknown> = {
+      id: expect.any(String) as string,
       name: 'Test Key',
       createdById: adminId,
-      createdAt: expect.any(String),
-    });
+      createdAt: expect.any(String) as string,
+    };
+    expect(body).toMatchObject(expectedBody);
   });
 
   it('POST /api/admin/api-keys: rawKey is not present in subsequent GET response', async () => {
