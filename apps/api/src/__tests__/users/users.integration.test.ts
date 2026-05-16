@@ -70,6 +70,7 @@ describe('User management integration', () => {
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
+    await prisma.apiKey.deleteMany();
     await prisma.user.deleteMany();
     await seedUser({
       email: adminEmail,

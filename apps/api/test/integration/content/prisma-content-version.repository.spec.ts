@@ -36,6 +36,7 @@ describe.skipIf(!hasDatabase)('PrismaContentVersionRepository', () => {
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
+    await prisma.apiKey.deleteMany();
     await prisma.user.deleteMany();
     await prisma.user.create({
       data: {
