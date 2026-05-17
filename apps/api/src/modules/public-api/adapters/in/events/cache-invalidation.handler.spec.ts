@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InMemoryCache } from '../../../../../../test/fakes/in-memory-cache';
 import { ContentPublished } from '../../../../content/domain/events/content-published.event';
@@ -10,16 +10,22 @@ import { CacheInvalidationHandler } from './cache-invalidation.handler';
 describe('CacheInvalidationHandler', () => {
   let handler: CacheInvalidationHandler;
   let cache: InMemoryCache;
+  let mockPrisma: { content: { findUnique: ReturnType<typeof vi.fn> } };
 
   beforeEach(() => {
     cache = new InMemoryCache();
-    handler = new CacheInvalidationHandler(cache);
+    mockPrisma = {
+      content: {
+        findUnique: vi.fn().mockResolvedValue({ slug: 'my-article' }),
+      },
+    };
+    handler = new CacheInvalidationHandler(cache, mockPrisma as never);
   });
 
   it('handleContentPublished evicts article list cache', async () => {
     await seedPublicCache(cache);
 
-    await handler.handleContentPublished(makePublishedEvent('my-article'));
+    await handler.handleContentPublished(makePublishedEvent());
 
     await expect(cache.get(CacheKeys.articleList(1, 25))).resolves.toBeNull();
   });
@@ -27,7 +33,7 @@ describe('CacheInvalidationHandler', () => {
   it('handleContentPublished evicts article slug cache', async () => {
     await seedPublicCache(cache);
 
-    await handler.handleContentPublished(makePublishedEvent('my-article'));
+    await handler.handleContentPublished(makePublishedEvent());
 
     await expect(cache.get(CacheKeys.articleBySlug('my-article'))).resolves.toBeNull();
   });
@@ -35,15 +41,16 @@ describe('CacheInvalidationHandler', () => {
   it('handleContentPublished evicts page list cache', async () => {
     await seedPublicCache(cache);
 
-    await handler.handleContentPublished(makePublishedEvent('my-page'));
+    await handler.handleContentPublished(makePublishedEvent());
 
     await expect(cache.get(CacheKeys.pageList(1, 25))).resolves.toBeNull();
   });
 
   it('handleContentPublished evicts page slug cache', async () => {
     await seedPublicCache(cache);
+    mockPrisma.content.findUnique.mockResolvedValue({ slug: 'my-page' });
 
-    await handler.handleContentPublished(makePublishedEvent('my-page'));
+    await handler.handleContentPublished(makePublishedEvent());
 
     await expect(cache.get(CacheKeys.pageBySlug('my-page'))).resolves.toBeNull();
   });
@@ -51,7 +58,7 @@ describe('CacheInvalidationHandler', () => {
   it('handleContentUnpublished evicts article list and slug cache', async () => {
     await seedPublicCache(cache);
 
-    await handler.handleContentUnpublished(makeUnpublishedEvent('my-article'));
+    await handler.handleContentUnpublished(makeUnpublishedEvent());
 
     await expect(cache.get(CacheKeys.articleList(1, 25))).resolves.toBeNull();
     await expect(cache.get(CacheKeys.articleBySlug('my-article'))).resolves.toBeNull();
@@ -59,8 +66,9 @@ describe('CacheInvalidationHandler', () => {
 
   it('handleContentUnpublished evicts page list and slug cache', async () => {
     await seedPublicCache(cache);
+    mockPrisma.content.findUnique.mockResolvedValue({ slug: 'my-page' });
 
-    await handler.handleContentUnpublished(makeUnpublishedEvent('my-page'));
+    await handler.handleContentUnpublished(makeUnpublishedEvent());
 
     await expect(cache.get(CacheKeys.pageList(1, 25))).resolves.toBeNull();
     await expect(cache.get(CacheKeys.pageBySlug('my-page'))).resolves.toBeNull();
@@ -70,14 +78,22 @@ describe('CacheInvalidationHandler', () => {
     await seedPublicCache(cache);
     await cache.set('other:key', 'value', 300);
 
-    await handler.handleContentPublished(makePublishedEvent('my-article'));
+    await handler.handleContentPublished(makePublishedEvent());
 
     await expect(cache.get('other:key')).resolves.toBe('value');
   });
 
   it('handler does not throw when cache keys do not exist', async () => {
     await expect(
-      handler.handleContentUnpublished(makeUnpublishedEvent('missing-slug')),
+      handler.handleContentUnpublished(makeUnpublishedEvent()),
+    ).resolves.toBeUndefined();
+  });
+
+  it('does not throw when content row is not found', async () => {
+    mockPrisma.content.findUnique.mockResolvedValue(null);
+
+    await expect(
+      handler.handleContentPublished(makePublishedEvent()),
     ).resolves.toBeUndefined();
   });
 });
@@ -89,24 +105,18 @@ async function seedPublicCache(cache: InMemoryCache): Promise<void> {
   await cache.set(CacheKeys.pageBySlug('my-page'), 'page-detail-data', 600);
 }
 
-function makePublishedEvent(slug: string): ContentPublished & { slug: string } {
-  return Object.assign(
-    new ContentPublished(
-      ContentId.create('11111111-1111-4111-8111-111111111111'),
-      new Date('2026-01-01T00:00:00.000Z'),
-      'actor-1',
-    ),
-    { slug },
+function makePublishedEvent(): ContentPublished {
+  return new ContentPublished(
+    ContentId.create('11111111-1111-4111-8111-111111111111'),
+    new Date('2026-01-01T00:00:00.000Z'),
+    'actor-1',
   );
 }
 
-function makeUnpublishedEvent(slug: string): ContentUnpublished & { slug: string } {
-  return Object.assign(
-    new ContentUnpublished(
-      ContentId.create('11111111-1111-4111-8111-111111111111'),
-      'actor-1',
-      new Date('2026-01-01T00:00:00.000Z'),
-    ),
-    { slug },
+function makeUnpublishedEvent(): ContentUnpublished {
+  return new ContentUnpublished(
+    ContentId.create('11111111-1111-4111-8111-111111111111'),
+    'actor-1',
+    new Date('2026-01-01T00:00:00.000Z'),
   );
 }
