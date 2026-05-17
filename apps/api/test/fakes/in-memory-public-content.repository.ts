@@ -21,12 +21,31 @@ export class InMemoryPublicContentRepository implements PublicContentRepository 
   private articles: PublicArticleDetail[] = [];
   private pages: PublicPageDetail[] = [];
 
-  seed(articles: PublicArticleDetail[]): void {
-    this.articles = articles;
+  seed(articles: Array<PublicArticleSummary | PublicArticleDetail>): void {
+    this.articles = articles.map(toArticleDetail);
   }
 
-  seedPages(pages: PublicPageDetail[]): void {
-    this.pages = pages;
+  seedDetail(article: PublicArticleDetail): void {
+    this.articles = [
+      ...this.articles.filter((existing) => existing.slug !== article.slug),
+      article,
+    ];
+  }
+
+  seedPages(pages: Array<PublicPageSummary | PublicPageDetail>): void {
+    this.pages = pages.map(toPageDetail);
+  }
+
+  seedPageDetail(page: PublicPageDetail): void {
+    this.pages = [
+      ...this.pages.filter((existing) => existing.slug !== page.slug),
+      page,
+    ];
+  }
+
+  clear(): void {
+    this.articles = [];
+    this.pages = [];
   }
 
   listPublishedArticles(
@@ -89,5 +108,37 @@ function toPageSummary(page: PublicPageDetail): PublicPageSummary {
     title: page.title,
     slug: page.slug,
     publishedAt: page.publishedAt,
+  };
+}
+
+function toArticleDetail(article: PublicArticleSummary | PublicArticleDetail): PublicArticleDetail {
+  if ('body' in article && 'seo' in article) {
+    return article;
+  }
+
+  return {
+    ...article,
+    body: { type: 'doc', content: [] },
+    seo: {
+      seoTitle: null,
+      seoDescription: null,
+      socialImageUrl: null,
+    },
+  };
+}
+
+function toPageDetail(page: PublicPageSummary | PublicPageDetail): PublicPageDetail {
+  if ('body' in page && 'seo' in page) {
+    return page;
+  }
+
+  return {
+    ...page,
+    body: { type: 'doc', content: [] },
+    seo: {
+      seoTitle: null,
+      seoDescription: null,
+      socialImageUrl: null,
+    },
   };
 }
