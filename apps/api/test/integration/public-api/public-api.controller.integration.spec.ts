@@ -22,10 +22,25 @@ import type {
 import { PUBLIC_CONTENT_REPOSITORY } from '../../../src/modules/public-api/application/ports/out/public-content-repository.port';
 import { CACHE } from '../../../src/shared/ports/cache.port';
 
+type ListResponse<T> = {
+  data: T[];
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+};
+
+type ErrorResponse = {
+  error: { code: string; message: string };
+};
+
 @Catch(ZodError)
 class ZodFilter implements ExceptionFilter {
   catch(err: ZodError, host: ArgumentsHost) {
-    host.switchToHttp().getResponse().status(400).json({
+    const res = host.switchToHttp().getResponse<{
+      status(code: number): { json(body: unknown): void };
+    }>();
+    res.status(400).json({
       error: { code: 'VALIDATION_ERROR', message: err.message },
     });
   }
@@ -48,7 +63,7 @@ describe('PublicApiController integration', () => {
       .overrideProvider(CACHE)
       .useValue(cache)
       .overrideProvider(LOOKUP_API_KEY)
-      .useValue({ execute: async () => ({ id: 'key-1', name: 'test' }) })
+      .useValue({ execute: () => ({ id: 'key-1', name: 'test' }) })
       .overrideProvider('REDIS_CLIENT')
       .useValue({})
       .compile();
@@ -70,12 +85,13 @@ describe('PublicApiController integration', () => {
       contentRepo.seed([anArticle()]);
 
       const res = await api('/api/v1/articles').expect(200);
+      const body = res.body as ListResponse<PublicArticleSummary>;
 
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.page).toBe(1);
-      expect(res.body.page_size).toBe(25);
-      expect(res.body.total).toBe(1);
-      expect(res.body.total_pages).toBe(1);
+      expect(body.data).toHaveLength(1);
+      expect(body.page).toBe(1);
+      expect(body.page_size).toBe(25);
+      expect(body.total).toBe(1);
+      expect(body.total_pages).toBe(1);
     });
 
     it('returns Cache-Control header', async () => {
@@ -107,17 +123,19 @@ describe('PublicApiController integration', () => {
       ]);
 
       const res = await api('/api/v1/articles?page=1&page_size=1').expect(200);
+      const body = res.body as ListResponse<PublicArticleSummary>;
 
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.total).toBe(2);
-      expect(res.body.total_pages).toBe(2);
+      expect(body.data).toHaveLength(1);
+      expect(body.total).toBe(2);
+      expect(body.total_pages).toBe(2);
     });
 
     it('returns 200 with empty data array when no articles exist', async () => {
       const res = await api('/api/v1/articles').expect(200);
+      const body = res.body as ListResponse<PublicArticleSummary>;
 
-      expect(res.body.data).toEqual([]);
-      expect(res.body.total).toBe(0);
+      expect(body.data).toEqual([]);
+      expect(body.total).toBe(0);
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
@@ -130,8 +148,9 @@ describe('PublicApiController integration', () => {
 
       contentRepo.clear();
       const res = await api('/api/v1/articles').expect(200);
+      const body = res.body as ListResponse<PublicArticleSummary>;
 
-      expect(res.body.data).toHaveLength(1);
+      expect(body.data).toHaveLength(1);
     });
   });
 
@@ -140,9 +159,10 @@ describe('PublicApiController integration', () => {
       contentRepo.seedDetail(anArticleDetail());
 
       const res = await api('/api/v1/articles/test-article').expect(200);
+      const body = res.body as PublicArticleDetail;
 
-      expect(res.body.seo.seoTitle).toBe('SEO');
-      expect(res.body.body).toBeDefined();
+      expect(body.seo.seoTitle).toBe('SEO');
+      expect(body.body).toBeDefined();
     });
 
     it('returns Cache-Control header', async () => {
@@ -166,9 +186,10 @@ describe('PublicApiController integration', () => {
 
     it('returns 404 with correct error envelope for unknown slug', async () => {
       const res = await api('/api/v1/articles/does-not-exist').expect(404);
+      const body = res.body as ErrorResponse;
 
-      expect(res.body.error.code).toBe('NOT_FOUND');
-      expect(res.body.error.message).toBe('Article not found');
+      expect(body.error.code).toBe('NOT_FOUND');
+      expect(body.error.message).toBe('Article not found');
     });
 
     it('serves from cache on second request', async () => {
@@ -177,8 +198,9 @@ describe('PublicApiController integration', () => {
 
       contentRepo.clear();
       const res = await api('/api/v1/articles/test-article').expect(200);
+      const body = res.body as PublicArticleDetail;
 
-      expect(res.body.slug).toBe('test-article');
+      expect(body.slug).toBe('test-article');
     });
   });
 
@@ -187,12 +209,13 @@ describe('PublicApiController integration', () => {
       contentRepo.seedPages([aPage()]);
 
       const res = await api('/api/v1/pages').expect(200);
+      const body = res.body as ListResponse<PublicPageSummary>;
 
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.page).toBe(1);
-      expect(res.body.page_size).toBe(25);
-      expect(res.body.total).toBe(1);
-      expect(res.body.total_pages).toBe(1);
+      expect(body.data).toHaveLength(1);
+      expect(body.page).toBe(1);
+      expect(body.page_size).toBe(25);
+      expect(body.total).toBe(1);
+      expect(body.total_pages).toBe(1);
     });
 
     it('returns Cache-Control header', async () => {
@@ -211,9 +234,10 @@ describe('PublicApiController integration', () => {
 
     it('returns 200 with empty data when no pages exist', async () => {
       const res = await api('/api/v1/pages').expect(200);
+      const body = res.body as ListResponse<PublicPageSummary>;
 
-      expect(res.body.data).toEqual([]);
-      expect(res.body.total).toBe(0);
+      expect(body.data).toEqual([]);
+      expect(body.total).toBe(0);
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
@@ -226,9 +250,10 @@ describe('PublicApiController integration', () => {
       contentRepo.seedPageDetail(aPageDetail());
 
       const res = await api('/api/v1/pages/test-page').expect(200);
+      const body = res.body as PublicPageDetail;
 
-      expect(res.body.seo.seoTitle).toBe('SEO Page');
-      expect(res.body.body).toBeDefined();
+      expect(body.seo.seoTitle).toBe('SEO Page');
+      expect(body.body).toBeDefined();
     });
 
     it('returns Cache-Control header', async () => {
@@ -243,9 +268,10 @@ describe('PublicApiController integration', () => {
 
     it('returns 404 with correct error envelope for unknown slug', async () => {
       const res = await api('/api/v1/pages/does-not-exist').expect(404);
+      const body = res.body as ErrorResponse;
 
-      expect(res.body.error.code).toBe('NOT_FOUND');
-      expect(res.body.error.message).toBe('Page not found');
+      expect(body.error.code).toBe('NOT_FOUND');
+      expect(body.error.message).toBe('Page not found');
     });
   });
 
@@ -256,9 +282,10 @@ describe('PublicApiController integration', () => {
 
     it('defaults page=1 page_size=25 when no params provided', async () => {
       const res = await api('/api/v1/articles').expect(200);
+      const body = res.body as ListResponse<PublicArticleSummary>;
 
-      expect(res.body.page).toBe(1);
-      expect(res.body.page_size).toBe(25);
+      expect(body.page).toBe(1);
+      expect(body.page_size).toBe(25);
     });
   });
 });
