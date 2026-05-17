@@ -10,14 +10,15 @@ describe('InProcessEventPublisher', () => {
     vi.restoreAllMocks();
   });
 
-  it('logs each published event', async () => {
+  it('does not emit Nest events for unknown domain events', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     const eventEmitter = { emit: vi.fn() };
     const event = { occurredAt: new Date('2026-06-01T00:00:00.000Z') };
 
     await new InProcessEventPublisher(eventEmitter as never).publishAll([event]);
 
-    expect(log).toHaveBeenCalledWith('[DomainEvent] Object', event);
+    expect(log).not.toHaveBeenCalled();
+    expect(eventEmitter.emit).not.toHaveBeenCalled();
   });
 
   it('emits content.published for ContentPublished events', async () => {
@@ -27,7 +28,6 @@ describe('InProcessEventPublisher', () => {
       new Date('2026-06-01T00:00:00.000Z'),
       'actor-1',
     );
-    vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
     await new InProcessEventPublisher(eventEmitter as never).publishAll([event]);
 
@@ -41,7 +41,6 @@ describe('InProcessEventPublisher', () => {
       'actor-1',
       new Date('2026-06-01T00:00:00.000Z'),
     );
-    vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
     await new InProcessEventPublisher(eventEmitter as never).publishAll([event]);
 
