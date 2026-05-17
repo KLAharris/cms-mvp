@@ -30,7 +30,12 @@ export class ListPublishedPages implements ListPublishedPagesUseCase {
     try {
       const cached = await this.cache.get(key);
       if (cached) {
-        return JSON.parse(cached) as PaginatedResult<PublicPageSummary>;
+        const parsed = JSON.parse(cached) as PaginatedResult<PublicPageSummary>;
+        parsed.data = parsed.data.map((page) => ({
+          ...page,
+          publishedAt: new Date(page.publishedAt),
+        }));
+        return parsed;
       }
     } catch {
       // Redis unavailable - degrade gracefully to DB.

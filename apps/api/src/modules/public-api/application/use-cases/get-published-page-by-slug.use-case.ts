@@ -27,7 +27,9 @@ export class GetPublishedPageBySlug implements GetPublishedPageBySlugUseCase {
     try {
       const cached = await this.cache.get(key);
       if (cached) {
-        return JSON.parse(cached) as PublicPageDetail;
+        const parsed = JSON.parse(cached) as PublicPageDetail;
+        parsed.publishedAt = new Date(parsed.publishedAt);
+        return parsed;
       }
     } catch {
       // Redis unavailable - degrade gracefully to DB.

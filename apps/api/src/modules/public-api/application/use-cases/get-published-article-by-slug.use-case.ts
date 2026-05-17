@@ -29,7 +29,9 @@ export class GetPublishedArticleBySlug implements GetPublishedArticleBySlugUseCa
     try {
       const cached = await this.cache.get(key);
       if (cached) {
-        return JSON.parse(cached) as PublicArticleDetail;
+        const parsed = JSON.parse(cached) as PublicArticleDetail;
+        parsed.publishedAt = new Date(parsed.publishedAt);
+        return parsed;
       }
     } catch {
       // Redis unavailable - degrade gracefully to DB.

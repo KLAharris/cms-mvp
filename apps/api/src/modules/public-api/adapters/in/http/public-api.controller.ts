@@ -66,10 +66,12 @@ export class PublicApiController {
 
     res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
     res.setHeader('ETag', toETag(body));
-    if (result.data.length > 0) {
-      const latest = result.data.reduce((a, b) => (a.publishedAt > b.publishedAt ? a : b));
-      res.setHeader('Last-Modified', toLastModified(latest.publishedAt));
-    }
+    const lastModifiedDate =
+      result.data.length > 0
+        ? result.data.reduce((a, b) => (a.publishedAt > b.publishedAt ? a : b))
+            .publishedAt
+        : new Date(0);
+    res.setHeader('Last-Modified', toLastModified(lastModifiedDate));
 
     return body;
   }
@@ -105,10 +107,12 @@ export class PublicApiController {
 
     res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
     res.setHeader('ETag', toETag(body));
-    if (result.data.length > 0) {
-      const latest = result.data.reduce((a, b) => (a.publishedAt > b.publishedAt ? a : b));
-      res.setHeader('Last-Modified', toLastModified(latest.publishedAt));
-    }
+    const lastModifiedDate =
+      result.data.length > 0
+        ? result.data.reduce((a, b) => (a.publishedAt > b.publishedAt ? a : b))
+            .publishedAt
+        : new Date(0);
+    res.setHeader('Last-Modified', toLastModified(lastModifiedDate));
 
     return body;
   }

@@ -33,7 +33,12 @@ export class ListPublishedArticles implements ListPublishedArticlesUseCase {
     try {
       const cached = await this.cache.get(key);
       if (cached) {
-        return JSON.parse(cached) as PaginatedResult<PublicArticleSummary>;
+        const parsed = JSON.parse(cached) as PaginatedResult<PublicArticleSummary>;
+        parsed.data = parsed.data.map((article) => ({
+          ...article,
+          publishedAt: new Date(article.publishedAt),
+        }));
+        return parsed;
       }
     } catch {
       // Redis unavailable - degrade gracefully to DB.

@@ -47,7 +47,7 @@ describe('ListPublishedArticles', () => {
 
     const result = await useCase.execute({ page: 1, pageSize: 10 });
 
-    expect(result).toEqual(JSON.parse(JSON.stringify(cached)));
+    expect(result).toEqual(cached);
     expect(repo.calls.listPublishedArticles).toBe(0);
   });
 

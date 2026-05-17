@@ -36,7 +36,7 @@ describe('GetPublishedPageBySlug', () => {
 
     const result = await useCase.execute({ slug: 'one' });
 
-    expect(result).toEqual(JSON.parse(JSON.stringify(cached)));
+    expect(result).toEqual(cached);
     expect(repo.calls.getPublishedPageBySlug).toBe(0);
   });
 
