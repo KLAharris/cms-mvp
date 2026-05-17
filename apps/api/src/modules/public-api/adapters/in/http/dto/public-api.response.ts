@@ -11,8 +11,8 @@ export function toETag(data: unknown): string {
   return `"${hash}"`;
 }
 
-export function toLastModified(date: Date): string {
-  return date.toUTCString();
+export function toLastModified(date: Date | string): string {
+  return new Date(date).toUTCString();
 }
 
 export function wrapList<T>(result: PaginatedResult<T>) {
