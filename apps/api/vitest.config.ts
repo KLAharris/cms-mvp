@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 const coverageRequested = process.argv.includes('--coverage');
 const contentDomainOnly = process.argv.includes('src/modules/content/domain');
@@ -41,6 +41,7 @@ export default defineConfig({
     },
     fileParallelism: false,
     globals: false,
+    exclude: [...configDefaults.exclude, 'test/fakes/**/*.ts'],
     include: ['test/**/*.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts'],
     maxWorkers: 1,
     minWorkers: 1,
