@@ -23,10 +23,14 @@ export class GetPublishedPageBySlug implements GetPublishedPageBySlugUseCase {
 
   async execute(query: GetPublishedPageBySlugQuery): Promise<PublicPageDetail | null> {
     const key = CacheKeys.pageBySlug(query.slug);
-    const cached = await this.cache.get(key);
 
-    if (cached) {
-      return JSON.parse(cached) as PublicPageDetail;
+    try {
+      const cached = await this.cache.get(key);
+      if (cached) {
+        return JSON.parse(cached) as PublicPageDetail;
+      }
+    } catch {
+      // Redis unavailable - degrade gracefully to DB.
     }
 
     const page = await this.repo.getPublishedPageBySlug(query.slug);
@@ -34,7 +38,11 @@ export class GetPublishedPageBySlug implements GetPublishedPageBySlugUseCase {
       return null;
     }
 
-    await this.cache.set(key, JSON.stringify(page), CacheTtl.DETAIL_SECONDS);
+    try {
+      await this.cache.set(key, JSON.stringify(page), CacheTtl.DETAIL_SECONDS);
+    } catch {
+      // Redis unavailable - return DB result without caching.
+    }
 
     return page;
   }

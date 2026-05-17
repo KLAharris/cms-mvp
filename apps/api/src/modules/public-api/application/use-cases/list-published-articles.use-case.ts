@@ -30,13 +30,22 @@ export class ListPublishedArticles implements ListPublishedArticlesUseCase {
     const { page, pageSize } = query;
     const key = CacheKeys.articleList(page, pageSize);
 
-    const cached = await this.cache.get(key);
-    if (cached) {
-      return JSON.parse(cached) as PaginatedResult<PublicArticleSummary>;
+    try {
+      const cached = await this.cache.get(key);
+      if (cached) {
+        return JSON.parse(cached) as PaginatedResult<PublicArticleSummary>;
+      }
+    } catch {
+      // Redis unavailable - degrade gracefully to DB.
     }
 
     const result = await this.repo.listPublishedArticles({ page, pageSize });
-    await this.cache.set(key, JSON.stringify(result), CacheTtl.LIST_SECONDS);
+
+    try {
+      await this.cache.set(key, JSON.stringify(result), CacheTtl.LIST_SECONDS);
+    } catch {
+      // Redis unavailable - return DB result without caching.
+    }
 
     return result;
   }

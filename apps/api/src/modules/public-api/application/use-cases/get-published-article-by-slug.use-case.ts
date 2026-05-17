@@ -25,10 +25,14 @@ export class GetPublishedArticleBySlug implements GetPublishedArticleBySlugUseCa
     query: GetPublishedArticleBySlugQuery,
   ): Promise<PublicArticleDetail | null> {
     const key = CacheKeys.articleBySlug(query.slug);
-    const cached = await this.cache.get(key);
 
-    if (cached) {
-      return JSON.parse(cached) as PublicArticleDetail;
+    try {
+      const cached = await this.cache.get(key);
+      if (cached) {
+        return JSON.parse(cached) as PublicArticleDetail;
+      }
+    } catch {
+      // Redis unavailable - degrade gracefully to DB.
     }
 
     const article = await this.repo.getPublishedArticleBySlug(query.slug);
@@ -36,7 +40,11 @@ export class GetPublishedArticleBySlug implements GetPublishedArticleBySlugUseCa
       return null;
     }
 
-    await this.cache.set(key, JSON.stringify(article), CacheTtl.DETAIL_SECONDS);
+    try {
+      await this.cache.set(key, JSON.stringify(article), CacheTtl.DETAIL_SECONDS);
+    } catch {
+      // Redis unavailable - return DB result without caching.
+    }
 
     return article;
   }

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InMemoryCache } from '../../../../../test/fakes/in-memory-cache';
 import { InMemoryPublicContentRepository } from '../../../../../test/fakes/in-memory-public-content.repository';
@@ -38,6 +38,28 @@ describe('GetPublishedPageBySlug', () => {
 
     expect(result).toEqual(JSON.parse(JSON.stringify(cached)));
     expect(repo.calls.getPublishedPageBySlug).toBe(0);
+  });
+
+  it('returns DB result when cache.get() throws', async () => {
+    const page = makePage('1', 'one');
+    repo.seedPages([page]);
+    cache.setFailMode(true);
+
+    const result = await useCase.execute({ slug: 'one' });
+
+    expect(result).toEqual(page);
+    expect(repo.calls.getPublishedPageBySlug).toBe(1);
+  });
+
+  it('returns DB result when cache.set() throws', async () => {
+    const page = makePage('1', 'one');
+    repo.seedPages([page]);
+    vi.spyOn(cache, 'set').mockRejectedValueOnce(new Error('Redis unavailable'));
+
+    const result = await useCase.execute({ slug: 'one' });
+
+    expect(result).toEqual(page);
+    expect(repo.calls.getPublishedPageBySlug).toBe(1);
   });
 
   it('returns null when page not found and does NOT cache null', async () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InMemoryCache } from '../../../../../test/fakes/in-memory-cache';
 import { InMemoryPublicContentRepository } from '../../../../../test/fakes/in-memory-public-content.repository';
@@ -49,6 +49,38 @@ describe('ListPublishedArticles', () => {
 
     expect(result).toEqual(JSON.parse(JSON.stringify(cached)));
     expect(repo.calls.listPublishedArticles).toBe(0);
+  });
+
+  it('returns DB result when cache.get() throws', async () => {
+    repo.seed([makeArticle('1', 'one')]);
+    cache.setFailMode(true);
+
+    const result = await useCase.execute({ page: 1, pageSize: 10 });
+
+    expect(result).toEqual({
+      data: [makeArticleSummary('1', 'one')],
+      page: 1,
+      pageSize: 10,
+      total: 1,
+      totalPages: 1,
+    });
+    expect(repo.calls.listPublishedArticles).toBe(1);
+  });
+
+  it('returns DB result when cache.set() throws', async () => {
+    repo.seed([makeArticle('1', 'one')]);
+    vi.spyOn(cache, 'set').mockRejectedValueOnce(new Error('Redis unavailable'));
+
+    const result = await useCase.execute({ page: 1, pageSize: 10 });
+
+    expect(result).toEqual({
+      data: [makeArticleSummary('1', 'one')],
+      page: 1,
+      pageSize: 10,
+      total: 1,
+      totalPages: 1,
+    });
+    expect(repo.calls.listPublishedArticles).toBe(1);
   });
 
   it('cache key includes page and pageSize so different pages are cached separately', async () => {

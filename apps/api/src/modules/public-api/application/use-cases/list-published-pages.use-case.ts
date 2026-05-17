@@ -27,13 +27,22 @@ export class ListPublishedPages implements ListPublishedPagesUseCase {
     const { page, pageSize } = query;
     const key = CacheKeys.pageList(page, pageSize);
 
-    const cached = await this.cache.get(key);
-    if (cached) {
-      return JSON.parse(cached) as PaginatedResult<PublicPageSummary>;
+    try {
+      const cached = await this.cache.get(key);
+      if (cached) {
+        return JSON.parse(cached) as PaginatedResult<PublicPageSummary>;
+      }
+    } catch {
+      // Redis unavailable - degrade gracefully to DB.
     }
 
     const result = await this.repo.listPublishedPages({ page, pageSize });
-    await this.cache.set(key, JSON.stringify(result), CacheTtl.LIST_SECONDS);
+
+    try {
+      await this.cache.set(key, JSON.stringify(result), CacheTtl.LIST_SECONDS);
+    } catch {
+      // Redis unavailable - return DB result without caching.
+    }
 
     return result;
   }

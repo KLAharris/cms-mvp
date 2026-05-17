@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InMemoryCache } from '../../../../../test/fakes/in-memory-cache';
 import { InMemoryPublicContentRepository } from '../../../../../test/fakes/in-memory-public-content.repository';
@@ -38,6 +38,28 @@ describe('GetPublishedArticleBySlug', () => {
 
     expect(result).toEqual(JSON.parse(JSON.stringify(cached)));
     expect(repo.calls.getPublishedArticleBySlug).toBe(0);
+  });
+
+  it('returns DB result when cache.get() throws', async () => {
+    const article = makeArticle('1', 'one');
+    repo.seed([article]);
+    cache.setFailMode(true);
+
+    const result = await useCase.execute({ slug: 'one' });
+
+    expect(result).toEqual(article);
+    expect(repo.calls.getPublishedArticleBySlug).toBe(1);
+  });
+
+  it('returns DB result when cache.set() throws', async () => {
+    const article = makeArticle('1', 'one');
+    repo.seed([article]);
+    vi.spyOn(cache, 'set').mockRejectedValueOnce(new Error('Redis unavailable'));
+
+    const result = await useCase.execute({ slug: 'one' });
+
+    expect(result).toEqual(article);
+    expect(repo.calls.getPublishedArticleBySlug).toBe(1);
   });
 
   it('returns null when article not found and does NOT cache the null', async () => {
