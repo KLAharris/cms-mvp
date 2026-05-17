@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
 import { randomUUID } from 'node:crypto';
@@ -10,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { ContentModule } from './modules/content/content.module';
 import { MediaModule } from './modules/media/media.module';
+import { PublicApiModule } from './modules/public-api/public-api.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -43,11 +45,13 @@ import { UsersModule } from './modules/users/users.module';
       },
     }),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     AuthModule,
     UsersModule,
     ContentModule,
     MediaModule,
     ApiKeysModule,
+    PublicApiModule,
   ],
   controllers: [HealthController],
 })
