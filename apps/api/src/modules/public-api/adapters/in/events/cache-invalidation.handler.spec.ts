@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InMemoryCache } from '../../../../../../test/fakes/in-memory-cache';
-import { ContentPublished } from '../../../../content/domain/events/content-published.event';
-import { ContentUnpublished } from '../../../../content/domain/events/content-unpublished.event';
-import { ContentId } from '../../../../content/domain/value-objects/content-id.vo';
+import type {
+  ContentPublishedPayload,
+  ContentUnpublishedPayload,
+} from '../../../../../shared/events/content-event-payloads';
 import { CacheKeys } from '../../../application/cache-keys';
 import { CacheInvalidationHandler } from './cache-invalidation.handler';
 
@@ -105,18 +106,18 @@ async function seedPublicCache(cache: InMemoryCache): Promise<void> {
   await cache.set(CacheKeys.pageBySlug('my-page'), 'page-detail-data', 600);
 }
 
-function makePublishedEvent(): ContentPublished {
-  return new ContentPublished(
-    ContentId.create('11111111-1111-4111-8111-111111111111'),
-    new Date('2026-01-01T00:00:00.000Z'),
-    'actor-1',
-  );
+function makePublishedEvent(): ContentPublishedPayload {
+  return {
+    contentId: '11111111-1111-4111-8111-111111111111',
+    actorId: 'actor-1',
+    occurredAt: new Date('2026-01-01T00:00:00.000Z'),
+  };
 }
 
-function makeUnpublishedEvent(): ContentUnpublished {
-  return new ContentUnpublished(
-    ContentId.create('11111111-1111-4111-8111-111111111111'),
-    'actor-1',
-    new Date('2026-01-01T00:00:00.000Z'),
-  );
+function makeUnpublishedEvent(): ContentUnpublishedPayload {
+  return {
+    contentId: '11111111-1111-4111-8111-111111111111',
+    actorId: 'actor-1',
+    occurredAt: new Date('2026-01-01T00:00:00.000Z'),
+  };
 }

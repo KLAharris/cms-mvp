@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
-import { ContentPublished } from '../../../../content/domain/events/content-published.event';
-import { ContentUnpublished } from '../../../../content/domain/events/content-unpublished.event';
+import type {
+  ContentPublishedPayload,
+  ContentUnpublishedPayload,
+} from '../../../../../shared/events/content-event-payloads';
 import { CACHE, Cache } from '../../../../../shared/ports/cache.port';
 import { PrismaService } from '../../../../../shared/prisma/prisma.service';
 import { CacheKeys } from '../../../application/cache-keys';
@@ -16,13 +18,13 @@ export class CacheInvalidationHandler {
   ) {}
 
   @OnEvent('content.published')
-  async handleContentPublished(event: ContentPublished): Promise<void> {
+  async handleContentPublished(event: ContentPublishedPayload): Promise<void> {
     const slug = await this.getSlug(event.contentId);
     await this.invalidatePublicContentCache(slug);
   }
 
   @OnEvent('content.unpublished')
-  async handleContentUnpublished(event: ContentUnpublished): Promise<void> {
+  async handleContentUnpublished(event: ContentUnpublishedPayload): Promise<void> {
     const slug = await this.getSlug(event.contentId);
     await this.invalidatePublicContentCache(slug);
   }
