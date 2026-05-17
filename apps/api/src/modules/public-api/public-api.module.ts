@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import Redis from 'ioredis';
 
 import { RedisCacheAdapter } from '../../shared/adapters/redis-cache.adapter';
@@ -7,6 +8,7 @@ import { CACHE } from '../../shared/ports/cache.port';
 import { PrismaModule } from '../../shared/prisma/prisma.module';
 import { ApiKeyGuard } from '../api-keys/adapters/in/http';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
+import { CacheInvalidationHandler } from './adapters/in/events/cache-invalidation.handler';
 import { PublicApiController } from './adapters/in/http/public-api.controller';
 import { PrismaPublicContentRepository } from './adapters/out/persistence/prisma-public-content.repository';
 import {
@@ -24,7 +26,7 @@ import { ListPublishedArticles } from './application/use-cases/list-published-ar
 import { ListPublishedPages } from './application/use-cases/list-published-pages.use-case';
 
 @Module({
-  imports: [PrismaModule, ApiKeysModule, ConfigModule],
+  imports: [PrismaModule, ApiKeysModule, ConfigModule, EventEmitterModule.forRoot()],
   providers: [
     {
       provide: 'REDIS_CLIENT',
@@ -60,6 +62,7 @@ import { ListPublishedPages } from './application/use-cases/list-published-pages
     { provide: LIST_PUBLISHED_PAGES, useClass: ListPublishedPages },
     { provide: GET_PUBLISHED_PAGE_BY_SLUG, useClass: GetPublishedPageBySlug },
     ApiKeyGuard,
+    CacheInvalidationHandler,
   ],
   controllers: [PublicApiController],
 })
