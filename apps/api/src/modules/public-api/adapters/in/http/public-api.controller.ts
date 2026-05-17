@@ -29,6 +29,14 @@ import {
 import { PaginationQuerySchema } from './dto/pagination-query.dto';
 import { toETag, toLastModified, wrapList } from './dto/public-api.response';
 
+/**
+ * FR-PUBAPI-07: OpenAPI 3.1 specification and /docs endpoint.
+ * Status: DEFERRED to Phase 3 (Slice 5 Phase 3).
+ * Rationale: @nestjs/swagger setup and decorator annotations are
+ * out of scope for Phase 2. Will be added in Phase 3 alongside
+ * rate limiting (SEC-07).
+ */
+
 type HeaderResponse = {
   setHeader(name: string, value: string): void;
 };
