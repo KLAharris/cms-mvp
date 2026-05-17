@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import Redis from 'ioredis';
 
 import { RedisCacheAdapter } from '../../shared/adapters/redis-cache.adapter';
@@ -26,7 +25,7 @@ import { ListPublishedArticles } from './application/use-cases/list-published-ar
 import { ListPublishedPages } from './application/use-cases/list-published-pages.use-case';
 
 @Module({
-  imports: [PrismaModule, ApiKeysModule, ConfigModule, EventEmitterModule.forRoot()],
+  imports: [PrismaModule, ApiKeysModule, ConfigModule],
   providers: [
     {
       provide: 'REDIS_CLIENT',
