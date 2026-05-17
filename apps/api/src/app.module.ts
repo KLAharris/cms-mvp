@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { ContentModule } from './modules/content/content.module';
 import { MediaModule } from './modules/media/media.module';
+import { PublicApiModule } from './modules/public-api/public-api.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -48,6 +49,7 @@ import { UsersModule } from './modules/users/users.module';
     ContentModule,
     MediaModule,
     ApiKeysModule,
+    PublicApiModule,
   ],
   controllers: [HealthController],
 })
