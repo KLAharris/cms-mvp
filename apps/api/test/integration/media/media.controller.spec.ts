@@ -1,13 +1,14 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as argon2 from 'argon2';
+import { PrismaClient, Role, UserStatus } from '@prisma/client';
+import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import { config as loadEnv } from 'dotenv';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { PrismaClient, Role, UserStatus } from '@prisma/client';
 import Redis from 'ioredis';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { config as loadEnv } from 'dotenv';
 
 import { AppModule } from '../../../src/app.module';
 import { ValidationPipe } from '../../../src/shared/http/validation.pipe';
@@ -33,6 +34,7 @@ const authorPassword = 'AuthorPassword123!';
 
 describe('MediaController integration', () => {
   let app: INestApplication;
+  let postgres: StartedPostgreSqlContainer;
   let prisma: PrismaClient;
   let adminToken: string;
   let authorToken: string;
@@ -65,21 +67,21 @@ describe('MediaController integration', () => {
   beforeAll(async () => {
     loadEnv({ path: resolve(apiRoot, '.env') });
 
-    const testDatabaseUrl = process.env.TEST_DATABASE_URL;
-    if (!testDatabaseUrl) {
-      throw new Error('TEST_DATABASE_URL is required for media controller integration tests');
-    }
+    postgres = await new PostgreSqlContainer('postgres:16-alpine').start();
+    const databaseUrl = postgres.getConnectionUri();
 
-    process.env.DATABASE_URL = testDatabaseUrl;
+    process.env.DATABASE_URL = databaseUrl;
     process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
 
     execFileSync('pnpm', ['exec', 'prisma', 'migrate', 'deploy'], {
       cwd: apiRoot,
-      env: { ...process.env, DATABASE_URL: testDatabaseUrl },
+      env: { ...process.env, DATABASE_URL: databaseUrl },
       stdio: 'pipe',
     });
 
-    prisma = new PrismaClient();
+    prisma = new PrismaClient({
+      datasources: { db: { url: databaseUrl } },
+    });
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -126,17 +128,20 @@ describe('MediaController integration', () => {
 
     adminToken = await loginAndGetToken(adminEmail, adminPassword);
     authorToken = await loginAndGetToken(authorEmail, authorPassword);
-  }, 30000);
+  }, 120000);
 
   afterAll(async () => {
-    await prisma.contentMediaRef.deleteMany();
-    await prisma.contentVersion.deleteMany();
-    await prisma.content.deleteMany();
-    await prisma.mediaItem.deleteMany();
-    await prisma.user.deleteMany({ where: { email: { in: [adminEmail, authorEmail] } } });
-    await app.close();
+    await prisma?.contentMediaRef.deleteMany();
+    await prisma?.contentVersion.deleteMany();
+    await prisma?.content.deleteMany();
+    await prisma?.mediaItem.deleteMany();
+    await prisma?.auditEvent.deleteMany();
+    await prisma?.apiKey.deleteMany();
+    await prisma?.user.deleteMany({ where: { email: { in: [adminEmail, authorEmail] } } });
+    await app?.close();
     await cleanupRedis.quit();
-    await prisma.$disconnect();
+    await prisma?.$disconnect();
+    await postgres?.stop();
   });
 
   beforeEach(async () => {
@@ -144,6 +149,7 @@ describe('MediaController integration', () => {
     await prisma.contentMediaRef.deleteMany();
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
+    await prisma.auditEvent.deleteMany();
     await prisma.mediaItem.deleteMany({
       where: { uploadedBy: { in: [adminId, authorId] } },
     });
