@@ -287,12 +287,16 @@ describe('PublicApiController integration', () => {
       contentRepo.seedMedia(aMediaItem());
 
       const res = await api('/api/v1/media/media-1');
-
+      const mediaBody = res.body as {
+        id: string;
+        filename: string;
+        variants: Array<{ key: string }>;
+      };
       expect(res.status).toBe(200);
-      expect(res.body.id).toBe('media-1');
-      expect(res.body.filename).toBe('photo.jpg');
-      expect(res.body.variants).toHaveLength(1);
-      expect(res.body.variants[0].key).toBe('original');
+      expect(mediaBody.id).toBe('media-1');
+      expect(mediaBody.filename).toBe('photo.jpg');
+      expect(mediaBody.variants).toHaveLength(1);
+      expect(mediaBody.variants[0]?.key).toBe('original');
     });
 
     it('returns Cache-Control header', async () => {
@@ -307,10 +311,11 @@ describe('PublicApiController integration', () => {
 
     it('returns 404 with correct error envelope for unknown id', async () => {
       const res = await api('/api/v1/media/00000000-0000-0000-0000-000000000000');
+      const notFoundBody = res.body as { error: { code: string; message: string } };
 
       expect(res.status).toBe(404);
-      expect(res.body.error.code).toBe('NOT_FOUND');
-      expect(res.body.error.message).toBe('Media item not found');
+      expect(notFoundBody.error.code).toBe('NOT_FOUND');
+      expect(notFoundBody.error.message).toBe('Media item not found');
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
@@ -328,10 +333,11 @@ describe('PublicApiController integration', () => {
       await api('/api/v1/articles').expect(200);
       await api('/api/v1/articles').expect(200);
       const res = await api('/api/v1/articles');
+      const body = res.body as ErrorResponse;
 
       expect(res.status).toBe(429);
-      expect(res.body.error.code).toBe('RATE_LIMIT_EXCEEDED');
-      expect(res.body.error.message).toBe(
+      expect(body.error.code).toBe('RATE_LIMIT_EXCEEDED');
+      expect(body.error.message).toBe(
         'Too many requests. Please retry after 60 seconds.',
       );
     });
