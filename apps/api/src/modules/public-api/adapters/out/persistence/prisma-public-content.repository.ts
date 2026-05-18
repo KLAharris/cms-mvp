@@ -12,7 +12,11 @@ import type {
 import type {
   PublicContentRepository,
   PublicListQuery,
+  PublicMediaItem,
+  PublicMediaVariant,
 } from '../../../application/ports/out/public-content-repository.port';
+
+type MediaVariantRecord = Record<string, unknown>;
 
 @Injectable()
 export class PrismaPublicContentRepository implements PublicContentRepository {
@@ -151,6 +155,27 @@ export class PrismaPublicContentRepository implements PublicContentRepository {
     };
   }
 
+  async getMediaById(id: string): Promise<PublicMediaItem | null> {
+    const row = await this.prisma.mediaItem.findUnique({
+      where: { id },
+    });
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      id: row.id,
+      filename: row.filename,
+      mimeType: row.mimeType,
+      size: Number(row.sizeBytes),
+      altText: row.altText ?? null,
+      caption: row.caption ?? null,
+      uploadedAt: row.uploadedAt,
+      variants: this.toMediaVariants(row),
+    };
+  }
+
   private toArticleSummary(row: {
     id: string;
     title: string;
@@ -211,4 +236,59 @@ export class PrismaPublicContentRepository implements PublicContentRepository {
     const endpoint = this.config.get<string>('OBJECT_STORAGE_ENDPOINT', '');
     return `${endpoint}/${resolvedBucket}/${storageKey}`;
   }
+
+  private toMediaVariants(row: {
+    storageKey: string;
+    mimeType: string;
+    sizeBytes: bigint;
+    width: number | null;
+    height: number | null;
+    variants: unknown;
+  }): PublicMediaVariant[] {
+    const fallbackSize = Number(row.sizeBytes);
+    const original: PublicMediaVariant = {
+      key: 'original',
+      url: this.resolveUrl(row.storageKey) ?? row.storageKey,
+      width: row.width ?? null,
+      height: row.height ?? null,
+      size: fallbackSize,
+      mimeType: row.mimeType,
+    };
+
+    if (!isMediaVariantRecord(row.variants)) {
+      return [original];
+    }
+
+    const variants = Object.entries(row.variants).map(([key, value]) => {
+      const metadata = isMediaVariantRecord(value) ? value : {};
+      const storageKey =
+        typeof metadata['key'] === 'string' ? metadata['key'] : row.storageKey;
+
+      return {
+        key,
+        url: this.resolveUrl(storageKey) ?? storageKey,
+        width: numberOrNull(metadata['w']),
+        height: numberOrNull(metadata['h']),
+        size: numberOrDefault(metadata['size'], fallbackSize),
+        mimeType:
+          typeof metadata['mimeType'] === 'string' ? metadata['mimeType'] : row.mimeType,
+      };
+    });
+
+    return variants.some((variant) => variant.key === 'original')
+      ? variants
+      : [original, ...variants];
+  }
+}
+
+function isMediaVariantRecord(value: unknown): value is MediaVariantRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === 'number' ? value : null;
+}
+
+function numberOrDefault(value: unknown, fallback: number): number {
+  return typeof value === 'number' ? value : fallback;
 }

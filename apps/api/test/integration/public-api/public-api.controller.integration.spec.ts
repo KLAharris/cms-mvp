@@ -5,6 +5,7 @@ import {
   INestApplication,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { getOptionsToken, ThrottlerModule } from '@nestjs/throttler';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
@@ -12,6 +13,7 @@ import { ZodError } from 'zod';
 import { InMemoryCache } from '../../fakes/in-memory-cache';
 import { InMemoryPublicContentRepository } from '../../fakes/in-memory-public-content.repository';
 import { LOOKUP_API_KEY } from '../../../src/modules/api-keys/application/ports/tokens';
+import { ThrottlerExceptionFilter } from '../../../src/modules/public-api/adapters/in/http/throttler-exception.filter';
 import { PublicApiModule } from '../../../src/modules/public-api/public-api.module';
 import type {
   PublicArticleDetail,
@@ -19,15 +21,18 @@ import type {
   PublicPageDetail,
   PublicPageSummary,
 } from '../../../src/modules/public-api/application/public-content.read-model';
+import type { PublicMediaItem } from '../../../src/modules/public-api/application/ports/out/public-content-repository.port';
 import { PUBLIC_CONTENT_REPOSITORY } from '../../../src/modules/public-api/application/ports/out/public-content-repository.port';
 import { CACHE } from '../../../src/shared/ports/cache.port';
 
 type ListResponse<T> = {
   data: T[];
-  page: number;
-  page_size: number;
-  total: number;
-  total_pages: number;
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
 };
 
 type ErrorResponse = {
@@ -56,8 +61,10 @@ describe('PublicApiController integration', () => {
     cache = new InMemoryCache();
 
     const module = await Test.createTestingModule({
-      imports: [PublicApiModule],
+      imports: [PublicApiModule, ThrottlerModule.forRoot([{ ttl: 60_000, limit: 3 }])],
     })
+      .overrideProvider(getOptionsToken())
+      .useValue([{ ttl: 60_000, limit: 3 }])
       .overrideProvider(PUBLIC_CONTENT_REPOSITORY)
       .useValue(contentRepo)
       .overrideProvider(CACHE)
@@ -69,7 +76,7 @@ describe('PublicApiController integration', () => {
       .compile();
 
     app = module.createNestApplication();
-    app.useGlobalFilters(new ZodFilter());
+    app.useGlobalFilters(new ZodFilter(), new ThrottlerExceptionFilter());
     await app.init();
   });
 
@@ -88,10 +95,10 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicArticleSummary>;
 
       expect(body.data).toHaveLength(1);
-      expect(body.page).toBe(1);
-      expect(body.page_size).toBe(25);
-      expect(body.total).toBe(1);
-      expect(body.total_pages).toBe(1);
+      expect(body.pagination.page).toBe(1);
+      expect(body.pagination.page_size).toBe(25);
+      expect(body.pagination.total).toBe(1);
+      expect(body.pagination.total_pages).toBe(1);
     });
 
     it('returns Cache-Control header', async () => {
@@ -126,8 +133,8 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicArticleSummary>;
 
       expect(body.data).toHaveLength(1);
-      expect(body.total).toBe(2);
-      expect(body.total_pages).toBe(2);
+      expect(body.pagination.total).toBe(2);
+      expect(body.pagination.total_pages).toBe(2);
     });
 
     it('returns 200 with empty data array when no articles exist', async () => {
@@ -135,7 +142,7 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicArticleSummary>;
 
       expect(body.data).toEqual([]);
-      expect(body.total).toBe(0);
+      expect(body.pagination.total).toBe(0);
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
@@ -212,10 +219,10 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicPageSummary>;
 
       expect(body.data).toHaveLength(1);
-      expect(body.page).toBe(1);
-      expect(body.page_size).toBe(25);
-      expect(body.total).toBe(1);
-      expect(body.total_pages).toBe(1);
+      expect(body.pagination.page).toBe(1);
+      expect(body.pagination.page_size).toBe(25);
+      expect(body.pagination.total).toBe(1);
+      expect(body.pagination.total_pages).toBe(1);
     });
 
     it('returns Cache-Control header', async () => {
@@ -237,7 +244,7 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicPageSummary>;
 
       expect(body.data).toEqual([]);
-      expect(body.total).toBe(0);
+      expect(body.pagination.total).toBe(0);
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
@@ -275,6 +282,76 @@ describe('PublicApiController integration', () => {
     });
   });
 
+  describe('GET /api/v1/media/:id', () => {
+    it('returns 200 with media item metadata and variants', async () => {
+      contentRepo.seedMedia(aMediaItem());
+
+      const res = await api('/api/v1/media/media-1');
+
+      expect(res.status).toBe(200);
+      expect(res.body.id).toBe('media-1');
+      expect(res.body.filename).toBe('photo.jpg');
+      expect(res.body.variants).toHaveLength(1);
+      expect(res.body.variants[0].key).toBe('original');
+    });
+
+    it('returns Cache-Control header', async () => {
+      contentRepo.seedMedia(aMediaItem());
+
+      const res = await api('/api/v1/media/media-1');
+
+      expect(res.headers['cache-control']).toBe(
+        'public, max-age=600, stale-while-revalidate=60',
+      );
+    });
+
+    it('returns 404 with correct error envelope for unknown id', async () => {
+      const res = await api('/api/v1/media/00000000-0000-0000-0000-000000000000');
+
+      expect(res.status).toBe(404);
+      expect(res.body.error.code).toBe('NOT_FOUND');
+      expect(res.body.error.message).toBe('Media item not found');
+    });
+
+    it('returns 401 when X-API-Key header is missing', async () => {
+      const res = await request(app.getHttpServer()).get('/api/v1/media/media-1');
+
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('Rate limiting', () => {
+    it('returns 429 after exceeding the request limit', async () => {
+      contentRepo.seed([anArticle()]);
+
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      const res = await api('/api/v1/articles');
+
+      expect(res.status).toBe(429);
+      expect(res.body.error.code).toBe('RATE_LIMIT_EXCEEDED');
+      expect(res.body.error.message).toBe(
+        'Too many requests. Please retry after 60 seconds.',
+      );
+    });
+
+    it('counts requests per API key not per IP', async () => {
+      contentRepo.seed([anArticle()]);
+
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(429);
+
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/articles')
+        .set('X-API-Key', 'different-key');
+
+      expect(res.status).toBe(200);
+    });
+  });
+
   describe('pagination validation', () => {
     it('returns 400 when page_size exceeds 100', async () => {
       await api('/api/v1/articles?page_size=101').expect(400);
@@ -284,8 +361,8 @@ describe('PublicApiController integration', () => {
       const res = await api('/api/v1/articles').expect(200);
       const body = res.body as ListResponse<PublicArticleSummary>;
 
-      expect(body.page).toBe(1);
-      expect(body.page_size).toBe(25);
+      expect(body.pagination.page).toBe(1);
+      expect(body.pagination.page_size).toBe(25);
     });
   });
 });
@@ -331,6 +408,29 @@ function aPageDetail(overrides: Partial<PublicPageDetail> = {}): PublicPageDetai
     ...aPage(),
     body: { type: 'doc', content: [] },
     seo: { seoTitle: 'SEO Page', seoDescription: 'Page Desc', socialImageUrl: null },
+    ...overrides,
+  };
+}
+
+function aMediaItem(overrides: Partial<PublicMediaItem> = {}): PublicMediaItem {
+  return {
+    id: 'media-1',
+    filename: 'photo.jpg',
+    mimeType: 'image/jpeg',
+    size: 102400,
+    altText: 'A photo',
+    caption: null,
+    uploadedAt: new Date('2026-01-01'),
+    variants: [
+      {
+        key: 'original',
+        url: 'https://cdn.example.com/photo.jpg',
+        width: 1920,
+        height: 1080,
+        size: 102400,
+        mimeType: 'image/jpeg',
+      },
+    ],
     ...overrides,
   };
 }
