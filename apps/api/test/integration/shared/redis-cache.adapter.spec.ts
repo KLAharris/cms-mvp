@@ -1,14 +1,21 @@
+import { config as loadEnv } from 'dotenv';
 import Redis from 'ioredis';
+import { resolve } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { RedisCacheAdapter } from '../../../src/shared/adapters/redis-cache.adapter';
+
+const apiRoot = resolve(__dirname, '../../..');
 
 describe('RedisCacheAdapter', () => {
   let redis: Redis;
   let adapter: RedisCacheAdapter;
 
   beforeAll(() => {
-    redis = new Redis({ host: 'localhost', port: 6379 });
+    loadEnv({ path: resolve(apiRoot, '.env') });
+
+    redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379');
+    redis.on('error', () => undefined);
     adapter = new RedisCacheAdapter(redis);
   });
 

@@ -4,6 +4,7 @@ import * as argon2 from 'argon2';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient, Role, UserStatus } from '@prisma/client';
+import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import Redis from 'ioredis';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -13,6 +14,7 @@ import { AppModule } from '../../../../../app.module';
 import { ValidationPipe } from '../../../../../shared/http/validation.pipe';
 
 const apiRoot = resolve(__dirname, '../../../../../..');
+const originalDatabaseUrl = process.env.DATABASE_URL;
 
 const adminId = '123e4567-e89b-42d3-a456-426614174000';
 const editorId = '223e4567-e89b-42d3-a456-426614174000';
@@ -25,6 +27,7 @@ const editorPassword = 'editorpassword123';
 
 describe('ApiKeys admin integration', () => {
   let app: INestApplication;
+  let postgres: StartedPostgreSqlContainer;
   let prisma: PrismaClient;
   let cleanupRedis: Redis;
   let adminToken: string;
@@ -33,13 +36,12 @@ describe('ApiKeys admin integration', () => {
   beforeAll(async () => {
     loadEnv({ path: resolve(apiRoot, '.env') });
 
-    const testDatabaseUrl = process.env.TEST_DATABASE_URL;
+    postgres = await new PostgreSqlContainer('postgres:16-alpine')
+      .withStartupTimeout(120000)
+      .start();
+    const databaseUrl = postgres.getConnectionUri();
 
-    if (!testDatabaseUrl) {
-      throw new Error('TEST_DATABASE_URL is required for api key integration tests');
-    }
-
-    process.env.DATABASE_URL = testDatabaseUrl;
+    process.env.DATABASE_URL = databaseUrl;
     process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
     cleanupRedis = new Redis(process.env.REDIS_URL, {
       enableOfflineQueue: false,
@@ -54,14 +56,21 @@ describe('ApiKeys admin integration', () => {
       cwd: apiRoot,
       env: {
         ...process.env,
-        DATABASE_URL: testDatabaseUrl,
+        DATABASE_URL: databaseUrl,
       },
       stdio: 'pipe',
     });
 
-    prisma = new PrismaClient();
+    prisma = new PrismaClient({
+      datasources: { db: { url: databaseUrl } },
+    });
     await cleanupRedis.flushdb();
+    await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany({
       where: {
         OR: [
@@ -95,17 +104,27 @@ describe('ApiKeys admin integration', () => {
 
     adminToken = await loginAndReadAccessToken(adminEmail, adminPassword);
     editorToken = await loginAndReadAccessToken(editorEmail, editorPassword);
-  }, 60000);
+  }, 120000);
 
   beforeEach(async () => {
     await cleanupRedis.flushdb();
+    await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
   });
 
   afterAll(async () => {
+    await prisma.auditEvent.deleteMany();
+    await prisma.apiKey.deleteMany();
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany();
+    await prisma.user.deleteMany();
     await app.close();
     cleanupRedis.disconnect();
     await prisma.$disconnect();
+    await postgres.stop();
+    restoreDatabaseUrl();
   });
 
   it('GET /api/admin/api-keys: No JWT returns 401', async () => {
@@ -292,14 +311,20 @@ describe('ApiKeys admin integration', () => {
     password: string;
     role: Role;
   }) {
-    return prisma.user.create({
-      data: {
+    const data = {
+      email: params.email,
+      name: params.name,
+      passwordHash: await argon2.hash(params.password),
+      role: params.role,
+      status: UserStatus.ACTIVE,
+    };
+
+    return prisma.user.upsert({
+      where: { id: params.id },
+      update: data,
+      create: {
         id: params.id,
-        email: params.email,
-        name: params.name,
-        passwordHash: await argon2.hash(params.password),
-        role: params.role,
-        status: UserStatus.ACTIVE,
+        ...data,
       },
     });
   }
@@ -307,6 +332,14 @@ describe('ApiKeys admin integration', () => {
   async function seedApiKey(overrides: Partial<{
     revokedAt: Date | null;
   }> = {}) {
+    await seedUser({
+      id: adminId,
+      email: adminEmail,
+      name: 'API Key Admin',
+      password: adminPassword,
+      role: Role.ADMIN,
+    });
+
     return prisma.apiKey.create({
       data: {
         id: apiKeyId,
@@ -337,3 +370,12 @@ describe('ApiKeys admin integration', () => {
     return request(app.getHttpServer() as Parameters<typeof request>[0]);
   }
 });
+
+function restoreDatabaseUrl(): void {
+  if (originalDatabaseUrl === undefined) {
+    delete process.env.DATABASE_URL;
+    return;
+  }
+
+  process.env.DATABASE_URL = originalDatabaseUrl;
+}

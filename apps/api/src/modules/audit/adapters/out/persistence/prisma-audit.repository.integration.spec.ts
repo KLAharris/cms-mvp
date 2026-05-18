@@ -19,7 +19,9 @@ describe('PrismaAuditRepository integration', () => {
   let repository: PrismaAuditRepository;
 
   beforeAll(async () => {
-    container = await new PostgreSqlContainer('postgres:16-alpine').start();
+    container = await new PostgreSqlContainer('postgres:16-alpine')
+      .withStartupTimeout(120000)
+      .start();
     const databaseUrl = container.getConnectionUri();
 
     execFileSync('pnpm', ['exec', 'prisma', 'migrate', 'deploy'], {
@@ -40,6 +42,11 @@ describe('PrismaAuditRepository integration', () => {
 
   beforeEach(async () => {
     await prisma.auditEvent.deleteMany();
+    await prisma.apiKey.deleteMany();
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany();
     await prisma.user.create({
       data: {

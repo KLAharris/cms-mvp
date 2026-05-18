@@ -34,11 +34,12 @@ describe.skipIf(!hasDatabase)('ContentMediaRefAdapter', () => {
   });
 
   beforeEach(async () => {
+    await prisma.auditEvent.deleteMany();
+    await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
-    await prisma.apiKey.deleteMany();
     await prisma.user.deleteMany();
     await prisma.user.create({
       data: {

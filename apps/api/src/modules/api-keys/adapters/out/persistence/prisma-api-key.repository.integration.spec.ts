@@ -1,4 +1,7 @@
 import { PrismaClient, Role } from '@prisma/client';
+import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import { execFileSync } from 'node:child_process';
+import { resolve } from 'node:path';
 import { beforeAll, beforeEach, afterAll, describe, expect, it } from 'vitest';
 
 import { ApiKey } from '../../../domain/entities';
@@ -10,9 +13,7 @@ const SECOND_API_KEY_ID = '323e4567-e89b-42d3-a456-426614174000';
 const THIRD_API_KEY_ID = '423e4567-e89b-42d3-a456-426614174000';
 const CREATED_AT = new Date('2026-05-16T00:00:00.000Z');
 
-const testDatabaseUrl = process.env.TEST_DATABASE_URL;
-
-const describeIntegration = testDatabaseUrl === undefined ? describe.skip : describe;
+const apiRoot = resolve(__dirname, '../../../../../..');
 
 function createApiKey(overrides: Partial<{
   id: string;
@@ -29,28 +30,45 @@ function createApiKey(overrides: Partial<{
   });
 }
 
-describeIntegration('PrismaApiKeyRepository integration', () => {
+describe('PrismaApiKeyRepository integration', () => {
+  let postgres: StartedPostgreSqlContainer;
   let prisma: PrismaClient;
   let repository: PrismaApiKeyRepository;
 
   beforeAll(async () => {
-    prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: testDatabaseUrl,
-        },
+    postgres = await new PostgreSqlContainer('postgres:16-alpine')
+      .withStartupTimeout(120000)
+      .start();
+    const databaseUrl = postgres.getConnectionUri();
+
+    execFileSync('pnpm', ['exec', 'prisma', 'migrate', 'deploy'], {
+      cwd: apiRoot,
+      env: {
+        ...process.env,
+        DATABASE_URL: databaseUrl,
       },
+      stdio: 'pipe',
+    });
+
+    prisma = new PrismaClient({
+      datasources: { db: { url: databaseUrl } },
     });
     await prisma.$connect();
     repository = new PrismaApiKeyRepository(prisma as never);
-  });
+  }, 120000);
 
   afterAll(async () => {
     await prisma.$disconnect();
+    await postgres.stop();
   });
 
   beforeEach(async () => {
+    await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany({
       where: {
         id: TEST_USER_ID,
@@ -150,8 +168,15 @@ describeIntegration('PrismaApiKeyRepository integration', () => {
   });
 
   async function seedUser(): Promise<void> {
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { id: TEST_USER_ID },
+      update: {
+        email: 'api-key-tests@example.com',
+        name: 'API Key Test Admin',
+        passwordHash: 'password-hash',
+        role: Role.ADMIN,
+      },
+      create: {
         id: TEST_USER_ID,
         email: 'api-key-tests@example.com',
         name: 'API Key Test Admin',

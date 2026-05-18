@@ -19,6 +19,7 @@ import {
 import { JOB_ENQUEUER } from '../../../src/shared/ports/job-enqueuer.port';
 
 const apiRoot = resolve(__dirname, '../../..');
+const originalDatabaseUrl = process.env.DATABASE_URL;
 
 const cleanupRedis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
   enableOfflineQueue: false,
@@ -67,7 +68,9 @@ describe('MediaController integration', () => {
   beforeAll(async () => {
     loadEnv({ path: resolve(apiRoot, '.env') });
 
-    postgres = await new PostgreSqlContainer('postgres:16-alpine').start();
+    postgres = await new PostgreSqlContainer('postgres:16-alpine')
+      .withStartupTimeout(120000)
+      .start();
     const databaseUrl = postgres.getConnectionUri();
 
     process.env.DATABASE_URL = databaseUrl;
@@ -98,6 +101,8 @@ describe('MediaController integration', () => {
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
+    await prisma.auditEvent.deleteMany();
+    await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
@@ -131,25 +136,27 @@ describe('MediaController integration', () => {
   }, 120000);
 
   afterAll(async () => {
+    await prisma.auditEvent.deleteMany();
+    await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
-    await prisma.auditEvent.deleteMany();
-    await prisma.apiKey.deleteMany();
     await prisma.user.deleteMany({ where: { email: { in: [adminEmail, authorEmail] } } });
     await app.close();
     await cleanupRedis.quit();
     await prisma.$disconnect();
     await postgres.stop();
+    restoreDatabaseUrl();
   });
 
   beforeEach(async () => {
     await cleanupRedis.flushdb();
+    await prisma.auditEvent.deleteMany();
+    await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
     await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
-    await prisma.auditEvent.deleteMany();
     await prisma.mediaItem.deleteMany({
       where: { uploadedBy: { in: [adminId, authorId] } },
     });
@@ -441,3 +448,12 @@ describe('MediaController integration', () => {
     return request(app.getHttpServer() as Parameters<typeof request>[0]);
   }
 });
+
+function restoreDatabaseUrl(): void {
+  if (originalDatabaseUrl === undefined) {
+    delete process.env.DATABASE_URL;
+    return;
+  }
+
+  process.env.DATABASE_URL = originalDatabaseUrl;
+}
