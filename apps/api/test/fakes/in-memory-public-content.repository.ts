@@ -81,8 +81,8 @@ export class InMemoryPublicContentRepository implements PublicContentRepository 
     return Promise.resolve(this.pages.find((page) => page.slug === slug) ?? null);
   }
 
-  async getMediaById(id: string): Promise<PublicMediaItem | null> {
-    return this.mediaItems.get(id) ?? null;
+  getMediaById(id: string): Promise<PublicMediaItem | null> {
+    return Promise.resolve(this.mediaItems.get(id) ?? null);
   }
 }
 
