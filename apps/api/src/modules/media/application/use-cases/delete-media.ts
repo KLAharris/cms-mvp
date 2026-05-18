@@ -1,5 +1,6 @@
 import { DomainEventPublisher } from '../../../../shared/ports/event-publisher.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { MediaDeletedEvent } from '../../domain/events';
 import {
   MediaForbiddenError,
@@ -23,6 +24,7 @@ export class DeleteMediaUseCase implements DeleteMediaPort {
     private readonly references: MediaReferenceChecker,
     private readonly storage: ObjectStorage,
     private readonly events: DomainEventPublisher,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(command: DeleteMediaCommand): Promise<void> {
@@ -53,6 +55,16 @@ export class DeleteMediaUseCase implements DeleteMediaPort {
       await this.storage.deleteObject(storageKey.value);
     }
     await this.media.delete(media.id);
+    await this.audit?.save(
+      AuditEvent.create({
+        actorId: command.requestedBy,
+        actorIp: command.actorIp ?? 'unknown',
+        action: AuditAction.MEDIA_DELETED,
+        targetType: 'media',
+        targetId: media.id.value,
+        summary: { force: command.force === true },
+      }),
+    );
     await this.events.publishAll([
       new MediaDeletedEvent(
         media.id.value,

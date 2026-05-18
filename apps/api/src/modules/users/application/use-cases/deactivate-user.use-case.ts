@@ -20,6 +20,7 @@ export class DeactivateUser implements DeactivateUserUseCase {
     cmd: DeactivateUserCommand,
     actorId: string,
     actorRole: Role,
+    actorIp?: string,
   ): Promise<void> {
     if (actorRole !== Role.ADMIN) {
       throw new ForbiddenError();
@@ -38,6 +39,7 @@ export class DeactivateUser implements DeactivateUserUseCase {
     await this.auditLogger.log({
       action: 'user.deactivate',
       actorId,
+      ...(actorIp !== undefined ? { actorIp } : {}),
       targetId: cmd.userId,
       occurredAt: this.clock.now(),
     });

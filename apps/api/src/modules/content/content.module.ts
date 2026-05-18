@@ -10,6 +10,9 @@ import { PrismaModule } from '../../shared/prisma/prisma.module';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { AuthModule } from '../auth/auth.module';
+import { AuditModule } from '../audit/audit.module';
+import { AUDIT_PORT } from '../audit/audit.tokens';
+import { AuditPort } from '../audit/domain';
 import { ContentController } from './adapters/in/http/content.controller';
 import { ScheduledPublishJob } from './adapters/in/scheduler/scheduled-publish.job';
 import { SoftDeleteCleanupJob } from './adapters/in/scheduler/soft-delete-cleanup.job';
@@ -34,7 +37,7 @@ export const CONTENT_REPOSITORY = Symbol('ContentRepository');
 export const CONTENT_VERSION_REPOSITORY = Symbol('ContentVersionRepository');
 
 @Module({
-  imports: [AuthModule, PrismaModule],
+  imports: [AuthModule, AuditModule, PrismaModule],
   controllers: [ContentController],
   providers: [
     {
@@ -58,74 +61,81 @@ export const CONTENT_VERSION_REPOSITORY = Symbol('ContentVersionRepository');
     VersionPruningJob,
     {
       provide: 'CREATE_CONTENT_USE_CASE',
-      inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         versions: ContentVersionRepository,
         ids: IdGenerator,
         clock: { now(): Date },
         tx: TransactionRunner,
-      ): CreateContentUseCase => new CreateContentUseCase(contents, versions, ids, clock, tx),
+        audit: AuditPort,
+      ): CreateContentUseCase => new CreateContentUseCase(contents, versions, ids, clock, tx, audit),
     },
     {
       provide: 'UPDATE_CONTENT_USE_CASE',
-      inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         versions: ContentVersionRepository,
         ids: IdGenerator,
         clock: { now(): Date },
         tx: TransactionRunner,
-      ): UpdateContentUseCase => new UpdateContentUseCase(contents, versions, ids, clock, tx),
+        audit: AuditPort,
+      ): UpdateContentUseCase => new UpdateContentUseCase(contents, versions, ids, clock, tx, audit),
     },
     {
       provide: 'SUBMIT_FOR_REVIEW_USE_CASE',
-      inject: [CONTENT_REPOSITORY, 'CLOCK', TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, 'CLOCK', TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         clock: { now(): Date },
         tx: TransactionRunner,
-      ): SubmitForReviewUseCase => new SubmitForReviewUseCase(contents, clock, tx),
+        audit: AuditPort,
+      ): SubmitForReviewUseCase => new SubmitForReviewUseCase(contents, clock, tx, audit),
     },
     {
       provide: 'PUBLISH_CONTENT_USE_CASE',
-      inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         clock: { now(): Date },
         events: DomainEventPublisher,
         tx: TransactionRunner,
-      ): PublishContentUseCase => new PublishContentUseCase(contents, clock, events, tx),
+        audit: AuditPort,
+      ): PublishContentUseCase => new PublishContentUseCase(contents, clock, events, tx, audit),
     },
     {
       provide: 'UNPUBLISH_CONTENT_USE_CASE',
-      inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         clock: { now(): Date },
         events: DomainEventPublisher,
         tx: TransactionRunner,
+        audit: AuditPort,
       ): UnpublishContentUseCase =>
-        new UnpublishContentUseCase(contents, clock, events, tx),
+        new UnpublishContentUseCase(contents, clock, events, tx, audit),
     },
     {
       provide: 'SCHEDULE_CONTENT_USE_CASE',
-      inject: [CONTENT_REPOSITORY, 'CLOCK', TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, 'CLOCK', TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         clock: { now(): Date },
         tx: TransactionRunner,
-      ): ScheduleContentUseCase => new ScheduleContentUseCase(contents, clock, tx),
+        audit: AuditPort,
+      ): ScheduleContentUseCase => new ScheduleContentUseCase(contents, clock, tx, audit),
     },
     {
       provide: 'DELETE_CONTENT_USE_CASE',
-      inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         clock: { now(): Date },
         events: DomainEventPublisher,
         tx: TransactionRunner,
-      ): DeleteContentUseCase => new DeleteContentUseCase(contents, clock, events, tx),
+        audit: AuditPort,
+      ): DeleteContentUseCase => new DeleteContentUseCase(contents, clock, events, tx, audit),
     },
     {
       provide: 'LIST_CONTENT_USE_CASE',

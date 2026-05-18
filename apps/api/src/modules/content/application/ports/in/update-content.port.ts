@@ -8,6 +8,7 @@ export type UpdateContentCommand = {
   contentId: string;
   actorId: string;
   actorRole: string;
+  actorIp?: string;
   title?: string;
   slug?: string;
   body?: object | null;

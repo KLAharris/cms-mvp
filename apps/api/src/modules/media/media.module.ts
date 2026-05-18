@@ -5,6 +5,9 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { MediaController } from './adapters/in/http/media.controller';
 import { ImageVariantWorker } from './adapters/in/scheduler';
 import { AuthModule } from '../auth/auth.module';
+import { AuditModule } from '../audit/audit.module';
+import { AUDIT_PORT } from '../audit/audit.tokens';
+import { AuditPort } from '../audit/domain';
 
 import { BullMQJobEnqueuer } from '../../shared/adapters/bullmq-job-enqueuer.adapter';
 import { InProcessEventPublisher } from '../../shared/adapters/in-process-event-publisher.adapter';
@@ -62,7 +65,7 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
 }
 
 @Module({
-  imports: [AuthModule, ConfigModule, PrismaModule],
+  imports: [AuthModule, AuditModule, ConfigModule, PrismaModule],
   controllers: [MediaController],
   providers: [
     {
@@ -155,6 +158,7 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
         CLOCK,
         MAX_UPLOAD_BYTES,
         PRESIGN_TTL_SECONDS,
+        AUDIT_PORT,
       ],
       useFactory: (
         media: MediaRepository,
@@ -163,6 +167,7 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
         clock: Clock,
         maxUploadBytes: number,
         presignTtlSeconds: number,
+        audit: AuditPort,
       ): PresignUploadUseCase =>
         new PresignUploadUseCase(
           media,
@@ -171,6 +176,7 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
           clock,
           maxUploadBytes,
           presignTtlSeconds,
+          audit,
         ),
     },
     {
@@ -198,14 +204,16 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
         MEDIA_REFERENCE_CHECKER,
         OBJECT_STORAGE,
         DOMAIN_EVENT_PUBLISHER,
+        AUDIT_PORT,
       ],
       useFactory: (
         media: MediaRepository,
         references: MediaReferenceChecker,
         storage: ObjectStorage,
         events: DomainEventPublisher,
+        audit: AuditPort,
       ): DeleteMediaUseCase =>
-        new DeleteMediaUseCase(media, references, storage, events),
+        new DeleteMediaUseCase(media, references, storage, events, audit),
     },
     {
       provide: 'GET_MEDIA_USE_CASE',

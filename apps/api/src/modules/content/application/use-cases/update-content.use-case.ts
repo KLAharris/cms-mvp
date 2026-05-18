@@ -2,6 +2,7 @@ import { Clock } from '@shared/ports/clock.port';
 import { IdGenerator } from '@shared/ports/id-generator.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { ContentVersion } from '../../domain/entities/content-version.entity';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
@@ -24,6 +25,7 @@ export class UpdateContentUseCase implements UpdateContentPort {
     private readonly idGenerator: IdGenerator,
     private readonly clock: Clock,
     private readonly tx: TransactionRunner,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(command: UpdateContentCommand): Promise<UpdateContentResult> {
@@ -67,6 +69,17 @@ export class UpdateContentUseCase implements UpdateContentPort {
 
       await this.contents.save(content);
       await this.versions.save(version);
+      await this.audit?.save(
+        AuditEvent.create({
+          actorId: command.actorId,
+          actorIp: command.actorIp ?? 'unknown',
+          action: AuditAction.CONTENT_UPDATED,
+          targetType: 'content',
+          targetId: content.id.value,
+          summary: { versionNo },
+          timestamp: now,
+        }),
+      );
 
       return {
         contentId: content.id.value,

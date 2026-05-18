@@ -1,6 +1,7 @@
 import { Clock } from '../../../../shared/ports/clock.port';
 import { IdGenerator } from '../../../../shared/ports/id-generator.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { MediaItem } from '../../domain/entities';
 import {
   AllowedMimeType,
@@ -27,6 +28,7 @@ export class PresignUploadUseCase implements PresignUploadPort {
     private readonly clock: Clock,
     private readonly maxUploadBytes: number = DEFAULT_MAX_UPLOAD_BYTES,
     private readonly presignTtlSeconds: number = 300,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(command: PresignUploadCommand): Promise<PresignUploadResult> {
@@ -54,6 +56,21 @@ export class PresignUploadUseCase implements PresignUploadPort {
     });
 
     await this.media.save(media);
+    await this.audit?.save(
+      AuditEvent.create({
+        actorId: command.uploadedBy,
+        actorIp: command.actorIp ?? 'unknown',
+        action: AuditAction.MEDIA_UPLOADED,
+        targetType: 'media',
+        targetId: mediaId.value,
+        summary: {
+          filename: command.filename,
+          mimeType,
+          sizeBytes: command.sizeBytes,
+        },
+        timestamp: media.uploadedAt,
+      }),
+    );
 
     return {
       mediaId: mediaId.value,

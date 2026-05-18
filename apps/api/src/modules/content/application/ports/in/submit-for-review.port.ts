@@ -8,6 +8,7 @@ export type SubmitForReviewCommand = {
   contentId: string;
   actorId: string;
   actorRole: string;
+  actorIp?: string;
 };
 
 export type SubmitForReviewResult = {

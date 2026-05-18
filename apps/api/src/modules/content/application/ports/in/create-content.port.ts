@@ -10,6 +10,7 @@ export type CreateContentCommand = {
   title: string;
   actorId: string;
   actorRole: string;
+  actorIp?: string;
   tags?: string[];
   category?: string | null;
   parentId?: string | null;

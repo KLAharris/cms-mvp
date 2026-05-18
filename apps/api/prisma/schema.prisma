@@ -37,6 +37,7 @@ model User {
   contents                   Content[]
   uploadedMedia              MediaItem[] @relation("UploadedMedia")
   apiKeys                    ApiKey[]
+  auditEvents                AuditEvent[]
 }
 
 enum ContentType {
@@ -146,4 +147,23 @@ model ApiKey {
   createdBy User @relation(fields: [createdById], references: [id])
 
   @@map("api_keys")
+}
+
+model AuditEvent {
+  id         String   @id @default(uuid())
+  occurredAt DateTime @default(now()) @map("occurred_at")
+  actorId    String?  @map("actor_id")
+  actorIp    String   @map("actor_ip")
+  action     String
+  targetType String   @map("target_type")
+  targetId   String?  @map("target_id")
+  summary    Json
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([occurredAt(sort: Desc)])
+  @@index([actorId, occurredAt(sort: Desc)])
+  @@index([action, occurredAt(sort: Desc)])
+  @@index([targetType, targetId])
+  @@map("audit_events")
 }

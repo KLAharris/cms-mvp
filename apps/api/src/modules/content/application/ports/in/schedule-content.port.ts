@@ -8,6 +8,7 @@ export type ScheduleContentCommand = {
   contentId: string;
   actorId: string;
   actorRole: string;
+  actorIp?: string;
   scheduledAt: Date;
 };
 

@@ -2,6 +2,7 @@ import { Clock } from '@shared/ports/clock.port';
 import { IdGenerator } from '@shared/ports/id-generator.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { Content } from '../../domain/entities/content.entity';
 import { ContentVersion } from '../../domain/entities/content-version.entity';
 import { ContentId } from '../../domain/value-objects/content-id.vo';
@@ -24,6 +25,7 @@ export class CreateContentUseCase implements CreateContentPort {
     private readonly idGenerator: IdGenerator,
     private readonly clock: Clock,
     private readonly tx: TransactionRunner,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(command: CreateContentCommand): Promise<CreateContentResult> {
@@ -59,6 +61,17 @@ export class CreateContentUseCase implements CreateContentPort {
           snapshot: contentSnapshot(content),
           editorId: command.actorId,
           createdAt: now,
+        }),
+      );
+      await this.audit?.save(
+        AuditEvent.create({
+          actorId: command.actorId,
+          actorIp: command.actorIp ?? 'unknown',
+          action: AuditAction.CONTENT_CREATED,
+          targetType: 'content',
+          targetId: content.id.value,
+          summary: { type: content.type, title: content.title, slug: content.slug.value },
+          timestamp: now,
         }),
       );
 

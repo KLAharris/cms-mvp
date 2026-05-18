@@ -25,7 +25,12 @@ export class InviteUser implements InviteUserUseCase {
     private readonly baseUrl: string,
   ) {}
 
-  async execute(cmd: InviteUserCommand, actorId: string, actorRole: Role): Promise<void> {
+  async execute(
+    cmd: InviteUserCommand,
+    actorId: string,
+    actorRole: Role,
+    actorIp?: string,
+  ): Promise<void> {
     void this.passwordHasher;
 
     if (actorRole !== Role.ADMIN) {
@@ -62,6 +67,7 @@ export class InviteUser implements InviteUserUseCase {
     await this.auditLogger.log({
       action: 'user.invite',
       actorId,
+      ...(actorIp !== undefined ? { actorIp } : {}),
       targetId: user.id,
       occurredAt: this.clock.now(),
     });

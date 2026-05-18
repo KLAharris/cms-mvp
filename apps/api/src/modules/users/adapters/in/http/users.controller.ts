@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  Ip,
   Param,
   Patch,
   Post,
@@ -143,6 +144,7 @@ export class UsersController {
   async invite(
     @Body() body: unknown,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ): Promise<void> {
     const parsed = inviteUserBodySchema.safeParse(body);
 
@@ -155,6 +157,7 @@ export class UsersController {
         parsed.data satisfies InviteUserCommand,
         user.userId,
         this.toRole(user.role),
+        actorIp,
       );
     } catch (error) {
       throw this.mapInviteError(error);
@@ -166,6 +169,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() body: unknown,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ): Promise<{ data: UserDto }> {
     const parsed = updateUserBodySchema.safeParse(body);
 
@@ -178,6 +182,7 @@ export class UsersController {
         { userId: id, ...parsed.data } satisfies UpdateUserCommand,
         user.userId,
         this.toRole(user.role),
+        actorIp,
       );
 
       return { data: result };
@@ -191,12 +196,14 @@ export class UsersController {
   async deactivate(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ): Promise<void> {
     try {
       await this.deactivateUser.execute(
         { userId: id } satisfies DeactivateUserCommand,
         user.userId,
         this.toRole(user.role),
+        actorIp,
       );
     } catch (error) {
       throw this.mapDeactivateError(error);

@@ -17,7 +17,7 @@ export class UpdateUser implements UpdateUserUseCase {
     private readonly clock: Clock,
   ) {}
 
-  async execute(cmd: UpdateUserCommand, actorId: string, actorRole: Role) {
+  async execute(cmd: UpdateUserCommand, actorId: string, actorRole: Role, actorIp?: string) {
     if (actorRole !== Role.ADMIN) {
       throw new ForbiddenError();
     }
@@ -42,6 +42,7 @@ export class UpdateUser implements UpdateUserUseCase {
     await this.auditLogger.log({
       action: 'user.update',
       actorId,
+      ...(actorIp !== undefined ? { actorIp } : {}),
       targetId: cmd.userId,
       occurredAt: this.clock.now(),
     });

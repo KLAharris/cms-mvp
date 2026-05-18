@@ -4,6 +4,9 @@ import Redis from 'ioredis';
 
 import { PrismaModule } from '../../shared/prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
+import { AuditLoggerAdapter } from '../audit/adapters/out/persistence/audit-logger.adapter';
+import { PrismaAuditRepository } from '../audit/adapters/out/persistence/prisma-audit.repository';
+import { AuditPort } from '../audit/domain';
 import { Login } from './application/use-cases/login';
 import { Logout } from './application/use-cases/logout';
 import { Refresh } from './application/use-cases/refresh';
@@ -11,7 +14,6 @@ import { AuthController } from './adapters/in/http/auth.controller';
 import { Argon2PasswordHasher } from './adapters/out/argon2-password-hasher.adapter';
 import { JoseJwtSigner } from './adapters/out/jose-jwt-signer.adapter';
 import { JoseJwtVerifier } from './adapters/out/jose-jwt-verifier.adapter';
-import { NoopAuditLogger } from './adapters/out/noop-audit-logger.adapter';
 import { PrismaUserRepository } from './adapters/out/prisma-user-repository.adapter';
 import { RedisRateLimiter } from './adapters/out/redis-rate-limiter.adapter';
 import { RedisTokenBlocklist } from './adapters/out/redis-token-blocklist.adapter';
@@ -24,6 +26,7 @@ import { TokenBlocklist } from './application/ports/out/token-blocklist.port';
 import { TokenSigner } from './application/ports/out/token-signer.port';
 import { TokenVerifier } from './application/ports/out/token-verifier.port';
 import { UserRepository } from './application/ports/out/user-repository.port';
+import { PrismaService } from '../../shared/prisma/prisma.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, forwardRef(() => UsersModule)],
@@ -79,7 +82,11 @@ import { UserRepository } from './application/ports/out/user-repository.port';
     },
     {
       provide: 'AUDIT_LOGGER',
-      useClass: NoopAuditLogger,
+      inject: [PrismaService],
+      useFactory: (prisma: PrismaService): AuditLogger => {
+        const audit: AuditPort = new PrismaAuditRepository(prisma);
+        return new AuditLoggerAdapter(audit);
+      },
     },
     {
       provide: 'LOGIN_USE_CASE',
