@@ -29,6 +29,7 @@ describe('AuditEvent', () => {
 
   it('allows system events without actor or target', () => {
     const event = AuditEvent.create({
+      id: 'audit-2',
       actorId: null,
       actorIp: '127.0.0.1',
       action: AuditAction.USER_LOGIN_FAILED,
@@ -44,6 +45,7 @@ describe('AuditEvent', () => {
   it('rejects a missing actor IP', () => {
     expect(() =>
       AuditEvent.create({
+        id: 'audit-3',
         actorId: 'user-1',
         actorIp: '',
         action: AuditAction.USER_LOGIN,
@@ -57,6 +59,7 @@ describe('AuditEvent', () => {
   it('rejects a missing target type', () => {
     expect(() =>
       AuditEvent.create({
+        id: 'audit-4',
         actorId: 'user-1',
         actorIp: '127.0.0.1',
         action: AuditAction.USER_LOGIN,

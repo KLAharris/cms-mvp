@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto';
+
 import { AuditAction, AuditEvent, AuditPort, AuditSummary } from '../../domain';
 
 export type WriteAuditEventCommand = {
@@ -16,6 +18,7 @@ export class WriteAuditEventUseCase {
   async execute(command: WriteAuditEventCommand): Promise<void> {
     await this.audit.save(
       AuditEvent.create({
+        id: randomUUID(),
         actorId: command.actorId,
         actorIp: command.actorIp,
         action: command.action,

@@ -1,8 +1,10 @@
+import { randomUUID } from 'crypto';
+
 import { Clock } from '@shared/ports/clock.port';
 import { DomainEventPublisher } from '@shared/ports/event-publisher.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
-import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
 import { ContentId } from '../../domain/value-objects/content-id.vo';
@@ -39,6 +41,7 @@ export class DeleteContentUseCase implements DeleteContentPort {
       await this.events.publishAll(content.pullDomainEvents());
       await this.audit?.save(
         AuditEvent.create({
+          id: randomUUID(),
           actorId: command.actorId,
           actorIp: command.actorIp ?? 'unknown',
           action: AuditAction.CONTENT_DELETED,

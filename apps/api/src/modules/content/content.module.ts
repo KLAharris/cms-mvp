@@ -12,7 +12,7 @@ import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { AuthModule } from '../auth/auth.module';
 import { AuditModule } from '../audit/audit.module';
 import { AUDIT_PORT } from '../audit/audit.tokens';
-import { AuditPort } from '../audit/domain';
+import { AuditPort } from '../audit';
 import { ContentController } from './adapters/in/http/content.controller';
 import { ScheduledPublishJob } from './adapters/in/scheduler/scheduled-publish.job';
 import { SoftDeleteCleanupJob } from './adapters/in/scheduler/soft-delete-cleanup.job';

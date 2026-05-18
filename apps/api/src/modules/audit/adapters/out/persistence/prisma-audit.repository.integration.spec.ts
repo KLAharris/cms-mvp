@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto';
+
 import { PrismaClient, Role, UserStatus } from '@prisma/client';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { execFileSync } from 'node:child_process';
@@ -182,7 +184,7 @@ function auditEvent(overrides: Partial<{
   summary: Record<string, unknown>;
 }>): AuditEvent {
   return AuditEvent.create({
-    id: overrides.id,
+    id: overrides.id ?? randomUUID(),
     actorId: overrides.actorId ?? actorId,
     actorIp: '127.0.0.1',
     action: overrides.action ?? AuditAction.USER_LOGIN,

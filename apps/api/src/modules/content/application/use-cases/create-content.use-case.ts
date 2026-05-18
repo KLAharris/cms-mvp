@@ -2,7 +2,7 @@ import { Clock } from '@shared/ports/clock.port';
 import { IdGenerator } from '@shared/ports/id-generator.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
-import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit';
 import { Content } from '../../domain/entities/content.entity';
 import { ContentVersion } from '../../domain/entities/content-version.entity';
 import { ContentId } from '../../domain/value-objects/content-id.vo';
@@ -65,6 +65,7 @@ export class CreateContentUseCase implements CreateContentPort {
       );
       await this.audit?.save(
         AuditEvent.create({
+          id: this.idGenerator.generate(),
           actorId: command.actorId,
           actorIp: command.actorIp ?? 'unknown',
           action: AuditAction.CONTENT_CREATED,

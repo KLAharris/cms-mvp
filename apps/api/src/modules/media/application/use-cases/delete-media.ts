@@ -1,6 +1,8 @@
+import { randomUUID } from 'crypto';
+
 import { DomainEventPublisher } from '../../../../shared/ports/event-publisher.port';
 
-import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit';
 import { MediaDeletedEvent } from '../../domain/events';
 import {
   MediaForbiddenError,
@@ -57,6 +59,7 @@ export class DeleteMediaUseCase implements DeleteMediaPort {
     await this.media.delete(media.id);
     await this.audit?.save(
       AuditEvent.create({
+        id: randomUUID(),
         actorId: command.requestedBy,
         actorIp: command.actorIp ?? 'unknown',
         action: AuditAction.MEDIA_DELETED,

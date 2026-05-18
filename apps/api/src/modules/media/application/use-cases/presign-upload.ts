@@ -1,7 +1,7 @@
 import { Clock } from '../../../../shared/ports/clock.port';
 import { IdGenerator } from '../../../../shared/ports/id-generator.port';
 
-import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit';
 import { MediaItem } from '../../domain/entities';
 import {
   AllowedMimeType,
@@ -58,6 +58,7 @@ export class PresignUploadUseCase implements PresignUploadPort {
     await this.media.save(media);
     await this.audit?.save(
       AuditEvent.create({
+        id: this.ids.generate(),
         actorId: command.uploadedBy,
         actorIp: command.actorIp ?? 'unknown',
         action: AuditAction.MEDIA_UPLOADED,

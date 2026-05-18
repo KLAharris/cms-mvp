@@ -7,7 +7,7 @@ import { ImageVariantWorker } from './adapters/in/scheduler';
 import { AuthModule } from '../auth/auth.module';
 import { AuditModule } from '../audit/audit.module';
 import { AUDIT_PORT } from '../audit/audit.tokens';
-import { AuditPort } from '../audit/domain';
+import { AuditPort } from '../audit';
 
 import { BullMQJobEnqueuer } from '../../shared/adapters/bullmq-job-enqueuer.adapter';
 import { InProcessEventPublisher } from '../../shared/adapters/in-process-event-publisher.adapter';

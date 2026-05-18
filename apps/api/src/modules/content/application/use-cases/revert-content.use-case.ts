@@ -2,7 +2,7 @@ import { Clock } from '@shared/ports/clock.port';
 import { IdGenerator } from '@shared/ports/id-generator.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
-import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit';
 import { ContentSnapshot } from '../../domain/entities/content.entity';
 import { ContentVersion } from '../../domain/entities/content-version.entity';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
@@ -69,6 +69,7 @@ export class RevertContentUseCase implements RevertContentPort {
       );
       await this.audit?.save(
         AuditEvent.create({
+          id: this.idGenerator.generate(),
           actorId: command.actorId,
           actorIp: command.actorIp ?? 'unknown',
           action: AuditAction.CONTENT_STATUS_CHANGED,

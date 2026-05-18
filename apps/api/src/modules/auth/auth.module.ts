@@ -6,7 +6,7 @@ import { PrismaModule } from '../../shared/prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
 import { AuditLoggerAdapter } from '../audit/adapters/out/persistence/audit-logger.adapter';
 import { PrismaAuditRepository } from '../audit/adapters/out/persistence/prisma-audit.repository';
-import { AuditPort } from '../audit/domain';
+import { AuditPort } from '../audit';
 import { Login } from './application/use-cases/login';
 import { Logout } from './application/use-cases/logout';
 import { Refresh } from './application/use-cases/refresh';

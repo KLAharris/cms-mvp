@@ -1,8 +1,8 @@
-import { AuditAction, AuditEvent, AuditPort } from '../../../domain';
-import { AuditLogger as AuthAuditLogger } from '../../../../auth/application/ports/out/audit-logger.port';
-import { AuditLogger as UsersAuditLogger } from '../../../../users/application/ports/out/audit-logger.port';
+import { randomUUID } from 'crypto';
 
-export class AuditLoggerAdapter implements AuthAuditLogger, UsersAuditLogger {
+import { AuditAction, AuditEvent, AuditPort } from '../../../domain';
+
+export class AuditLoggerAdapter {
   constructor(private readonly audit: AuditPort) {}
 
   async log(params: {
@@ -14,6 +14,7 @@ export class AuditLoggerAdapter implements AuthAuditLogger, UsersAuditLogger {
   }): Promise<void> {
     await this.audit.save(
       AuditEvent.create({
+        id: randomUUID(),
         actorId: params.actorId,
         actorIp: params.actorIp ?? 'unknown',
         action: this.mapLegacyAction(params.action),
@@ -32,6 +33,7 @@ export class AuditLoggerAdapter implements AuthAuditLogger, UsersAuditLogger {
   }): Promise<void> {
     await this.audit.save(
       AuditEvent.create({
+        id: randomUUID(),
         actorId: params.userId,
         actorIp: params.actorIp,
         action: AuditAction.USER_LOGIN,
@@ -51,6 +53,7 @@ export class AuditLoggerAdapter implements AuthAuditLogger, UsersAuditLogger {
   }): Promise<void> {
     await this.audit.save(
       AuditEvent.create({
+        id: randomUUID(),
         actorId: null,
         actorIp: params.actorIp,
         action: AuditAction.USER_LOGIN_FAILED,
@@ -69,6 +72,7 @@ export class AuditLoggerAdapter implements AuthAuditLogger, UsersAuditLogger {
   }): Promise<void> {
     await this.audit.save(
       AuditEvent.create({
+        id: randomUUID(),
         actorId: params.userId,
         actorIp: params.actorIp,
         action: AuditAction.USER_LOGIN,
@@ -87,6 +91,7 @@ export class AuditLoggerAdapter implements AuthAuditLogger, UsersAuditLogger {
   }): Promise<void> {
     await this.audit.save(
       AuditEvent.create({
+        id: randomUUID(),
         actorId: params.userId,
         actorIp: params.actorIp,
         action: AuditAction.USER_LOGOUT,

@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 export enum AuditAction {
   USER_LOGIN = 'USER_LOGIN',
   USER_LOGIN_FAILED = 'USER_LOGIN_FAILED',
@@ -31,8 +29,7 @@ export type AuditEventProps = {
 export class AuditEvent {
   private constructor(private readonly props: AuditEventProps) {}
 
-  static create(params: Omit<AuditEventProps, 'id' | 'timestamp'> & {
-    id?: string;
+  static create(params: Omit<AuditEventProps, 'timestamp'> & {
     timestamp?: Date;
   }): AuditEvent {
     if (params.actorIp.trim() === '') {
@@ -44,7 +41,7 @@ export class AuditEvent {
     }
 
     return new AuditEvent({
-      id: params.id ?? randomUUID(),
+      id: params.id,
       timestamp: params.timestamp ?? new Date(),
       actorId: params.actorId,
       actorIp: params.actorIp,
