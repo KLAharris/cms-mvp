@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 
 import { PrismaModule } from '../../shared/prisma/prisma.module';
 import { PrismaService } from '../../shared/prisma/prisma.service';
@@ -13,7 +13,7 @@ import { AuditPort } from './domain';
 import { ExportAuditCsvUseCase, ListAuditEventsUseCase, WriteAuditEventUseCase } from './application/use-cases';
 
 @Module({
-  imports: [AuthModule, PrismaModule],
+  imports: [forwardRef(() => AuthModule), PrismaModule],
   controllers: [AuditController],
   providers: [
     JwtAuthGuard,

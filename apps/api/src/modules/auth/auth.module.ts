@@ -145,6 +145,6 @@ import { PrismaService } from '../../shared/prisma/prisma.service';
       ): Logout => new Logout(tokenVerifier, tokenBlocklist, clock, auditLogger),
     },
   ],
-  exports: ['JWT_SECRET', 'USER_REPOSITORY', 'PASSWORD_HASHER', 'CLOCK', 'AUDIT_LOGGER'],
+  exports: ['JWT_SECRET', 'USER_REPOSITORY', 'PASSWORD_HASHER', 'CLOCK'],
 })
 export class AuthModule {}

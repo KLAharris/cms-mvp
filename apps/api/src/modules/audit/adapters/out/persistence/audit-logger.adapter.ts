@@ -62,8 +62,22 @@ export class AuditLoggerAdapter implements AuthAuditLogger, UsersAuditLogger {
     );
   }
 
-  logTokenRefresh(): Promise<void> {
-    return Promise.resolve();
+  async logTokenRefresh(params: {
+    userId: string;
+    actorIp: string;
+    occurredAt: Date;
+  }): Promise<void> {
+    await this.audit.save(
+      AuditEvent.create({
+        actorId: params.userId,
+        actorIp: params.actorIp,
+        action: AuditAction.USER_LOGIN,
+        targetType: 'user',
+        targetId: params.userId,
+        summary: { result: 'token_refresh' },
+        timestamp: params.occurredAt,
+      }),
+    );
   }
 
   async logLogout(params: {
