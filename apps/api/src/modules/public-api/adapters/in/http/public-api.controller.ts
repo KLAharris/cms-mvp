@@ -28,6 +28,7 @@ import {
 } from '../../../application/ports/in/list-published-pages.port';
 import type { PublicMediaItem } from '../../../application/ports/out/public-content-repository.port';
 import { GetPublicMediaItemUseCase } from '../../../application/use-cases/get-public-media-item.use-case';
+import { ApiKeyThrottlerGuard } from './api-key-throttler.guard';
 import { PaginationQuerySchema } from './dto/pagination-query.dto';
 import { toETag, toLastModified, wrapList } from './dto/public-api.response';
 
@@ -44,7 +45,7 @@ type HeaderResponse = {
 };
 
 @Controller('api/v1')
-@UseGuards(ApiKeyGuard)
+@UseGuards(ApiKeyGuard, ApiKeyThrottlerGuard)
 export class PublicApiController {
   constructor(
     @Inject(LIST_PUBLISHED_ARTICLES)
