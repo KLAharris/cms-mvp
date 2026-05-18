@@ -5,6 +5,7 @@ import {
   INestApplication,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { getOptionsToken, ThrottlerModule } from '@nestjs/throttler';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
@@ -12,6 +13,7 @@ import { ZodError } from 'zod';
 import { InMemoryCache } from '../../fakes/in-memory-cache';
 import { InMemoryPublicContentRepository } from '../../fakes/in-memory-public-content.repository';
 import { LOOKUP_API_KEY } from '../../../src/modules/api-keys/application/ports/tokens';
+import { ThrottlerExceptionFilter } from '../../../src/modules/public-api/adapters/in/http/throttler-exception.filter';
 import { PublicApiModule } from '../../../src/modules/public-api/public-api.module';
 import type {
   PublicArticleDetail,
@@ -59,8 +61,10 @@ describe('PublicApiController integration', () => {
     cache = new InMemoryCache();
 
     const module = await Test.createTestingModule({
-      imports: [PublicApiModule],
+      imports: [PublicApiModule, ThrottlerModule.forRoot([{ ttl: 60_000, limit: 3 }])],
     })
+      .overrideProvider(getOptionsToken())
+      .useValue([{ ttl: 60_000, limit: 3 }])
       .overrideProvider(PUBLIC_CONTENT_REPOSITORY)
       .useValue(contentRepo)
       .overrideProvider(CACHE)
@@ -72,7 +76,7 @@ describe('PublicApiController integration', () => {
       .compile();
 
     app = module.createNestApplication();
-    app.useGlobalFilters(new ZodFilter());
+    app.useGlobalFilters(new ZodFilter(), new ThrottlerExceptionFilter());
     await app.init();
   });
 
@@ -313,6 +317,38 @@ describe('PublicApiController integration', () => {
       const res = await request(app.getHttpServer()).get('/api/v1/media/media-1');
 
       expect(res.status).toBe(401);
+    });
+  });
+
+  describe('Rate limiting', () => {
+    it('returns 429 after exceeding the request limit', async () => {
+      contentRepo.seed([anArticle()]);
+
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      const res = await api('/api/v1/articles');
+
+      expect(res.status).toBe(429);
+      expect(res.body.error.code).toBe('RATE_LIMIT_EXCEEDED');
+      expect(res.body.error.message).toBe(
+        'Too many requests. Please retry after 60 seconds.',
+      );
+    });
+
+    it('counts requests per API key not per IP', async () => {
+      contentRepo.seed([anArticle()]);
+
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(200);
+      await api('/api/v1/articles').expect(429);
+
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/articles')
+        .set('X-API-Key', 'different-key');
+
+      expect(res.status).toBe(200);
     });
   });
 
