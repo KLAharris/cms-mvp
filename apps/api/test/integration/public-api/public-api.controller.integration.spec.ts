@@ -19,6 +19,7 @@ import type {
   PublicPageDetail,
   PublicPageSummary,
 } from '../../../src/modules/public-api/application/public-content.read-model';
+import type { PublicMediaItem } from '../../../src/modules/public-api/application/ports/out/public-content-repository.port';
 import { PUBLIC_CONTENT_REPOSITORY } from '../../../src/modules/public-api/application/ports/out/public-content-repository.port';
 import { CACHE } from '../../../src/shared/ports/cache.port';
 
@@ -277,6 +278,44 @@ describe('PublicApiController integration', () => {
     });
   });
 
+  describe('GET /api/v1/media/:id', () => {
+    it('returns 200 with media item metadata and variants', async () => {
+      contentRepo.seedMedia(aMediaItem());
+
+      const res = await api('/api/v1/media/media-1');
+
+      expect(res.status).toBe(200);
+      expect(res.body.id).toBe('media-1');
+      expect(res.body.filename).toBe('photo.jpg');
+      expect(res.body.variants).toHaveLength(1);
+      expect(res.body.variants[0].key).toBe('original');
+    });
+
+    it('returns Cache-Control header', async () => {
+      contentRepo.seedMedia(aMediaItem());
+
+      const res = await api('/api/v1/media/media-1');
+
+      expect(res.headers['cache-control']).toBe(
+        'public, max-age=600, stale-while-revalidate=60',
+      );
+    });
+
+    it('returns 404 with correct error envelope for unknown id', async () => {
+      const res = await api('/api/v1/media/00000000-0000-0000-0000-000000000000');
+
+      expect(res.status).toBe(404);
+      expect(res.body.error.code).toBe('NOT_FOUND');
+      expect(res.body.error.message).toBe('Media item not found');
+    });
+
+    it('returns 401 when X-API-Key header is missing', async () => {
+      const res = await request(app.getHttpServer()).get('/api/v1/media/media-1');
+
+      expect(res.status).toBe(401);
+    });
+  });
+
   describe('pagination validation', () => {
     it('returns 400 when page_size exceeds 100', async () => {
       await api('/api/v1/articles?page_size=101').expect(400);
@@ -333,6 +372,29 @@ function aPageDetail(overrides: Partial<PublicPageDetail> = {}): PublicPageDetai
     ...aPage(),
     body: { type: 'doc', content: [] },
     seo: { seoTitle: 'SEO Page', seoDescription: 'Page Desc', socialImageUrl: null },
+    ...overrides,
+  };
+}
+
+function aMediaItem(overrides: Partial<PublicMediaItem> = {}): PublicMediaItem {
+  return {
+    id: 'media-1',
+    filename: 'photo.jpg',
+    mimeType: 'image/jpeg',
+    size: 102400,
+    altText: 'A photo',
+    caption: null,
+    uploadedAt: new Date('2026-01-01'),
+    variants: [
+      {
+        key: 'original',
+        url: 'https://cdn.example.com/photo.jpg',
+        width: 1920,
+        height: 1080,
+        size: 102400,
+        mimeType: 'image/jpeg',
+      },
+    ],
     ...overrides,
   };
 }

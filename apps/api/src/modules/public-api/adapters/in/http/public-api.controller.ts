@@ -26,6 +26,8 @@ import {
   LIST_PUBLISHED_PAGES,
   type ListPublishedPagesUseCase,
 } from '../../../application/ports/in/list-published-pages.port';
+import type { PublicMediaItem } from '../../../application/ports/out/public-content-repository.port';
+import { GetPublicMediaItemUseCase } from '../../../application/use-cases/get-public-media-item.use-case';
 import { PaginationQuerySchema } from './dto/pagination-query.dto';
 import { toETag, toLastModified, wrapList } from './dto/public-api.response';
 
@@ -53,6 +55,8 @@ export class PublicApiController {
     private readonly listPagesUseCase: ListPublishedPagesUseCase,
     @Inject(GET_PUBLISHED_PAGE_BY_SLUG)
     private readonly getPageUseCase: GetPublishedPageBySlugUseCase,
+    @Inject(GetPublicMediaItemUseCase)
+    private readonly getPublicMediaItemUseCase: GetPublicMediaItemUseCase,
   ) {}
 
   @Get('articles')
@@ -135,5 +139,23 @@ export class PublicApiController {
     res.setHeader('Last-Modified', toLastModified(page.publishedAt));
 
     return page;
+  }
+
+  @Get('media/:id')
+  async getMediaById(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: HeaderResponse,
+  ): Promise<PublicMediaItem> {
+    const item = await this.getPublicMediaItemUseCase.execute(id);
+
+    if (!item) {
+      throw new NotFoundException({
+        error: { code: 'NOT_FOUND', message: 'Media item not found' },
+      });
+    }
+
+    res.setHeader('Cache-Control', 'public, max-age=600, stale-while-revalidate=60');
+
+    return item;
   }
 }

@@ -1,14 +1,15 @@
 import type {
+  PublicMediaItem,
+  PublicContentRepository,
+  PublicListQuery,
+} from '../../src/modules/public-api/application/ports/out/public-content-repository.port';
+import type {
   PaginatedResult,
   PublicArticleDetail,
   PublicArticleSummary,
   PublicPageDetail,
   PublicPageSummary,
 } from '../../src/modules/public-api/application/public-content.read-model';
-import type {
-  PublicContentRepository,
-  PublicListQuery,
-} from '../../src/modules/public-api/application/ports/out/public-content-repository.port';
 
 export class InMemoryPublicContentRepository implements PublicContentRepository {
   readonly calls = {
@@ -20,6 +21,7 @@ export class InMemoryPublicContentRepository implements PublicContentRepository 
 
   private articles: PublicArticleDetail[] = [];
   private pages: PublicPageDetail[] = [];
+  private mediaItems: Map<string, PublicMediaItem> = new Map();
 
   seed(articles: Array<PublicArticleSummary | PublicArticleDetail>): void {
     this.articles = articles.map(toArticleDetail);
@@ -43,9 +45,14 @@ export class InMemoryPublicContentRepository implements PublicContentRepository 
     ];
   }
 
+  seedMedia(item: PublicMediaItem): void {
+    this.mediaItems.set(item.id, item);
+  }
+
   clear(): void {
     this.articles = [];
     this.pages = [];
+    this.mediaItems.clear();
   }
 
   listPublishedArticles(
@@ -72,6 +79,10 @@ export class InMemoryPublicContentRepository implements PublicContentRepository 
     this.calls.getPublishedPageBySlug += 1;
 
     return Promise.resolve(this.pages.find((page) => page.slug === slug) ?? null);
+  }
+
+  async getMediaById(id: string): Promise<PublicMediaItem | null> {
+    return this.mediaItems.get(id) ?? null;
   }
 }
 
