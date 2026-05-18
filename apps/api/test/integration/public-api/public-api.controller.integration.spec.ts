@@ -287,17 +287,16 @@ describe('PublicApiController integration', () => {
       contentRepo.seedMedia(aMediaItem());
 
       const res = await api('/api/v1/media/media-1');
-      const body = res.body as {
+      const mediaBody = res.body as {
         id: string;
         filename: string;
         variants: Array<{ key: string }>;
       };
-
       expect(res.status).toBe(200);
-      expect(body.id).toBe('media-1');
-      expect(body.filename).toBe('photo.jpg');
-      expect(body.variants).toHaveLength(1);
-      expect(body.variants[0]?.key).toBe('original');
+      expect(mediaBody.id).toBe('media-1');
+      expect(mediaBody.filename).toBe('photo.jpg');
+      expect(mediaBody.variants).toHaveLength(1);
+      expect(mediaBody.variants[0]?.key).toBe('original');
     });
 
     it('returns Cache-Control header', async () => {
@@ -312,11 +311,11 @@ describe('PublicApiController integration', () => {
 
     it('returns 404 with correct error envelope for unknown id', async () => {
       const res = await api('/api/v1/media/00000000-0000-0000-0000-000000000000');
-      const body = res.body as ErrorResponse;
+      const notFoundBody = res.body as { error: { code: string; message: string } };
 
       expect(res.status).toBe(404);
-      expect(body.error.code).toBe('NOT_FOUND');
-      expect(body.error.message).toBe('Media item not found');
+      expect(notFoundBody.error.code).toBe('NOT_FOUND');
+      expect(notFoundBody.error.message).toBe('Media item not found');
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
