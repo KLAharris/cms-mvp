@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { FakeAuditRepository } from '../../../audit/tests/doubles/fake-audit.repository';
 import { Content } from '../../domain/entities/content.entity';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
@@ -49,7 +50,12 @@ class FakeContents implements ContentRepository {
 }
 
 function useCase(contents = new FakeContents()) {
-  return new SubmitForReviewUseCase(contents, { now: () => NOW }, { run: (fn) => fn() });
+  return new SubmitForReviewUseCase(
+    contents,
+    { now: () => NOW },
+    { run: (fn) => fn() },
+    new FakeAuditRepository(),
+  );
 }
 
 describe('SubmitForReviewUseCase', () => {

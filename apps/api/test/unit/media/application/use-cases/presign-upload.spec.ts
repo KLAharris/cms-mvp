@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Clock } from '../../../../../src/shared/ports/clock.port';
 import { IdGenerator } from '../../../../../src/shared/ports/id-generator.port';
+import { FakeAuditRepository } from '../../../../../src/modules/audit/tests/doubles/fake-audit.repository';
 import {
   FileSizeLimitExceededError,
   MediaItem,
@@ -45,7 +46,8 @@ describe('PresignUploadUseCase', () => {
     const clock: Clock = {
       now: vi.fn<Clock['now']>().mockReturnValue(new Date('2026-01-01T00:00:00.000Z')),
     };
-    const useCase = new PresignUploadUseCase(media, objectStorage, ids, clock, 1000);
+    const audit = new FakeAuditRepository();
+    const useCase = new PresignUploadUseCase(media, objectStorage, ids, clock, 1000, 300, audit);
 
     const result = await useCase.execute({
       filename: 'hero.png',
@@ -60,6 +62,7 @@ describe('PresignUploadUseCase', () => {
       expect.objectContaining({ mimeType: 'image/png', maxBytes: 1000, ttlSeconds: 300 }),
     );
     expect(media.save).toHaveBeenCalledWith(expect.any(MediaItem));
+    expect(audit.events).toHaveLength(1);
   });
 
   it('rejects invalid mime types', async () => {
@@ -69,6 +72,8 @@ describe('PresignUploadUseCase', () => {
       { generate: vi.fn<IdGenerator['generate']>().mockReturnValue(mediaId) },
       { now: vi.fn<Clock['now']>().mockReturnValue(new Date()) },
       1000,
+      300,
+      new FakeAuditRepository(),
     );
 
     await expect(
@@ -88,6 +93,8 @@ describe('PresignUploadUseCase', () => {
       { generate: vi.fn<IdGenerator['generate']>().mockReturnValue(mediaId) },
       { now: vi.fn<Clock['now']>().mockReturnValue(new Date()) },
       1000,
+      300,
+      new FakeAuditRepository(),
     );
 
     await expect(

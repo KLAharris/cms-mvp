@@ -10,6 +10,7 @@ import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 import { DOMAIN_EVENT_PUBLISHER } from '../../../../../shared/ports/event-publisher.port';
 import { ID_GENERATOR } from '../../../../../shared/ports/id-generator.port';
 import { TRANSACTION_RUNNER } from '../../../../../shared/ports/transaction-runner.port';
+import { FakeAuditRepository } from '../../../../audit/tests/doubles/fake-audit.repository';
 import { Content } from '../../../domain/entities/content.entity';
 import { ContentVersion } from '../../../domain/entities/content-version.entity';
 import { ContentId } from '../../../domain/value-objects/content-id.vo';
@@ -159,37 +160,37 @@ describe('ContentController', () => {
         {
           provide: 'CREATE_CONTENT_USE_CASE',
           inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, v: ContentVersionRepository, i: { generate(): string }, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new CreateContentUseCase(c, v, i, clock, tx),
+          useFactory: (c: ContentRepository, v: ContentVersionRepository, i: { generate(): string }, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new CreateContentUseCase(c, v, i, clock, tx, new FakeAuditRepository()),
         },
         {
           provide: 'UPDATE_CONTENT_USE_CASE',
           inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, v: ContentVersionRepository, i: { generate(): string }, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new UpdateContentUseCase(c, v, i, clock, tx),
+          useFactory: (c: ContentRepository, v: ContentVersionRepository, i: { generate(): string }, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new UpdateContentUseCase(c, v, i, clock, tx, new FakeAuditRepository()),
         },
         {
           provide: 'SUBMIT_FOR_REVIEW_USE_CASE',
           inject: [CONTENT_REPOSITORY, 'CLOCK', TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new SubmitForReviewUseCase(c, clock, tx),
+          useFactory: (c: ContentRepository, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new SubmitForReviewUseCase(c, clock, tx, new FakeAuditRepository()),
         },
         {
           provide: 'PUBLISH_CONTENT_USE_CASE',
           inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, clock: { now(): Date }, e: { publishAll(events: []): Promise<void> }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new PublishContentUseCase(c, clock, e, tx),
+          useFactory: (c: ContentRepository, clock: { now(): Date }, e: { publishAll(events: []): Promise<void> }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new PublishContentUseCase(c, clock, e, tx, new FakeAuditRepository()),
         },
         {
           provide: 'UNPUBLISH_CONTENT_USE_CASE',
           inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, clock: { now(): Date }, e: { publishAll(events: []): Promise<void> }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new UnpublishContentUseCase(c, clock, e, tx),
+          useFactory: (c: ContentRepository, clock: { now(): Date }, e: { publishAll(events: []): Promise<void> }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new UnpublishContentUseCase(c, clock, e, tx, new FakeAuditRepository()),
         },
         {
           provide: 'SCHEDULE_CONTENT_USE_CASE',
           inject: [CONTENT_REPOSITORY, 'CLOCK', TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new ScheduleContentUseCase(c, clock, tx),
+          useFactory: (c: ContentRepository, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new ScheduleContentUseCase(c, clock, tx, new FakeAuditRepository()),
         },
         {
           provide: 'DELETE_CONTENT_USE_CASE',
           inject: [CONTENT_REPOSITORY, 'CLOCK', DOMAIN_EVENT_PUBLISHER, TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, clock: { now(): Date }, e: { publishAll(events: []): Promise<void> }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new DeleteContentUseCase(c, clock, e, tx),
+          useFactory: (c: ContentRepository, clock: { now(): Date }, e: { publishAll(events: []): Promise<void> }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new DeleteContentUseCase(c, clock, e, tx, new FakeAuditRepository()),
         },
         {
           provide: 'LIST_CONTENT_USE_CASE',
@@ -204,7 +205,7 @@ describe('ContentController', () => {
         {
           provide: 'REVERT_CONTENT_USE_CASE',
           inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER],
-          useFactory: (c: ContentRepository, v: ContentVersionRepository, i: { generate(): string }, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new RevertContentUseCase(c, v, i, clock, tx),
+          useFactory: (c: ContentRepository, v: ContentVersionRepository, i: { generate(): string }, clock: { now(): Date }, tx: { run<T>(fn: () => Promise<T>): Promise<T> }) => new RevertContentUseCase(c, v, i, clock, tx, new FakeAuditRepository()),
         },
         {
           provide: 'LIST_VERSIONS_USE_CASE',

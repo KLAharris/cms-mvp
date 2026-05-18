@@ -309,6 +309,7 @@ export class ContentController {
     @Param('id') id: string,
     @Param('versionNo', ParseIntPipe) versionNo: number,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ) {
     return {
       data: await this.revertContent.execute({
@@ -316,6 +317,7 @@ export class ContentController {
         versionNo,
         actorId: user.userId,
         actorRole: this.role(user),
+        actorIp,
       }),
     };
   }

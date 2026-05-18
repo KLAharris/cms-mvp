@@ -155,15 +155,16 @@ export const CONTENT_VERSION_REPOSITORY = Symbol('ContentVersionRepository');
     },
     {
       provide: 'REVERT_CONTENT_USE_CASE',
-      inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER],
+      inject: [CONTENT_REPOSITORY, CONTENT_VERSION_REPOSITORY, ID_GENERATOR, 'CLOCK', TRANSACTION_RUNNER, AUDIT_PORT],
       useFactory: (
         contents: ContentRepository,
         versions: ContentVersionRepository,
         ids: IdGenerator,
         clock: { now(): Date },
         tx: TransactionRunner,
+        audit: AuditPort,
       ): RevertContentUseCase =>
-        new RevertContentUseCase(contents, versions, ids, clock, tx),
+        new RevertContentUseCase(contents, versions, ids, clock, tx, audit),
     },
     {
       provide: 'LIST_VERSIONS_USE_CASE',

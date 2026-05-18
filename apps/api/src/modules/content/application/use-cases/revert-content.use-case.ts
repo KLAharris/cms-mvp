@@ -2,6 +2,7 @@ import { Clock } from '@shared/ports/clock.port';
 import { IdGenerator } from '@shared/ports/id-generator.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { ContentSnapshot } from '../../domain/entities/content.entity';
 import { ContentVersion } from '../../domain/entities/content-version.entity';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
@@ -24,6 +25,7 @@ export class RevertContentUseCase implements RevertContentPort {
     private readonly idGenerator: IdGenerator,
     private readonly clock: Clock,
     private readonly tx: TransactionRunner,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(command: RevertContentCommand): Promise<RevertContentResult> {
@@ -63,6 +65,17 @@ export class RevertContentUseCase implements RevertContentPort {
           snapshot: contentSnapshot(content),
           editorId: command.actorId,
           createdAt: now,
+        }),
+      );
+      await this.audit?.save(
+        AuditEvent.create({
+          actorId: command.actorId,
+          actorIp: command.actorIp ?? 'unknown',
+          action: AuditAction.CONTENT_STATUS_CHANGED,
+          targetType: 'content',
+          targetId: content.id.value,
+          summary: { status: content.status, revertedFromVersionNo: command.versionNo, versionNo: newVersionNo },
+          timestamp: now,
         }),
       );
 
