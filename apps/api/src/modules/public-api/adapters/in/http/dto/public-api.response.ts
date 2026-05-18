@@ -15,12 +15,24 @@ export function toLastModified(date: Date | string): string {
   return new Date(date).toUTCString();
 }
 
-export function wrapList<T>(result: PaginatedResult<T>) {
+export type ListResponse<T> = {
+  data: T[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
+};
+
+export function wrapList<T>(result: PaginatedResult<T>): ListResponse<T> {
   return {
     data: result.data,
-    page: result.page,
-    page_size: result.pageSize,
-    total: result.total,
-    total_pages: result.totalPages,
+    pagination: {
+      page: result.page,
+      page_size: result.pageSize,
+      total: result.total,
+      total_pages: result.totalPages,
+    },
   };
 }

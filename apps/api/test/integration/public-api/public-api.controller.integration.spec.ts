@@ -24,10 +24,12 @@ import { CACHE } from '../../../src/shared/ports/cache.port';
 
 type ListResponse<T> = {
   data: T[];
-  page: number;
-  page_size: number;
-  total: number;
-  total_pages: number;
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
 };
 
 type ErrorResponse = {
@@ -88,10 +90,10 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicArticleSummary>;
 
       expect(body.data).toHaveLength(1);
-      expect(body.page).toBe(1);
-      expect(body.page_size).toBe(25);
-      expect(body.total).toBe(1);
-      expect(body.total_pages).toBe(1);
+      expect(body.pagination.page).toBe(1);
+      expect(body.pagination.page_size).toBe(25);
+      expect(body.pagination.total).toBe(1);
+      expect(body.pagination.total_pages).toBe(1);
     });
 
     it('returns Cache-Control header', async () => {
@@ -126,8 +128,8 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicArticleSummary>;
 
       expect(body.data).toHaveLength(1);
-      expect(body.total).toBe(2);
-      expect(body.total_pages).toBe(2);
+      expect(body.pagination.total).toBe(2);
+      expect(body.pagination.total_pages).toBe(2);
     });
 
     it('returns 200 with empty data array when no articles exist', async () => {
@@ -135,7 +137,7 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicArticleSummary>;
 
       expect(body.data).toEqual([]);
-      expect(body.total).toBe(0);
+      expect(body.pagination.total).toBe(0);
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
@@ -212,10 +214,10 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicPageSummary>;
 
       expect(body.data).toHaveLength(1);
-      expect(body.page).toBe(1);
-      expect(body.page_size).toBe(25);
-      expect(body.total).toBe(1);
-      expect(body.total_pages).toBe(1);
+      expect(body.pagination.page).toBe(1);
+      expect(body.pagination.page_size).toBe(25);
+      expect(body.pagination.total).toBe(1);
+      expect(body.pagination.total_pages).toBe(1);
     });
 
     it('returns Cache-Control header', async () => {
@@ -237,7 +239,7 @@ describe('PublicApiController integration', () => {
       const body = res.body as ListResponse<PublicPageSummary>;
 
       expect(body.data).toEqual([]);
-      expect(body.total).toBe(0);
+      expect(body.pagination.total).toBe(0);
     });
 
     it('returns 401 when X-API-Key header is missing', async () => {
@@ -284,8 +286,8 @@ describe('PublicApiController integration', () => {
       const res = await api('/api/v1/articles').expect(200);
       const body = res.body as ListResponse<PublicArticleSummary>;
 
-      expect(body.page).toBe(1);
-      expect(body.page_size).toBe(25);
+      expect(body.pagination.page).toBe(1);
+      expect(body.pagination.page_size).toBe(25);
     });
   });
 });
