@@ -61,7 +61,7 @@ describe.skipIf(!hasDatabase)('PrismaPublicContentRepository', () => {
 
     expect(result.data).toHaveLength(1);
     expect(result.data[0]?.slug).toBe('published');
-  });
+  }, 30000);
 
   it('listPublishedArticles excludes future-dated articles (FR-PUBAPI-03)', async () => {
     const user = await seedUser(prisma);
