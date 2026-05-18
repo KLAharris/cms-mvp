@@ -131,17 +131,17 @@ describe('MediaController integration', () => {
   }, 120000);
 
   afterAll(async () => {
-    await prisma?.contentMediaRef.deleteMany();
-    await prisma?.contentVersion.deleteMany();
-    await prisma?.content.deleteMany();
-    await prisma?.mediaItem.deleteMany();
-    await prisma?.auditEvent.deleteMany();
-    await prisma?.apiKey.deleteMany();
-    await prisma?.user.deleteMany({ where: { email: { in: [adminEmail, authorEmail] } } });
-    await app?.close();
+    await prisma.contentMediaRef.deleteMany();
+    await prisma.contentVersion.deleteMany();
+    await prisma.content.deleteMany();
+    await prisma.mediaItem.deleteMany();
+    await prisma.auditEvent.deleteMany();
+    await prisma.apiKey.deleteMany();
+    await prisma.user.deleteMany({ where: { email: { in: [adminEmail, authorEmail] } } });
+    await app.close();
     await cleanupRedis.quit();
-    await prisma?.$disconnect();
-    await postgres?.stop();
+    await prisma.$disconnect();
+    await postgres.stop();
   });
 
   beforeEach(async () => {
