@@ -8,5 +8,5 @@ export type UpdateUserCommand = {
 };
 
 export interface UpdateUserUseCase {
-  execute(cmd: UpdateUserCommand, actorId: string, actorRole: Role): Promise<UserDto>;
+  execute(cmd: UpdateUserCommand, actorId: string, actorRole: Role, actorIp?: string): Promise<UserDto>;
 }

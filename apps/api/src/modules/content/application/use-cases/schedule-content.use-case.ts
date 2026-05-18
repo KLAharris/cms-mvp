@@ -1,6 +1,7 @@
 import { Clock } from '@shared/ports/clock.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
 import { ContentId } from '../../domain/value-objects/content-id.vo';
@@ -17,6 +18,7 @@ export class ScheduleContentUseCase implements ScheduleContentPort {
     private readonly contents: ContentRepository,
     private readonly clock: Clock,
     private readonly tx: TransactionRunner,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(
@@ -38,6 +40,17 @@ export class ScheduleContentUseCase implements ScheduleContentPort {
         this.clock.now(),
       );
       await this.contents.save(content);
+      await this.audit?.save(
+        AuditEvent.create({
+          actorId: command.actorId,
+          actorIp: command.actorIp ?? 'unknown',
+          action: AuditAction.CONTENT_STATUS_CHANGED,
+          targetType: 'content',
+          targetId: content.id.value,
+          summary: { status: content.status, scheduledAt: command.scheduledAt.toISOString() },
+          timestamp: content.updatedAt,
+        }),
+      );
 
       return {
         contentId: content.id.value,

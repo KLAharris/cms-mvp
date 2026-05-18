@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { FakeAuditRepository } from '../../../audit/tests/doubles/fake-audit.repository';
 import { Content } from '../../domain/entities/content.entity';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
@@ -52,7 +53,12 @@ class FakeContents implements ContentRepository {
 
 function setup(contents = new FakeContents()) {
   const events = { publishAll: vi.fn(() => Promise.resolve()) };
-  return { events, useCase: new PublishContentUseCase(contents, { now: () => NOW }, events, { run: (fn) => fn() }) };
+  const audit = new FakeAuditRepository();
+  return {
+    audit,
+    events,
+    useCase: new PublishContentUseCase(contents, { now: () => NOW }, events, { run: (fn) => fn() }, audit),
+  };
 }
 
 describe('PublishContentUseCase', () => {
@@ -66,6 +72,7 @@ describe('PublishContentUseCase', () => {
     expect(result).toEqual({ contentId: ID, status: ContentStatus.Published, publishedAt: NOW });
     expect(contents.saved[0]?.publishedAt).toBe(NOW);
     expect(state.events.publishAll).toHaveBeenCalledWith([expect.objectContaining({ actorId: 'editor-1' })]);
+    expect(state.audit.events).toHaveLength(1);
   });
 
   it('throws ContentNotFoundError if not found', async () => {

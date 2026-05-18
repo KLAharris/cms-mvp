@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { DomainEventPublisher } from '../../../../../src/shared/ports/event-publisher.port';
+import { FakeAuditRepository } from '../../../../../src/modules/audit/tests/doubles/fake-audit.repository';
 import {
   MediaForbiddenError,
   MediaItem,
@@ -52,8 +53,9 @@ function dependencies(referenceCount: number) {
   const events: DomainEventPublisher = {
     publishAll: vi.fn<DomainEventPublisher['publishAll']>(),
   };
+  const audit = new FakeAuditRepository();
 
-  return { media, repo, refs, storage, events };
+  return { audit, media, repo, refs, storage, events };
 }
 
 describe('DeleteMediaUseCase', () => {
@@ -61,7 +63,7 @@ describe('DeleteMediaUseCase', () => {
     const deps = dependencies(2);
 
     await expect(
-      new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events).execute({
+      new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events, deps.audit).execute({
         mediaId,
         requestedBy: 'editor-1',
         requestedByRole: 'EDITOR',
@@ -72,7 +74,7 @@ describe('DeleteMediaUseCase', () => {
   it('allows admin force delete of referenced media', async () => {
     const deps = dependencies(2);
 
-    await new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events).execute({
+    await new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events, deps.audit).execute({
       mediaId,
       requestedBy: 'admin-1',
       requestedByRole: 'ADMIN',
@@ -80,13 +82,14 @@ describe('DeleteMediaUseCase', () => {
     });
 
     expect(deps.repo.delete).toHaveBeenCalledWith(deps.media.id);
+    expect(deps.audit.events).toHaveLength(1);
   });
 
   it('rejects editor force delete of referenced media', async () => {
     const deps = dependencies(2);
 
     await expect(
-      new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events).execute({
+      new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events, deps.audit).execute({
         mediaId,
         requestedBy: 'editor-1',
         requestedByRole: 'EDITOR',
@@ -99,7 +102,7 @@ describe('DeleteMediaUseCase', () => {
     const deps = dependencies(0);
 
     await expect(
-      new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events).execute({
+      new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events, deps.audit).execute({
         mediaId,
         requestedBy: 'author-2',
         requestedByRole: 'AUTHOR',
@@ -110,7 +113,7 @@ describe('DeleteMediaUseCase', () => {
   it('deletes storage, repository row, and publishes event on success', async () => {
     const deps = dependencies(0);
 
-    await new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events).execute({
+    await new DeleteMediaUseCase(deps.repo, deps.refs, deps.storage, deps.events, deps.audit).execute({
       mediaId,
       requestedBy: 'author-1',
       requestedByRole: 'AUTHOR',
@@ -121,5 +124,6 @@ describe('DeleteMediaUseCase', () => {
     expect(deps.events.publishAll).toHaveBeenCalledWith([
       expect.objectContaining({ name: 'media.deleted', mediaId }),
     ]);
+    expect(deps.audit.events).toHaveLength(1);
   });
 });

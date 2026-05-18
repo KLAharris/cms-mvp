@@ -3,6 +3,7 @@ export interface PresignUploadCommand {
   mimeType: string;
   sizeBytes: number;
   uploadedBy: string;
+  actorIp?: string;
 }
 
 export interface PresignUploadResult {

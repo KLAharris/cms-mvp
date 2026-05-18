@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { FakeAuditRepository } from '../../../audit/tests/doubles/fake-audit.repository';
 import { Content } from '../../domain/entities/content.entity';
 import { ContentVersion } from '../../domain/entities/content-version.entity';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
@@ -79,7 +80,9 @@ class FakeVersions implements ContentVersionRepository {
 
 function setup(contents = new FakeContents()) {
   const versions = new FakeVersions();
+  const audit = new FakeAuditRepository();
   return {
+    audit,
     contents,
     versions,
     useCase: new UpdateContentUseCase(
@@ -88,6 +91,7 @@ function setup(contents = new FakeContents()) {
       { generate: () => OTHER_ID },
       { now: () => NOW },
       { run: (fn) => fn() },
+      audit,
     ),
   };
 }
@@ -111,6 +115,7 @@ describe('UpdateContentUseCase', () => {
     expect(result.updatedAt).toBe(NOW);
     expect(state.contents.saved[0]?.title).toBe('Updated');
     expect(state.versions.saved[0]?.versionNo).toBe(2);
+    expect(state.audit.events).toHaveLength(1);
   });
 
   it('throws ContentNotFoundError if content is missing', async () => {

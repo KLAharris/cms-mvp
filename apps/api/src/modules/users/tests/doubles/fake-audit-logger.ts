@@ -3,6 +3,7 @@ import { AuditLogger } from '../../application/ports/out/audit-logger.port';
 export type AuditLogCall = {
   action: string;
   actorId: string;
+  actorIp?: string;
   targetId: string;
   occurredAt: Date;
 };

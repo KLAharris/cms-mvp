@@ -8,6 +8,7 @@ export type UnpublishContentCommand = {
   contentId: string;
   actorId: string;
   actorRole: string;
+  actorIp?: string;
 };
 
 export type UnpublishContentResult = {

@@ -2,6 +2,7 @@ import { Clock } from '@shared/ports/clock.port';
 import { DomainEventPublisher } from '@shared/ports/event-publisher.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
 import { PublishRequirementsCheckerService } from '../../domain/services/publish-requirements-checker.service';
@@ -20,6 +21,7 @@ export class PublishContentUseCase implements PublishContentPort {
     private readonly clock: Clock,
     private readonly events: DomainEventPublisher,
     private readonly tx: TransactionRunner,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(command: PublishContentCommand): Promise<PublishContentResult> {
@@ -37,6 +39,17 @@ export class PublishContentUseCase implements PublishContentPort {
       content.publish(command.actorId, this.clock.now());
       await this.contents.save(content);
       await this.events.publishAll(content.pullDomainEvents());
+      await this.audit?.save(
+        AuditEvent.create({
+          actorId: command.actorId,
+          actorIp: command.actorIp ?? 'unknown',
+          action: AuditAction.CONTENT_STATUS_CHANGED,
+          targetType: 'content',
+          targetId: content.id.value,
+          summary: { status: content.status },
+          timestamp: content.updatedAt,
+        }),
+      );
 
       const publishedAt = content.publishedAt;
       if (publishedAt === null) throw new Error('Invariant: publishedAt is null after publish');

@@ -7,5 +7,5 @@ export type InviteUserCommand = {
 };
 
 export interface InviteUserUseCase {
-  execute(cmd: InviteUserCommand, actorId: string, actorRole: Role): Promise<void>;
+  execute(cmd: InviteUserCommand, actorId: string, actorRole: Role, actorIp?: string): Promise<void>;
 }

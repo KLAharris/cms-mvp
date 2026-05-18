@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   Inject,
+  Ip,
   Param,
   ParseIntPipe,
   Patch,
@@ -107,7 +108,11 @@ export class ContentController {
 
   @Post()
   @HttpCode(201)
-  async create(@Body() body: unknown, @CurrentUser() user: AuthenticatedUser) {
+  async create(
+    @Body() body: unknown,
+    @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
+  ) {
     const parsed = CreateContentRequestSchema.safeParse(body);
     if (!parsed.success) {
       throw this.validationError();
@@ -117,6 +122,7 @@ export class ContentController {
       ...parsed.data,
       actorId: user.userId,
       actorRole: this.role(user),
+      actorIp,
     });
 
     return {
@@ -148,6 +154,7 @@ export class ContentController {
     @Param('id') id: string,
     @Body() body: unknown,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ) {
     const parsed = UpdateContentRequestSchema.safeParse(body);
     if (!parsed.success) {
@@ -158,6 +165,7 @@ export class ContentController {
       contentId: id,
       actorId: user.userId,
       actorRole: this.role(user),
+      actorIp,
       title: parsed.data.title,
       slug: parsed.data.slug,
       body: parsed.data.body,
@@ -180,11 +188,16 @@ export class ContentController {
 
   @Post(':id/submit')
   @HttpCode(200)
-  async submit(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+  async submit(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
+  ) {
     const result = await this.submitForReview.execute({
       contentId: id,
       actorId: user.userId,
       actorRole: this.role(user),
+      actorIp,
     });
 
     return { data: result };
@@ -192,11 +205,16 @@ export class ContentController {
 
   @Post(':id/publish')
   @HttpCode(200)
-  async publish(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+  async publish(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
+  ) {
     const result = await this.publishContent.execute({
       contentId: id,
       actorId: user.userId,
       actorRole: this.role(user),
+      actorIp,
     });
 
     return {
@@ -209,12 +227,17 @@ export class ContentController {
 
   @Post(':id/unpublish')
   @HttpCode(200)
-  async unpublish(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+  async unpublish(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
+  ) {
     return {
       data: await this.unpublishContent.execute({
         contentId: id,
         actorId: user.userId,
         actorRole: this.role(user),
+        actorIp,
       }),
     };
   }
@@ -225,6 +248,7 @@ export class ContentController {
     @Param('id') id: string,
     @Body() body: unknown,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ) {
     const parsed = ScheduleContentRequestSchema.safeParse(body);
     if (!parsed.success) {
@@ -235,6 +259,7 @@ export class ContentController {
       contentId: id,
       actorId: user.userId,
       actorRole: this.role(user),
+      actorIp,
       scheduledAt: parsed.data.scheduledAt,
     });
 
@@ -248,11 +273,16 @@ export class ContentController {
 
   @Delete(':id')
   @HttpCode(204)
-  async delete(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
+  ) {
     await this.deleteContent.execute({
       contentId: id,
       actorId: user.userId,
       actorRole: this.role(user),
+      actorIp,
     });
   }
 
@@ -279,6 +309,7 @@ export class ContentController {
     @Param('id') id: string,
     @Param('versionNo', ParseIntPipe) versionNo: number,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ) {
     return {
       data: await this.revertContent.execute({
@@ -286,6 +317,7 @@ export class ContentController {
         versionNo,
         actorId: user.userId,
         actorRole: this.role(user),
+        actorIp,
       }),
     };
   }

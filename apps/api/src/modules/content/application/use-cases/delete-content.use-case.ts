@@ -2,6 +2,7 @@ import { Clock } from '@shared/ports/clock.port';
 import { DomainEventPublisher } from '@shared/ports/event-publisher.port';
 import { TransactionRunner } from '@shared/ports/transaction-runner.port';
 
+import { AuditAction, AuditEvent, AuditPort } from '../../../audit/domain';
 import { ContentForbiddenError } from '../../domain/errors/content-forbidden.error';
 import { ContentNotFoundError } from '../../domain/errors/content-not-found.error';
 import { ContentId } from '../../domain/value-objects/content-id.vo';
@@ -19,6 +20,7 @@ export class DeleteContentUseCase implements DeleteContentPort {
     private readonly clock: Clock,
     private readonly events: DomainEventPublisher,
     private readonly tx: TransactionRunner,
+    private readonly audit?: AuditPort,
   ) {}
 
   async execute(command: DeleteContentCommand): Promise<DeleteContentResult> {
@@ -35,6 +37,17 @@ export class DeleteContentUseCase implements DeleteContentPort {
       content.softDelete(command.actorId, this.clock.now());
       await this.contents.save(content);
       await this.events.publishAll(content.pullDomainEvents());
+      await this.audit?.save(
+        AuditEvent.create({
+          actorId: command.actorId,
+          actorIp: command.actorIp ?? 'unknown',
+          action: AuditAction.CONTENT_DELETED,
+          targetType: 'content',
+          targetId: content.id.value,
+          summary: {},
+          timestamp: content.updatedAt,
+        }),
+      );
 
       const deletedAt = content.deletedAt;
       if (deletedAt === null) throw new Error('Invariant: deletedAt is null after softDelete');

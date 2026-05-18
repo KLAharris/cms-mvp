@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { FakeAuditRepository } from '../../../audit/tests/doubles/fake-audit.repository';
 import { Content } from '../../domain/entities/content.entity';
 import { ContentVersion } from '../../domain/entities/content-version.entity';
 import { ContentId } from '../../domain/value-objects/content-id.vo';
@@ -77,7 +78,9 @@ class FakeVersions implements ContentVersionRepository {
 
 function useCase(contents = new FakeContents(), versions = new FakeVersions()) {
   let index = 0;
+  const audit = new FakeAuditRepository();
   return {
+    audit,
     contents,
     versions,
     useCase: new CreateContentUseCase(
@@ -86,6 +89,7 @@ function useCase(contents = new FakeContents(), versions = new FakeVersions()) {
       { generate: () => IDS[index++] ?? IDS[0] },
       { now: () => NOW },
       { run: async (fn) => fn() },
+      audit,
     ),
   };
 }
@@ -113,6 +117,7 @@ describe('CreateContentUseCase', () => {
     expect(setup.contents.saved[0]?.category).toBe('News');
     expect(setup.versions.saved[0]?.versionNo).toBe(1);
     expect(setup.versions.saved[0]?.editorId).toBe('author-1');
+    expect(setup.audit.events).toHaveLength(1);
   });
 
   it('stores parentId when provided', async () => {

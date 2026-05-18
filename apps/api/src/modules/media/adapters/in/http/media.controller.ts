@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   Inject,
+  Ip,
   Param,
   Patch,
   Post,
@@ -69,6 +70,7 @@ export class MediaController {
   async presign(
     @Body() body: unknown,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ): Promise<PresignUploadResponse> {
     const parsed = PresignUploadRequestSchema.safeParse(body);
     if (!parsed.success) {
@@ -85,6 +87,7 @@ export class MediaController {
       mimeType: parsed.data.mimeType,
       sizeBytes: parsed.data.sizeBytes,
       uploadedBy: user.userId,
+      actorIp,
     });
 
     return {
@@ -167,11 +170,13 @@ export class MediaController {
     @Param('id') id: string,
     @Query('force') force: string | undefined,
     @CurrentUser() user: AuthenticatedUser,
+    @Ip() actorIp: string,
   ): Promise<void> {
     await this.deleteMedia.execute({
       mediaId: id,
       requestedBy: user.userId,
       requestedByRole: this.role(user),
+      actorIp,
       force: force === 'true',
     });
   }

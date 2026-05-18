@@ -9,6 +9,7 @@ export type RevertContentCommand = {
   versionNo: number;
   actorId: string;
   actorRole: string;
+  actorIp?: string;
 };
 
 export type RevertContentResult = {
