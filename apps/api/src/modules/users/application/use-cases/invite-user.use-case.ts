@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 
 import { InviteUserCommand, InviteUserUseCase } from '../ports/in/invite-user.port';
-import { NotificationService } from '../../../notification/application/notification.service';
+import { NotificationService } from '../../../notification';
 import { AuditLogger } from '../ports/out/audit-logger.port';
 import { Clock } from '../ports/out/clock.port';
 import { IdGenerator } from '../ports/out/id-generator.port';

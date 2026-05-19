@@ -5,6 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "build": "nest build",
+    "depcruise": "cd ../.. && depcruise --config .dependency-cruiser.cjs apps packages",
     "lint": "eslint . --max-warnings=0",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
