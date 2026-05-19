@@ -6,17 +6,14 @@ import { IEmailSenderPort } from '../../../domain/ports/email-sender.port';
 
 @Injectable()
 export class ResendEmailSenderAdapter implements IEmailSenderPort {
-  private readonly resend: Resend;
-  private readonly from: string;
+  private resend: Resend | undefined;
+  private fromAddress: string | undefined;
 
-  constructor(config: ConfigService) {
-    this.resend = new Resend(config.getOrThrow<string>('RESEND_API_KEY'));
-    this.from = config.getOrThrow<string>('RESEND_FROM_ADDRESS');
-  }
+  constructor(private readonly config: ConfigService) {}
 
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
-    const result = await this.resend.emails.send({
-      from: this.from,
+    const result = await this.getResend().emails.send({
+      from: this.getFromAddress(),
       to,
       subject: 'Reset your password',
       html: emailHtml({
@@ -31,8 +28,8 @@ export class ResendEmailSenderAdapter implements IEmailSenderPort {
   }
 
   async sendInviteEmail(to: string, inviteLink: string, role: string): Promise<void> {
-    const result = await this.resend.emails.send({
-      from: this.from,
+    const result = await this.getResend().emails.send({
+      from: this.getFromAddress(),
       to,
       subject: "You've been invited",
       html: emailHtml({
@@ -44,6 +41,16 @@ export class ResendEmailSenderAdapter implements IEmailSenderPort {
     });
 
     throwIfResendError(result.error);
+  }
+
+  private getResend(): Resend {
+    this.resend ??= new Resend(this.config.getOrThrow<string>('RESEND_API_KEY'));
+    return this.resend;
+  }
+
+  private getFromAddress(): string {
+    this.fromAddress ??= this.config.getOrThrow<string>('RESEND_FROM_ADDRESS');
+    return this.fromAddress;
   }
 }
 

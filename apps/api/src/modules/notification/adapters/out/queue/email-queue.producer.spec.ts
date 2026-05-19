@@ -10,6 +10,7 @@ type QueueAddCall = {
 };
 
 class FakeQueue {
+  readonly close = vi.fn((): Promise<void> => Promise.resolve());
   readonly add = vi.fn(
     (name: string, data: unknown, options: unknown): Promise<void> => {
       this.calls.push({ name, data, options });
@@ -48,5 +49,14 @@ describe('EmailQueueProducer', () => {
       },
     );
     expect(EMAIL_QUEUE_NAME).toBe('email.queue');
+  });
+
+  it('closes the BullMQ queue on module destroy', async () => {
+    const queue = new FakeQueue();
+    const producer = new EmailQueueProducer(queue);
+
+    await producer.onModuleDestroy();
+
+    expect(queue.close).toHaveBeenCalledOnce();
   });
 });

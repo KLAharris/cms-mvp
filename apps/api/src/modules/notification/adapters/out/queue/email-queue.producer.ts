@@ -1,8 +1,11 @@
+import { OnModuleDestroy } from '@nestjs/common';
+
 import { EmailQueueProducerPort } from '../../../application/ports/email-queue-producer.port';
 import { EmailJob } from '../../../domain/email-job';
 
 type EmailQueue = {
   add(name: string, data: EmailJob, options: EmailJobOptions): Promise<unknown>;
+  close(): Promise<unknown>;
 };
 
 type EmailJobOptions = {
@@ -12,7 +15,7 @@ type EmailJobOptions = {
   removeOnFail: number;
 };
 
-export class EmailQueueProducer implements EmailQueueProducerPort {
+export class EmailQueueProducer implements EmailQueueProducerPort, OnModuleDestroy {
   constructor(private readonly queue: EmailQueue) {}
 
   async enqueue(job: EmailJob): Promise<void> {
@@ -22,5 +25,9 @@ export class EmailQueueProducer implements EmailQueueProducerPort {
       removeOnComplete: 100,
       removeOnFail: 200,
     });
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.queue.close();
   }
 }

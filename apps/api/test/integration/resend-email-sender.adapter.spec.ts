@@ -90,4 +90,18 @@ describe('ResendEmailSenderAdapter', () => {
       ),
     ).rejects.toThrow('resend unavailable');
   });
+
+  it('does not require Resend config until an email is sent', async () => {
+    const missingConfig = {
+      getOrThrow: (key: string): string => {
+        throw new Error(`Missing config key: ${key}`);
+      },
+    } as ConfigService;
+
+    const adapter = new ResendEmailSenderAdapter(missingConfig);
+
+    await expect(
+      adapter.sendPasswordResetEmail('user@example.com', 'https://example.com/reset'),
+    ).rejects.toThrow('Missing config key: RESEND_API_KEY');
+  });
 });

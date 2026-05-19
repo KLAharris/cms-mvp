@@ -55,7 +55,8 @@ import {
       ): NotificationService =>
         new NotificationService(
           producer,
-          config.getOrThrow<string>('FRONTEND_BASE_URL'),
+          config.get<string>('FRONTEND_BASE_URL') ??
+            config.getOrThrow<string>('PUBLIC_URL'),
         ),
     },
     {
