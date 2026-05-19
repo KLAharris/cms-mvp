@@ -125,6 +125,12 @@ describe('PublicApiController integration', () => {
   });
 
   afterAll(async () => {
+    // Close the app before other teardown so BullMQ/ioredis connections finish
+    // draining. app.close() in afterEach starts the close but may return before
+    // ioredis fully settles; calling it again here is a no-op on the NestJS side
+    // but gives the runtime a chance to flush pending close callbacks.
+    await app.close().catch(() => undefined);
+    await new Promise<void>((resolve) => setTimeout(resolve, 200));
     await cleanDatabase(prisma);
     await prisma.$disconnect();
     await postgres.stop();
