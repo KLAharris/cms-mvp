@@ -5,6 +5,7 @@ import { createHash } from 'crypto';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient, Role, UserStatus } from '@prisma/client';
+import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import Redis from 'ioredis';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -14,13 +15,7 @@ import { AppModule } from '../../app.module';
 import { ValidationPipe } from '../../shared/http/validation.pipe';
 
 const apiRoot = resolve(__dirname, '../../..');
-
-const cleanupRedis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
-  enableOfflineQueue: false,
-  maxRetriesPerRequest: 1,
-  retryStrategy: () => null,
-});
-cleanupRedis.on('error', () => undefined);
+const originalDatabaseUrl = process.env.DATABASE_URL;
 
 const adminEmail = 'admin@cms.local';
 const adminPassword = 'adminpassword123';
@@ -29,31 +24,42 @@ const editorPassword = 'editorpassword123';
 
 describe('User management integration', () => {
   let app: INestApplication;
+  let postgres: StartedPostgreSqlContainer;
   let prisma: PrismaClient;
+  let cleanupRedis: Redis;
 
   beforeAll(async () => {
     loadEnv({ path: resolve(apiRoot, '.env') });
 
-    const testDatabaseUrl = process.env.TEST_DATABASE_URL;
+    postgres = await new PostgreSqlContainer('postgres:16-alpine')
+      .withStartupTimeout(120000)
+      .start();
+    const databaseUrl = postgres.getConnectionUri();
 
-    if (!testDatabaseUrl) {
-      throw new Error('TEST_DATABASE_URL is required for users integration tests');
-    }
-
-    process.env.DATABASE_URL = testDatabaseUrl;
+    process.env.DATABASE_URL = databaseUrl;
     process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
     process.env.APP_BASE_URL = process.env.APP_BASE_URL ?? 'http://localhost:3000';
+    cleanupRedis = new Redis(process.env.REDIS_URL, {
+      enableOfflineQueue: false,
+      lazyConnect: true,
+      maxRetriesPerRequest: 1,
+      retryStrategy: () => null,
+    });
+    cleanupRedis.on('error', () => undefined);
+    await cleanupRedis.connect();
 
     execFileSync('pnpm', ['exec', 'prisma', 'migrate', 'deploy'], {
       cwd: apiRoot,
       env: {
         ...process.env,
-        DATABASE_URL: testDatabaseUrl,
+        DATABASE_URL: databaseUrl,
       },
       stdio: 'pipe',
     });
 
-    prisma = new PrismaClient();
+    prisma = new PrismaClient({
+      datasources: { db: { url: databaseUrl } },
+    });
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -62,7 +68,7 @@ describe('User management integration', () => {
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
-  });
+  }, 120000);
 
   beforeEach(async () => {
     await cleanupRedis.flushdb();
@@ -83,8 +89,10 @@ describe('User management integration', () => {
 
   afterAll(async () => {
     await app.close();
-    await cleanupRedis.quit();
+    cleanupRedis.disconnect();
     await prisma.$disconnect();
+    await postgres.stop();
+    restoreDatabaseUrl();
   });
 
   it('GET /api/admin/users: Admin returns 200 with standard list envelope', async () => {
@@ -354,3 +362,12 @@ describe('User management integration', () => {
     return request(app.getHttpServer() as Parameters<typeof request>[0]);
   }
 });
+
+function restoreDatabaseUrl(): void {
+  if (originalDatabaseUrl === undefined) {
+    delete process.env.DATABASE_URL;
+    return;
+  }
+
+  process.env.DATABASE_URL = originalDatabaseUrl;
+}
