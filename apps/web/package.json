@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit && vite build",
+    "dev": "vite",
     "e2e": "playwright test",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
