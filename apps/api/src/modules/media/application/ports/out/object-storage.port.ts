@@ -22,5 +22,7 @@ export interface ObjectStorage {
     ttlSeconds: number;
   }): Promise<SignedDownloadUrl>;
 
+  getObjectBytes(storageKey: string): Promise<Buffer>;
+
   deleteObject(storageKey: string): Promise<void>;
 }

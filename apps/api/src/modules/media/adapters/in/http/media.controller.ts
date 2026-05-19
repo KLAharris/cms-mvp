@@ -24,7 +24,6 @@ import { MediaItemDto } from '../../../application/dto';
 import {
   DeleteMediaUseCase,
   FinalizeMediaUseCase,
-  GetMediaUseCase,
   ListMediaUseCase,
   PresignUploadUseCase,
   UpdateMediaMetadataUseCase,
@@ -58,8 +57,6 @@ export class MediaController {
     private readonly updateMediaMetadata: UpdateMediaMetadataUseCase,
     @Inject('DELETE_MEDIA_USE_CASE')
     private readonly deleteMedia: DeleteMediaUseCase,
-    @Inject('GET_MEDIA_USE_CASE')
-    private readonly getMedia: GetMediaUseCase,
     @Inject(OBJECT_STORAGE)
     private readonly storage: ObjectStorage,
   ) {}
@@ -179,12 +176,6 @@ export class MediaController {
       actorIp,
       force: force === 'true',
     });
-  }
-
-  @Get('api/v1/media/:id')
-  async getPublic(@Param('id') id: string): Promise<MediaItemResponse> {
-    const result = await this.getMedia.execute({ mediaId: id });
-    return this.toResponse(result);
   }
 
   private role(user: AuthenticatedUser): 'ADMIN' | 'EDITOR' | 'AUTHOR' {

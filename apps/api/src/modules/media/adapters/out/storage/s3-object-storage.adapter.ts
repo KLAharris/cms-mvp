@@ -5,6 +5,7 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import type { Readable } from 'stream';
 
 import {
   ObjectStorage,
@@ -58,6 +59,23 @@ export class S3ObjectStorageAdapter implements ObjectStorage {
       url,
       expiresAt: new Date(Date.now() + params.ttlSeconds * 1000),
     };
+  }
+
+  async getObjectBytes(storageKey: string): Promise<Buffer> {
+    const response = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: storageKey,
+      }),
+    );
+    const stream = response.Body as Readable;
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array));
+    }
+
+    return Buffer.concat(chunks);
   }
 
   async deleteObject(storageKey: string): Promise<void> {

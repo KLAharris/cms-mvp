@@ -34,6 +34,7 @@ function storage(): ObjectStorage {
       expiresAt: new Date('2026-01-01T00:05:00.000Z'),
     }),
     getSignedUrl: vi.fn<ObjectStorage['getSignedUrl']>(),
+    getObjectBytes: vi.fn<ObjectStorage['getObjectBytes']>(),
     deleteObject: vi.fn<ObjectStorage['deleteObject']>(),
   };
 }

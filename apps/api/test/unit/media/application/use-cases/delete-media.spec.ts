@@ -48,6 +48,7 @@ function dependencies(referenceCount: number) {
   const storage: ObjectStorage = {
     presignUpload: vi.fn<ObjectStorage['presignUpload']>(),
     getSignedUrl: vi.fn<ObjectStorage['getSignedUrl']>(),
+    getObjectBytes: vi.fn<ObjectStorage['getObjectBytes']>(),
     deleteObject: vi.fn<ObjectStorage['deleteObject']>(),
   };
   const events: DomainEventPublisher = {

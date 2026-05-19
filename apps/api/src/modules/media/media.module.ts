@@ -23,7 +23,10 @@ import {
   ContentMediaRefAdapter,
   PrismaMediaRepository,
 } from './adapters/out/persistence';
-import { SharpImageProcessorAdapter } from './adapters/out/processing';
+import {
+  SharpImageProcessorAdapter,
+  SharpMimeValidator,
+} from './adapters/out/processing';
 import { S3ObjectStorageAdapter } from './adapters/out/storage';
 import {
   DeleteMediaUseCase,
@@ -40,12 +43,14 @@ import {
   ImageProcessor,
   MediaReferenceChecker,
   MediaRepository,
+  MimeValidator,
   ObjectStorage,
 } from './application/ports/out';
 import {
   IMAGE_PROCESSOR,
   MEDIA_REFERENCE_CHECKER,
   MEDIA_REPOSITORY,
+  MIME_VALIDATOR,
   OBJECT_STORAGE,
 } from './media-tokens';
 
@@ -53,6 +58,7 @@ export {
   IMAGE_PROCESSOR,
   MEDIA_REFERENCE_CHECKER,
   MEDIA_REPOSITORY,
+  MIME_VALIDATOR,
   OBJECT_STORAGE,
 } from './media-tokens';
 
@@ -126,6 +132,10 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
         ),
     },
     {
+      provide: MIME_VALIDATOR,
+      useClass: SharpMimeValidator,
+    },
+    {
       provide: MAX_UPLOAD_BYTES,
       inject: [ConfigService],
       useFactory: (config: ConfigService): number =>
@@ -181,11 +191,14 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
     },
     {
       provide: 'FINALIZE_MEDIA_USE_CASE',
-      inject: [MEDIA_REPOSITORY, JOB_ENQUEUER],
+      inject: [MEDIA_REPOSITORY, JOB_ENQUEUER, OBJECT_STORAGE, MIME_VALIDATOR],
       useFactory: (
         media: MediaRepository,
         jobs: JobEnqueuer,
-      ): FinalizeMediaUseCase => new FinalizeMediaUseCase(media, jobs),
+        storage: ObjectStorage,
+        mimeValidator: MimeValidator,
+      ): FinalizeMediaUseCase =>
+        new FinalizeMediaUseCase(media, jobs, storage, mimeValidator),
     },
     {
       provide: 'GENERATE_MEDIA_VARIANTS_USE_CASE',
@@ -237,6 +250,7 @@ function redisConnectionFromUrl(redisUrl: string): { host: string; port: number 
   exports: [
     MEDIA_REPOSITORY,
     MEDIA_REFERENCE_CHECKER,
+    MIME_VALIDATOR,
     OBJECT_STORAGE,
     'LIST_MEDIA_USE_CASE',
     'UPDATE_MEDIA_METADATA_USE_CASE',

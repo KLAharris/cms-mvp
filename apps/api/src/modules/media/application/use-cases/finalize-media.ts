@@ -9,12 +9,14 @@ import {
   FinalizeMediaCommand,
   FinalizeMediaUseCase as FinalizeMediaPort,
 } from '../ports/in';
-import { MediaRepository } from '../ports/out';
+import { MediaRepository, MimeValidator, ObjectStorage } from '../ports/out';
 
 export class FinalizeMediaUseCase implements FinalizeMediaPort {
   constructor(
     private readonly media: MediaRepository,
     private readonly jobs: JobEnqueuer,
+    private readonly storage: ObjectStorage,
+    private readonly mimeValidator: MimeValidator,
   ) {}
 
   async execute(command: FinalizeMediaCommand): Promise<void> {
@@ -32,6 +34,13 @@ export class FinalizeMediaUseCase implements FinalizeMediaPort {
     ) {
       throw new MediaForbiddenError('Authors can only finalize their own uploads');
     }
+
+    const bytes = await this.storage.getObjectBytes(media.storageKey.value);
+    this.mimeValidator.validateMimeConsistency({
+      filename: media.filename,
+      declaredMimeType: media.mimeType,
+      bytes,
+    });
 
     if (media.mimeType === AllowedMimeType.APPLICATION_PDF) {
       media.markReady(new Map([[MediaVariant.ORIGINAL, media.storageKey]]));

@@ -54,6 +54,7 @@ describe('MediaController integration', () => {
       url: 'https://mock-s3.test/file.jpg',
       expiresAt: new Date(),
     }),
+    getObjectBytes: vi.fn().mockResolvedValue(pngBytes()),
     deleteObject: vi.fn().mockResolvedValue(undefined),
   };
 
@@ -151,6 +152,7 @@ describe('MediaController integration', () => {
   });
 
   beforeEach(async () => {
+    mockStorage.getObjectBytes.mockResolvedValue(pngBytes());
     await cleanupRedis.flushdb();
     await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
@@ -232,6 +234,20 @@ describe('MediaController integration', () => {
         .expect(202);
     });
 
+    it('returns 422 when uploaded magic bytes do not match the declared type', async () => {
+      const mediaId = await presignAndGetMediaId(adminToken, {
+        filename: 'photo.png',
+        mimeType: 'image/png',
+      });
+      mockStorage.getObjectBytes.mockResolvedValueOnce(jpegBytes());
+
+      await httpRequest()
+        .post('/api/admin/media')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ mediaId })
+        .expect(422);
+    });
+
     it('returns 404 for unknown mediaId', async () => {
       await httpRequest()
         .post('/api/admin/media')
@@ -246,6 +262,7 @@ describe('MediaController integration', () => {
         filename: 'doc.pdf',
         mimeType: 'application/pdf',
       });
+      mockStorage.getObjectBytes.mockResolvedValue(pdfBytes());
 
       await httpRequest()
         .post('/api/admin/media')
@@ -383,29 +400,15 @@ describe('MediaController integration', () => {
     });
   });
 
-  // ── GET /api/v1/media/:id (public) ────────────────────────────────────────
+  // ── GET /api/v1/media/:id is owned by PublicApiController ─────────────────
 
   describe('GET /api/v1/media/:id', () => {
-    it('returns 200 with media item and variants', async () => {
+    it('does not expose the media controller public bypass route', async () => {
       const mediaId = await presignAndGetMediaId(adminToken);
 
-      const response = await httpRequest()
-        .get(`/api/v1/media/${mediaId}`)
-        .expect(200);
-
-      expect(response.body).toMatchObject({
-        id: mediaId,
-        filename: 'photo.png',
-        mimeType: 'image/png',
-        status: 'pending',
-        variants: {},
-      });
-    });
-
-    it('returns 404 for unknown id', async () => {
       await httpRequest()
-        .get('/api/v1/media/00000000-0000-0000-0000-000000000000')
-        .expect(404);
+        .get(`/api/v1/media/${mediaId}`)
+        .expect(401);
     });
   });
 
@@ -456,4 +459,19 @@ function restoreDatabaseUrl(): void {
   }
 
   process.env.DATABASE_URL = originalDatabaseUrl;
+}
+
+function pngBytes(): Buffer {
+  return Buffer.from([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    0x00, 0x00, 0x00, 0x0d,
+  ]);
+}
+
+function jpegBytes(): Buffer {
+  return Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+}
+
+function pdfBytes(): Buffer {
+  return Buffer.from('%PDF-1.7\n', 'ascii');
 }
