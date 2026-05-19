@@ -64,10 +64,11 @@ describe('POST /api/admin/auth/refresh', () => {
 
   beforeEach(async () => {
     await cleanupRedis.flushdb();
+    await prisma.contentVersion.deleteMany();
+    await prisma.passwordResetToken.deleteMany();
     await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
-    await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany();
@@ -113,8 +114,14 @@ describe('POST /api/admin/auth/refresh', () => {
 });
 
 async function seedAuthor(prisma: PrismaClient): Promise<void> {
-  await prisma.user.create({
-    data: {
+  await prisma.user.upsert({
+    where: { email: 'author@cms.local' },
+    update: {
+      name: 'Test Author',
+      passwordHash: await argon2.hash('password123'),
+      role: Role.AUTHOR,
+    },
+    create: {
       email: 'author@cms.local',
       name: 'Test Author',
       passwordHash: await argon2.hash('password123'),
