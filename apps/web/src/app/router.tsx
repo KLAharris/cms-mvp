@@ -8,6 +8,11 @@ import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { ContentListPage } from '../features/content/pages/ContentListPage';
 import { ContentEditorPage } from '../features/content/pages/ContentEditorPage';
 import { VersionHistoryPage } from '../features/content/pages/VersionHistoryPage';
+import { MediaLibraryPage } from '../features/media/pages/MediaLibraryPage';
+import { UsersPage } from '../features/users/pages/UsersPage';
+import { AuditLogPage } from '../features/audit/pages/AuditLogPage';
+import { ApiKeysPage } from '../features/api-keys/pages/ApiKeysPage';
+import { ProfilePage } from '../features/profile/pages/ProfilePage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 
@@ -108,6 +113,56 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <AppShell>
           <VersionHistoryPage type="page" />
+        </AppShell>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/media',
+    element: (
+      <ProtectedRoute>
+        <AppShell>
+          <MediaLibraryPage />
+        </AppShell>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/users',
+    element: (
+      <ProtectedRoute>
+        <AppShell>
+          <UsersPage />
+        </AppShell>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/audit',
+    element: (
+      <ProtectedRoute>
+        <AppShell>
+          <AuditLogPage />
+        </AppShell>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/api-keys',
+    element: (
+      <ProtectedRoute>
+        <AppShell>
+          <ApiKeysPage />
+        </AppShell>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/profile',
+    element: (
+      <ProtectedRoute>
+        <AppShell>
+          <ProfilePage />
         </AppShell>
       </ProtectedRoute>
     ),

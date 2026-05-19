@@ -41,6 +41,11 @@ export function TopAppBar({ title = 'CMS' }: TopAppBarProps): ReactElement {
     navigate('/login');
   };
 
+  const handleProfile = () => {
+    handleCloseUserMenu();
+    navigate('/profile');
+  };
+
   const displayName = user?.name ?? user?.email ?? '';
   const initials = displayName.charAt(0).toUpperCase();
 
@@ -80,6 +85,7 @@ export function TopAppBar({ title = 'CMS' }: TopAppBarProps): ReactElement {
           <MenuItem disabled>
             <Typography variant="bodyMedium">{displayName}</Typography>
           </MenuItem>
+          <MenuItem onClick={handleProfile}>Profile &amp; Settings</MenuItem>
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
 

@@ -16,7 +16,8 @@ import { useQuery } from '@tanstack/react-query';
 import { type ReactElement } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
-import { getAuditEvents } from '../../audit/api/audit.api';
+import { listAuditEvents } from '../../audit/api/audit.api';
+import type { AuditEvent } from '../../audit/types/audit.types';
 import { listContent } from '../../content/api/content.api';
 import { useAuthStore } from '../../auth/store/auth.store';
 import { StatCard } from '../components/StatCard';
@@ -59,7 +60,7 @@ export function DashboardPage(): ReactElement {
   // Recent activity
   const { data: auditData, isLoading: auditLoading } = useQuery({
     queryKey: ['audit-recent'],
-    queryFn: () => getAuditEvents({ pageSize: 10 }),
+    queryFn: () => listAuditEvents({ pageSize: 10 }),
   });
 
   return (
@@ -130,7 +131,7 @@ export function DashboardPage(): ReactElement {
                 </List>
               ) : (
                 <List dense>
-                  {auditData?.items.map((event) => (
+                  {auditData?.items.map((event: AuditEvent) => (
                     <ListItem key={event.id} alignItems="flex-start">
                       <ListItemIcon sx={{ minWidth: 36 }}>
                         <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
