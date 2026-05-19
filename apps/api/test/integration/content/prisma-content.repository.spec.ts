@@ -48,15 +48,24 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
   });
 
   beforeEach(async () => {
+    await prisma.contentVersion.deleteMany();
+    await prisma.passwordResetToken.deleteMany();
     await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
-    await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany();
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { id: 'author-1' },
+      update: {
+        email: 'author1@cms.local',
+        name: 'Author One',
+        passwordHash: 'hash',
+        role: Role.AUTHOR,
+        status: UserStatus.ACTIVE,
+      },
+      create: {
         id: 'author-1',
         email: 'author1@cms.local',
         name: 'Author One',
@@ -65,8 +74,16 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
         status: UserStatus.ACTIVE,
       },
     });
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { id: 'author-2' },
+      update: {
+        email: 'author2@cms.local',
+        name: 'Author Two',
+        passwordHash: 'hash',
+        role: Role.AUTHOR,
+        status: UserStatus.ACTIVE,
+      },
+      create: {
         id: 'author-2',
         email: 'author2@cms.local',
         name: 'Author Two',

@@ -34,32 +34,49 @@ describe.skipIf(!hasDatabase)('PrismaMediaRepository', () => {
   });
 
   beforeEach(async () => {
+    await prisma.contentVersion.deleteMany();
+    await prisma.passwordResetToken.deleteMany();
     await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
-    await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany();
-    await prisma.user.createMany({
-      data: [
-        {
-          id: 'media-user-1',
-          email: 'media1@cms.local',
-          name: 'Media User One',
-          passwordHash: 'hash',
-          role: Role.AUTHOR,
-          status: UserStatus.ACTIVE,
-        },
-        {
-          id: 'media-user-2',
-          email: 'media2@cms.local',
-          name: 'Media User Two',
-          passwordHash: 'hash',
-          role: Role.AUTHOR,
-          status: UserStatus.ACTIVE,
-        },
-      ],
+    await prisma.user.upsert({
+      where: { id: 'media-user-1' },
+      update: {
+        email: 'media1@cms.local',
+        name: 'Media User One',
+        passwordHash: 'hash',
+        role: Role.AUTHOR,
+        status: UserStatus.ACTIVE,
+      },
+      create: {
+        id: 'media-user-1',
+        email: 'media1@cms.local',
+        name: 'Media User One',
+        passwordHash: 'hash',
+        role: Role.AUTHOR,
+        status: UserStatus.ACTIVE,
+      },
+    });
+    await prisma.user.upsert({
+      where: { id: 'media-user-2' },
+      update: {
+        email: 'media2@cms.local',
+        name: 'Media User Two',
+        passwordHash: 'hash',
+        role: Role.AUTHOR,
+        status: UserStatus.ACTIVE,
+      },
+      create: {
+        id: 'media-user-2',
+        email: 'media2@cms.local',
+        name: 'Media User Two',
+        passwordHash: 'hash',
+        role: Role.AUTHOR,
+        status: UserStatus.ACTIVE,
+      },
     });
   });
 

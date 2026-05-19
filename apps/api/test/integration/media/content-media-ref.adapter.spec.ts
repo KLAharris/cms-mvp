@@ -34,15 +34,24 @@ describe.skipIf(!hasDatabase)('ContentMediaRefAdapter', () => {
   });
 
   beforeEach(async () => {
+    await prisma.contentVersion.deleteMany();
+    await prisma.passwordResetToken.deleteMany();
     await prisma.auditEvent.deleteMany();
     await prisma.apiKey.deleteMany();
     await prisma.contentMediaRef.deleteMany();
-    await prisma.contentVersion.deleteMany();
     await prisma.content.deleteMany();
     await prisma.mediaItem.deleteMany();
     await prisma.user.deleteMany();
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { id: 'media-ref-author' },
+      update: {
+        email: 'media-ref-author@cms.local',
+        name: 'Author',
+        passwordHash: 'hash',
+        role: Role.AUTHOR,
+        status: UserStatus.ACTIVE,
+      },
+      create: {
         id: 'media-ref-author',
         email: 'media-ref-author@cms.local',
         name: 'Author',
