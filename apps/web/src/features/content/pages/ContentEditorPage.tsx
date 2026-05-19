@@ -28,6 +28,8 @@ import { StatusChip } from '../components/StatusChip';
 import { useAuthStore } from '../../auth/store/auth.store';
 import type { ContentType } from '../types/content.types';
 import { updateContent } from '../api/content.api';
+import { MediaPickerDialog } from '../../../shared/components/MediaPickerDialog';
+import type { MediaItem } from '../../media/types/media.types';
 
 interface ContentEditorPageProps {
   type: ContentType;
@@ -225,6 +227,10 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
   const [scheduleDate, setScheduleDate] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [socialImagePickerOpen, setSocialImagePickerOpen] = useState(false);
+  const [featuredImagePickerOpen, setFeaturedImagePickerOpen] = useState(false);
+  const [socialImage, setSocialImage] = useState<MediaItem | null>(null);
+  const [featuredImage, setFeaturedImage] = useState<MediaItem | null>(null);
 
   useEffect(() => {
     if (content?.tags) {
@@ -489,13 +495,64 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
               </Typography>
             </Box>
 
-            {/* Social image placeholder */}
-            <Button variant="outlined" disabled fullWidth sx={{ mb: 1 }}>
-              Select social image
-            </Button>
-            <Button variant="outlined" disabled fullWidth>
-              Select featured image
-            </Button>
+            {/* Social image */}
+            {socialImage ? (
+              <Box sx={{ mb: 1 }}>
+                <Box
+                  component="img"
+                  src={socialImage.url}
+                  alt={socialImage.altText ?? socialImage.filename}
+                  sx={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 1, mb: 0.5 }}
+                />
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  onClick={() => { setSocialImagePickerOpen(true); }}
+                >
+                  Change social image
+                </Button>
+              </Box>
+            ) : (
+              <Button
+                variant="outlined"
+                fullWidth
+                sx={{ mb: 1 }}
+                onClick={() => { setSocialImagePickerOpen(true); }}
+                aria-label="Select social image"
+              >
+                Select social image
+              </Button>
+            )}
+
+            {/* Featured image */}
+            {featuredImage ? (
+              <Box>
+                <Box
+                  component="img"
+                  src={featuredImage.url}
+                  alt={featuredImage.altText ?? featuredImage.filename}
+                  sx={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 1, mb: 0.5 }}
+                />
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  onClick={() => { setFeaturedImagePickerOpen(true); }}
+                >
+                  Change featured image
+                </Button>
+              </Box>
+            ) : (
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => { setFeaturedImagePickerOpen(true); }}
+                aria-label="Select featured image"
+              >
+                Select featured image
+              </Button>
+            )}
           </Paper>
 
           {/* Tags */}
@@ -562,6 +619,22 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
           </Paper>
         </Box>
       </Box>
+
+      {/* Media pickers */}
+      <MediaPickerDialog
+        open={socialImagePickerOpen}
+        onClose={() => { setSocialImagePickerOpen(false); }}
+        onSelect={(item) => {
+          setSocialImage(item);
+        }}
+      />
+      <MediaPickerDialog
+        open={featuredImagePickerOpen}
+        onClose={() => { setFeaturedImagePickerOpen(false); }}
+        onSelect={(item) => {
+          setFeaturedImage(item);
+        }}
+      />
 
       {/* Schedule dialog */}
       <Dialog open={scheduleDialogOpen} onClose={() => { setScheduleDialogOpen(false); }}>
