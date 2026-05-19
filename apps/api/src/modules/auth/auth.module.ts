@@ -4,6 +4,7 @@ import Redis from 'ioredis';
 
 import { PrismaModule } from '../../shared/prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
+import { NotificationModule } from '../notification';
 import { AuditLoggerAdapter } from '../audit/adapters/out/persistence/audit-logger.adapter';
 import { PrismaAuditRepository } from '../audit/adapters/out/persistence/prisma-audit.repository';
 import { AuditPort } from '../audit';
@@ -29,7 +30,12 @@ import { UserRepository } from './application/ports/out/user-repository.port';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, forwardRef(() => UsersModule)],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    NotificationModule,
+    PrismaModule,
+    forwardRef(() => UsersModule),
+  ],
   controllers: [AuthController],
   providers: [
     {

@@ -1,9 +1,9 @@
 import { createHash } from 'crypto';
 
 import { InviteUserCommand, InviteUserUseCase } from '../ports/in/invite-user.port';
+import { NotificationService } from '../../../notification/application/notification.service';
 import { AuditLogger } from '../ports/out/audit-logger.port';
 import { Clock } from '../ports/out/clock.port';
-import { EmailSender } from '../ports/out/email-sender.port';
 import { IdGenerator } from '../ports/out/id-generator.port';
 import { PasswordHasher } from '../ports/out/password-hasher.port';
 import { UserRepository } from '../ports/out/user-repository.port';
@@ -13,16 +13,16 @@ import { Role } from '../../domain/role';
 import { User } from '../../domain/user';
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+type InviteNotificationService = Pick<NotificationService, 'sendInviteEmail'>;
 
 export class InviteUser implements InviteUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,
-    private readonly emailSender: EmailSender,
+    private readonly notifications: InviteNotificationService,
     private readonly clock: Clock,
     private readonly idGenerator: IdGenerator,
     private readonly auditLogger: AuditLogger,
-    private readonly baseUrl: string,
   ) {}
 
   async execute(
@@ -58,12 +58,7 @@ export class InviteUser implements InviteUserUseCase {
     );
 
     await this.userRepository.save(user);
-    await this.emailSender.sendInvite({
-      to: email.value,
-      name: cmd.name,
-      inviteUrl: `${this.baseUrl}/accept-invite?token=${rawToken}`,
-      expiresAt,
-    });
+    await this.notifications.sendInviteEmail(email.value, rawToken, cmd.role);
     await this.auditLogger.log({
       action: 'user.invite',
       actorId,

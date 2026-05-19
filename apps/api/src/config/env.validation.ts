@@ -5,6 +5,7 @@ const envSchema = z
     EMAIL_PROVIDER: z.enum(['ses', 'smtp', 'resend', 'console']).default('console'),
     EMAIL_FROM: z.string().email().default('no-reply@cms.example.com'),
     EMAIL_FROM_NAME: z.string().default('CMS'),
+    FRONTEND_BASE_URL: z.string().url().optional(),
     SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.coerce.number().int().positive().optional(),
     SMTP_USER: z.string().optional(),
@@ -14,6 +15,7 @@ const envSchema = z
       .transform((value) => value === 'true')
       .optional(),
     RESEND_API_KEY: z.string().optional(),
+    RESEND_FROM_ADDRESS: z.string().optional(),
     PUBLIC_URL: z.string().url(),
     OBJECT_STORAGE_ENDPOINT: z.string().url(),
     OBJECT_STORAGE_REGION: z.string().min(1),
@@ -49,6 +51,14 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         message: 'RESEND_API_KEY is required when EMAIL_PROVIDER=resend',
         path: ['RESEND_API_KEY'],
+      });
+    }
+
+    if (data.EMAIL_PROVIDER === 'resend' && !data.RESEND_FROM_ADDRESS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'RESEND_FROM_ADDRESS is required when EMAIL_PROVIDER=resend',
+        path: ['RESEND_FROM_ADDRESS'],
       });
     }
   });

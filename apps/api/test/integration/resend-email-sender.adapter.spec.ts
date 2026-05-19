@@ -1,77 +1,93 @@
 import { ConfigService } from '@nestjs/config';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ResendEmailSenderAdapter } from '../../src/modules/users/adapters/out/email/resend-email-sender.adapter';
+import { ResendEmailSenderAdapter } from '../../src/modules/notification/adapters/out/email/resend-email-sender.adapter';
 
-const hasKey = !!process.env.RESEND_API_KEY;
+const send = vi.fn();
 
-describe.skipIf(!hasKey)('ResendEmailSenderAdapter (live Resend API)', () => {
-  let adapter: ResendEmailSenderAdapter;
+vi.mock('resend', () => ({
+  Resend: vi.fn().mockImplementation(() => ({
+    emails: { send },
+  })),
+}));
 
-  beforeAll(() => {
-    const apiKey = process.env.RESEND_API_KEY;
+function config(): ConfigService {
+  return {
+    getOrThrow: (key: string): string => {
+      const values: Record<string, string> = {
+        RESEND_API_KEY: 're_test_key',
+        RESEND_FROM_ADDRESS: 'CMS <no-reply@example.com>',
+      };
+      const value = values[key];
 
-    if (!apiKey) {
-      throw new Error('RESEND_API_KEY is required for live Resend adapter tests');
-    }
+      if (value === undefined) {
+        throw new Error(`Missing test config key: ${key}`);
+      }
 
-    const config = {
-      getOrThrow: (key: string) => {
-        const map: Record<string, string> = {
-          RESEND_API_KEY: apiKey,
-          EMAIL_FROM: process.env.EMAIL_FROM ?? 'no-reply@cms.example.com',
-          EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME ?? 'CMS',
-          PUBLIC_URL: process.env.PUBLIC_URL ?? 'http://localhost:5173',
-        };
+      return value;
+    },
+  } as ConfigService;
+}
 
-        if (!map[key]) {
-          throw new Error(`Missing config key in test stub: ${key}`);
-        }
-
-        return map[key];
-      },
-    } as unknown as ConfigService;
-
-    adapter = new ResendEmailSenderAdapter(config);
+describe('ResendEmailSenderAdapter', () => {
+  beforeEach(() => {
+    send.mockReset();
+    send.mockResolvedValue({ data: { id: 'email-1' }, error: null });
   });
 
-  it('delivers an invite email without throwing', async () => {
-    await expect(
-      adapter.sendInvite({
-        to: 'delivered@resend.dev',
-        name: 'Test User',
-        inviteUrl: 'http://localhost:5173/accept-invite?token=test-token-abc123',
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  it('sends password reset email payload through Resend', async () => {
+    const adapter = new ResendEmailSenderAdapter(config());
+
+    await adapter.sendPasswordResetEmail(
+      'user@example.com',
+      'https://admin.example.com/reset-password?token=token',
+    );
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'CMS <no-reply@example.com>',
+        to: 'user@example.com',
+        subject: 'Reset your password',
+        html: expect.stringContaining(
+          'https://admin.example.com/reset-password?token=token',
+        ),
       }),
-    ).resolves.not.toThrow();
+    );
   });
 
-  it('throws with "Email delivery failed" when the API key is invalid', async () => {
-    const badConfig = {
-      getOrThrow: (key: string) => {
-        const map: Record<string, string> = {
-          RESEND_API_KEY: 're_invalid_key_xxxxx',
-          EMAIL_FROM: 'no-reply@cms.example.com',
-          EMAIL_FROM_NAME: 'CMS',
-          PUBLIC_URL: 'http://localhost:5173',
-        };
+  it('sends invite email payload through Resend', async () => {
+    const adapter = new ResendEmailSenderAdapter(config());
 
-        if (!map[key]) {
-          throw new Error(`Missing config key in test stub: ${key}`);
-        }
+    await adapter.sendInviteEmail(
+      'author@example.com',
+      'https://admin.example.com/accept-invite?token=token',
+      'author',
+    );
 
-        return map[key];
-      },
-    } as unknown as ConfigService;
-
-    const badAdapter = new ResendEmailSenderAdapter(badConfig);
-    await expect(
-      badAdapter.sendInvite({
-        to: 'delivered@resend.dev',
-        name: 'Test User',
-        inviteUrl: 'http://localhost:5173/accept-invite?token=token',
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'CMS <no-reply@example.com>',
+        to: 'author@example.com',
+        subject: "You've been invited",
+        html: expect.stringContaining(
+          'https://admin.example.com/accept-invite?token=token',
+        ),
       }),
-    ).rejects.toThrow(/Email delivery failed/);
+    );
+    const payload = send.mock.calls[0]?.[0] as { html: string } | undefined;
+    expect(payload?.html).toContain('author');
+  });
+
+  it('propagates Resend send errors', async () => {
+    send.mockRejectedValue(new Error('resend unavailable'));
+    const adapter = new ResendEmailSenderAdapter(config());
+
+    await expect(
+      adapter.sendInviteEmail(
+        'author@example.com',
+        'https://admin.example.com/accept-invite?token=token',
+        'author',
+      ),
+    ).rejects.toThrow('resend unavailable');
   });
 });
