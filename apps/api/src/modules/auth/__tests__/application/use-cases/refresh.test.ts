@@ -17,6 +17,7 @@ const actorIp = '203.0.113.10';
 const validPayload = {
   sub: 'user-1',
   jti: 'refresh-jti-1',
+  iat: 1_778_494_400,
   exp: 1_800_000_000,
 };
 
@@ -100,6 +101,19 @@ describe('Refresh', () => {
   it('throws InvalidTokenError for a deactivated user refresh token', async () => {
     const { refresh, users } = setup();
     users.seed(createUser({ status: 'deactivated' }));
+
+    await expect(
+      refresh.execute({ refreshToken: 'valid-token', actorIp }),
+    ).rejects.toThrow(InvalidTokenError);
+  });
+
+  it('throws InvalidTokenError when refresh token was issued before password change', async () => {
+    const { refresh, users } = setup();
+    users.seed(
+      createUser({
+        passwordChangedAt: new Date((validPayload.iat + 1) * 1000),
+      }),
+    );
 
     await expect(
       refresh.execute({ refreshToken: 'valid-token', actorIp }),

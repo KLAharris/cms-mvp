@@ -23,6 +23,7 @@ export class JoseJwtSigner implements TokenSigner {
     const token = await new SignJWT({ sub: payload.userId, role: payload.role })
       .setProtectedHeader({ alg: 'HS256' })
       .setJti(jti)
+      .setIssuedAt()
       .setExpirationTime('15m')
       .sign(this.secretKey);
 
@@ -36,6 +37,7 @@ export class JoseJwtSigner implements TokenSigner {
     const token = await new SignJWT({ sub: payload.userId })
       .setProtectedHeader({ alg: 'HS256' })
       .setJti(jti)
+      .setIssuedAt()
       .setExpirationTime('7d')
       .sign(this.secretKey);
 

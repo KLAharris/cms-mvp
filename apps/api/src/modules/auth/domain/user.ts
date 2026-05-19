@@ -21,6 +21,7 @@ export type UserProps = {
   lastLoginAt: Date | null;
   inviteTokenHash?: string | null;
   inviteExpiresAt?: Date | null;
+  passwordChangedAt?: Date | null;
   createdAt?: Date;
 };
 
@@ -41,6 +42,7 @@ export class User {
   readonly lastLoginAt: Date | null;
   inviteTokenHash: string | null;
   inviteExpiresAt: Date | null;
+  passwordChangedAt: Date | null;
   readonly createdAt: Date;
 
   constructor(props: UserProps) {
@@ -64,6 +66,7 @@ export class User {
     this.lastLoginAt = props.lastLoginAt;
     this.inviteTokenHash = props.inviteTokenHash ?? null;
     this.inviteExpiresAt = props.inviteExpiresAt ?? null;
+    this.passwordChangedAt = props.passwordChangedAt ?? null;
     this.createdAt = props.createdAt ?? new Date(0);
   }
 
@@ -205,6 +208,7 @@ export class User {
       lastLoginAt: this.lastLoginAt,
       inviteTokenHash: this.inviteTokenHash,
       inviteExpiresAt: this.inviteExpiresAt,
+      passwordChangedAt: this.passwordChangedAt,
       createdAt: this.createdAt,
       ...overrides,
     });

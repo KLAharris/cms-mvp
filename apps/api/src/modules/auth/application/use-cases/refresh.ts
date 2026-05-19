@@ -40,6 +40,14 @@ export class Refresh {
       throw new InvalidTokenError();
     }
 
+    if (user.passwordChangedAt !== null) {
+      const issuedAt = payload.iat === undefined ? null : new Date(payload.iat * 1000);
+
+      if (issuedAt === null || issuedAt < user.passwordChangedAt) {
+        throw new InvalidTokenError();
+      }
+    }
+
     const accessToken = await this.tokenSigner.signAccessToken({
       userId: user.id,
       role: user.role,

@@ -106,6 +106,7 @@ const PrismaUserMapper = {
       lastLoginAt: user.lastLoginAt,
       inviteTokenHash: user.inviteTokenHash,
       inviteExpiresAt: user.inviteExpiresAt,
+      passwordChangedAt: user.passwordChangedAt,
       createdAt: user.createdAt,
     });
   },
@@ -123,6 +124,7 @@ const PrismaUserMapper = {
     lockedUntil: Date | null;
     inviteTokenHash: string | null;
     inviteExpiresAt: Date | null;
+    passwordChangedAt: Date | null;
   } {
     return {
       id: user.id,
@@ -137,6 +139,7 @@ const PrismaUserMapper = {
       lockedUntil: user.lockedUntil,
       inviteTokenHash: user.inviteTokenHash,
       inviteExpiresAt: user.inviteExpiresAt,
+      passwordChangedAt: user.passwordChangedAt,
     };
   },
 };

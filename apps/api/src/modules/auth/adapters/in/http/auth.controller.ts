@@ -9,18 +9,24 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { z } from 'zod';
 
 import { LoginUseCase } from '../../../application/ports/in/login.port';
 import { Refresh } from '../../../application/use-cases/refresh';
 import { Logout } from '../../../application/use-cases/logout';
+import { RequestPasswordReset } from '../../../application/use-cases/request-password-reset';
+import { ResetPassword } from '../../../application/use-cases/reset-password';
 import {
   AccountLockedError,
   InvalidCredentialsError,
   InvalidEmailError,
+  InvalidResetTokenError,
   InvalidTokenError,
   RateLimitExceededError,
+  WeakPasswordError,
 } from '../../../domain/errors';
 
 const loginBodySchema = z.object({
@@ -30,6 +36,15 @@ const loginBodySchema = z.object({
 
 const acceptInviteBodySchema = z.object({
   token: z.string(),
+  password: z.string(),
+});
+
+const forgotPasswordBodySchema = z.object({
+  email: z.string().email(),
+});
+
+const resetPasswordBodySchema = z.object({
+  token: z.string().min(1),
   password: z.string(),
 });
 
@@ -69,10 +84,66 @@ export class AuthController {
     @Inject('LOGIN_USE_CASE') private readonly login: LoginUseCase,
     @Inject('REFRESH_USE_CASE') private readonly refresh: Refresh,
     @Inject('LOGOUT_USE_CASE') private readonly logout: Logout,
+    @Inject('REQUEST_PASSWORD_RESET_USE_CASE')
+    private readonly requestPasswordReset: RequestPasswordReset,
+    @Inject('RESET_PASSWORD_USE_CASE')
+    private readonly resetPassword: ResetPassword,
     @Optional()
     @Inject('ACCEPT_INVITE_USE_CASE')
     private readonly acceptInvite: AcceptInviteUseCase | undefined,
   ) {}
+
+  @Post('forgot-password')
+  @HttpCode(200)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60 * 60 * 1000 } })
+  async forgotPassword(
+    @Body() body: unknown,
+  ): Promise<{ message: 'If that email exists you will receive a reset link' }> {
+    const parsed = forgotPasswordBodySchema.safeParse(body);
+
+    if (parsed.success) {
+      await this.requestPasswordReset.execute(parsed.data);
+    }
+
+    return { message: 'If that email exists you will receive a reset link' };
+  }
+
+  @Post('reset-password')
+  @HttpCode(200)
+  async resetPasswordWithToken(@Body() body: unknown): Promise<void> {
+    const parsed = resetPasswordBodySchema.safeParse(body);
+
+    if (!parsed.success) {
+      throw this.error(
+        HttpStatus.BAD_REQUEST,
+        'VALIDATION_ERROR',
+        'Invalid reset password request',
+      );
+    }
+
+    try {
+      await this.resetPassword.execute(parsed.data);
+    } catch (error) {
+      if (error instanceof InvalidResetTokenError) {
+        throw this.error(
+          HttpStatus.BAD_REQUEST,
+          'INVALID_RESET_TOKEN',
+          'Invalid or expired password reset token',
+        );
+      }
+
+      if (error instanceof WeakPasswordError) {
+        throw this.error(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          'WEAK_PASSWORD',
+          'Password must be at least 12 characters and contain at least one letter and one digit',
+        );
+      }
+
+      throw error;
+    }
+  }
 
   @Post('login')
   @HttpCode(200)

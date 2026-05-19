@@ -11,7 +11,9 @@ export class JoseJwtVerifier implements TokenVerifier {
     this.secretKey = new TextEncoder().encode(jwtSecret);
   }
 
-  async verifyRefreshToken(token: string): Promise<{ sub: string; jti: string; exp: number }> {
+  async verifyRefreshToken(
+    token: string,
+  ): Promise<{ sub: string; jti: string; iat?: number; exp: number }> {
     try {
       const { jwtVerify } = await import('jose');
       const { payload } = await jwtVerify(token, this.secretKey, {
@@ -29,6 +31,7 @@ export class JoseJwtVerifier implements TokenVerifier {
       return {
         sub: payload.sub,
         jti: payload.jti,
+        iat: typeof payload.iat === 'number' ? payload.iat : undefined,
         exp: payload.exp,
       };
     } catch {

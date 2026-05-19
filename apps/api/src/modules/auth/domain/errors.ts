@@ -29,6 +29,12 @@ export class InvalidTokenError extends DomainError {
   }
 }
 
+export class InvalidResetTokenError extends DomainError {
+  constructor() {
+    super('Invalid or expired password reset token');
+  }
+}
+
 export class RateLimitExceededError extends DomainError {
   constructor() {
     super('Rate limit exceeded');
