@@ -11,30 +11,26 @@ import { server } from './msw-setup';
 import { ApiKeysPage } from '../src/features/api-keys/pages/ApiKeysPage';
 import { lightTheme } from '../src/shared/theme/theme';
 import { useAuthStore } from '../src/features/auth/store/auth.store';
-import type { ApiKey, ApiKeyListResponse } from '../src/features/api-keys/types/api-keys.types';
+import type { ApiKey } from '../src/features/api-keys/types/api-keys.types';
 
 const mockKeys: ApiKey[] = [
   {
     id: 'key-1',
     name: 'Production Web',
-    prefix: 'cmsk_a1b2c3',
-    status: 'active',
     lastUsedAt: '2024-06-01T10:00:00Z',
+    revokedAt: null,
+    createdById: 'user-1',
     createdAt: '2024-01-01T00:00:00Z',
   },
   {
     id: 'key-2',
     name: 'Legacy v0',
-    prefix: 'cmsk_x7y8z9',
-    status: 'revoked',
+    lastUsedAt: null,
+    revokedAt: '2024-03-01T00:00:00Z',
+    createdById: 'user-1',
     createdAt: '2024-01-02T00:00:00Z',
   },
 ];
-
-const mockListResponse: ApiKeyListResponse = {
-  items: mockKeys,
-  total: 2,
-};
 
 function renderApiKeys(role: string = 'admin') {
   useAuthStore.setState({
@@ -71,7 +67,7 @@ function renderApiKeys(role: string = 'admin') {
 
 describe('ApiKeysPage', () => {
   beforeEach(() => {
-    server.use(http.get('/api/admin/api-keys', () => HttpResponse.json(mockListResponse)));
+    server.use(http.get('/api/admin/api-keys', () => HttpResponse.json(mockKeys)));
   });
 
   it('redirects non-admin users to dashboard', () => {
@@ -84,7 +80,7 @@ describe('ApiKeysPage', () => {
     expect(screen.getByRole('heading', { name: /api keys/i })).toBeInTheDocument();
   });
 
-  it('renders table columns: Name, Prefix, Last used, Status', async () => {
+  it('renders table columns: Name, Last used, Status', async () => {
     renderApiKeys();
 
     await waitFor(() => {
@@ -92,7 +88,6 @@ describe('ApiKeysPage', () => {
     });
 
     expect(screen.getByRole('columnheader', { name: /name/i })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /prefix/i })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /last used/i })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /status/i })).toBeInTheDocument();
   });
@@ -103,14 +98,6 @@ describe('ApiKeysPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Production Web')).toBeInTheDocument();
       expect(screen.getByText('Legacy v0')).toBeInTheDocument();
-    });
-  });
-
-  it('shows prefix in monospace', async () => {
-    renderApiKeys();
-
-    await waitFor(() => {
-      expect(screen.getByText('cmsk_a1b2c3')).toBeInTheDocument();
     });
   });
 
@@ -139,12 +126,13 @@ describe('ApiKeysPage', () => {
   });
 
   it('shows full key once after creation', async () => {
-    const createdKey = {
+    const createdKey: import('../src/features/api-keys/types/api-keys.types').CreateApiKeyResponse = {
       id: 'key-new',
       name: 'Test Key',
-      prefix: 'cmsk_new1',
-      key: 'cmsk_new1_secretfullkey1234567890',
-      status: 'active' as const,
+      rawKey: 'cmsk_new1_secretfullkey1234567890',
+      lastUsedAt: null,
+      revokedAt: null,
+      createdById: 'user-1',
       createdAt: '2024-06-01T00:00:00Z',
     };
 
@@ -174,12 +162,13 @@ describe('ApiKeysPage', () => {
   });
 
   it('key is not shown after closing the creation dialog', async () => {
-    const createdKey = {
+    const createdKey: import('../src/features/api-keys/types/api-keys.types').CreateApiKeyResponse = {
       id: 'key-new',
       name: 'Test Key',
-      prefix: 'cmsk_new1',
-      key: 'cmsk_new1_secretfullkey1234567890',
-      status: 'active' as const,
+      rawKey: 'cmsk_new1_secretfullkey1234567890',
+      lastUsedAt: null,
+      revokedAt: null,
+      createdById: 'user-1',
       createdAt: '2024-06-01T00:00:00Z',
     };
 

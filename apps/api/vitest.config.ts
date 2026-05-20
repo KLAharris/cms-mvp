@@ -41,6 +41,7 @@ export default defineConfig({
     },
     fileParallelism: false,
     globals: false,
+    hookTimeout: 30000,
     exclude: [...configDefaults.exclude, 'test/fakes/**/*.ts'],
     include: ['test/**/*.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts'],
     maxWorkers: 1,

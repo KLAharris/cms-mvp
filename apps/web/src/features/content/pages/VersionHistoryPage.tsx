@@ -20,10 +20,9 @@ import { revertContent } from '../api/content.api';
 import type { ContentType } from '../types/content.types';
 
 interface Version {
-  id: string;
-  versionNumber: number;
+  versionNo: number;
   createdAt: string;
-  editorName: string;
+  editorId: string;
 }
 
 interface VersionHistoryPageProps {
@@ -37,14 +36,14 @@ export function VersionHistoryPage({ type }: VersionHistoryPageProps): ReactElem
   const { data: versions, isLoading } = useQuery<Version[]>({
     queryKey: ['versions', id],
     queryFn: async () => {
-      const response = await api.get<Version[]>(`/api/admin/content/${id}/versions`);
-      return response.data;
+      const response = await api.get<{ data: Version[] }>(`/api/admin/content/${id}/versions`);
+      return response.data.data;
     },
     enabled: Boolean(id),
   });
 
-  const handleRevert = async (versionId: string) => {
-    await revertContent(id, versionId);
+  const handleRevert = async (versionNo: number) => {
+    await revertContent(id, versionNo);
     navigate(`/${type}s/${id}/edit`);
   };
 
@@ -90,17 +89,17 @@ export function VersionHistoryPage({ type }: VersionHistoryPageProps): ReactElem
               </TableRow>
             ) : (
               versions?.map((version) => (
-                <TableRow key={version.id}>
-                  <TableCell>v{version.versionNumber}</TableCell>
+                <TableRow key={version.versionNo}>
+                  <TableCell>v{version.versionNo}</TableCell>
                   <TableCell>
                     {new Date(version.createdAt).toLocaleString()}
                   </TableCell>
-                  <TableCell>{version.editorName}</TableCell>
+                  <TableCell>{version.editorId}</TableCell>
                   <TableCell align="right">
                     <Button
                       size="small"
                       variant="outlined"
-                      onClick={() => { void handleRevert(version.id); }}
+                      onClick={() => { void handleRevert(version.versionNo); }}
                     >
                       Revert
                     </Button>

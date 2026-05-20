@@ -139,8 +139,8 @@ export function DashboardPage(): ReactElement {
                         </span>
                       </ListItemIcon>
                       <ListItemText
-                        primary={`${event.action}: ${event.targetTitle}`}
-                        secondary={`${event.actorName} · ${relativeTime(event.createdAt)}`}
+                        primary={`${event.action}: ${event.targetId}`}
+                        secondary={`${event.actorId} · ${relativeTime(event.timestamp)}`}
                       />
                     </ListItem>
                   ))}

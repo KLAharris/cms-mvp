@@ -83,9 +83,9 @@ export async function scheduleContent(
   return response.data.data;
 }
 
-export async function revertContent(id: string, versionId: string): Promise<ContentItem> {
+export async function revertContent(id: string, versionNo: number): Promise<ContentItem> {
   const response = await api.post<{ data: ContentItem }>(
-    `/api/admin/content/${id}/revert/${versionId}`,
+    `/api/admin/content/${id}/revert/${String(versionNo)}`,
   );
   return response.data.data;
 }

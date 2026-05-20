@@ -5,7 +5,6 @@ import { finalizeMedia, presignMedia, uploadToStorage } from '../api/media.api';
 import {
   ALLOWED_MEDIA_TYPES,
   MAX_UPLOAD_BYTES,
-  type MediaItem,
   type UploadState,
 } from '../types/media.types';
 import { MEDIA_QUERY_KEY } from './useMedia';
@@ -15,7 +14,7 @@ export function useUpload() {
   const [state, setState] = useState<UploadState>({ status: 'idle', progress: 0 });
 
   const upload = useCallback(
-    async (file: File): Promise<MediaItem> => {
+    async (file: File): Promise<void> => {
       if (!(ALLOWED_MEDIA_TYPES as string[]).includes(file.type)) {
         const err = `Unsupported file type: ${file.type}`;
         setState({ status: 'error', progress: 0, error: err });
@@ -43,12 +42,10 @@ export function useUpload() {
 
         setState({ status: 'uploading', progress: 80 });
 
-        const item = await finalizeMedia({ mediaId });
+        await finalizeMedia({ mediaId });
 
         setState({ status: 'done', progress: 100 });
         await queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] });
-
-        return item;
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Upload failed';
         setState({ status: 'error', progress: 0, error: msg });

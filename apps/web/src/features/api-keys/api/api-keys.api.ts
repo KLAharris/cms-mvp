@@ -1,13 +1,12 @@
 import { api } from '../../../shared/api/api';
 import type {
   ApiKey,
-  ApiKeyListResponse,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
 } from '../types/api-keys.types';
 
-export async function listApiKeys(): Promise<ApiKeyListResponse> {
-  const response = await api.get<ApiKeyListResponse>('/api/admin/api-keys');
+export async function listApiKeys(): Promise<ApiKey[]> {
+  const response = await api.get<ApiKey[]>('/api/admin/api-keys');
   return response.data;
 }
 
@@ -16,7 +15,6 @@ export async function createApiKey(data: CreateApiKeyRequest): Promise<CreateApi
   return response.data;
 }
 
-export async function revokeApiKey(id: string): Promise<ApiKey> {
-  const response = await api.delete<ApiKey>(`/api/admin/api-keys/${id}`);
-  return response.data;
+export async function revokeApiKey(id: string): Promise<void> {
+  await api.delete(`/api/admin/api-keys/${id}`);
 }

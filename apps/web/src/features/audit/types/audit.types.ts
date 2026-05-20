@@ -1,26 +1,20 @@
-export interface AuditActor {
-  id: string;
-  name: string;
-  email: string;
-}
-
 export interface AuditEvent {
   id: string;
+  timestamp: string;
+  actorId: string;
+  actorIp: string;
   action: string;
-  actor: AuditActor;
-  actorName: string;
   targetType: string;
-  targetTitle: string;
+  targetId: string;
   summary: string;
-  createdAt: string;
 }
 
 export interface AuditListParams {
-  actor?: string;
+  actorId?: string;
   action?: string;
   targetType?: string;
-  from?: string;
-  to?: string;
+  dateFrom?: string;
+  dateTo?: string;
   page?: number;
   pageSize?: number;
 }

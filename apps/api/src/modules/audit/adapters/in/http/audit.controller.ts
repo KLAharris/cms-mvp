@@ -66,7 +66,12 @@ export class AuditController {
           targetId: event.targetId,
           summary: event.summary,
         })),
-        pagination: result.pagination,
+        pagination: {
+          page: result.pagination.page,
+          page_size: result.pagination.pageSize,
+          total: result.pagination.total,
+          total_pages: result.pagination.totalPages,
+        },
       };
     } catch (error) {
       throw this.mapError(error);

@@ -6,21 +6,6 @@ import { type ReactNode } from 'react';
 
 import { server } from './msw-setup';
 import { useUpload } from '../src/features/media/hooks/useUpload';
-import type { MediaItem } from '../src/features/media/types/media.types';
-
-const mockUploader = { id: 'user-1', name: 'Alice', email: 'alice@example.com' };
-
-const mockMediaItem: MediaItem = {
-  id: 'media-new',
-  filename: 'test.jpg',
-  mimeType: 'image/jpeg',
-  size: 1024,
-  url: 'https://cdn.example.com/test.jpg',
-  uploadedBy: mockUploader,
-  usedInCount: 0,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-};
 
 function makeWrapper() {
   const queryClient = new QueryClient({
@@ -65,21 +50,19 @@ describe('useUpload', () => {
   it('completes presign → upload → finalize flow', async () => {
     server.use(
       http.post('/api/admin/media/presign', () =>
-        HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', key: 'media/test.jpg' }),
+        HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', mediaId: 'new-media-id', storageKey: 'media/test.jpg' }),
       ),
       http.put('http://localhost/s3/upload', () => new HttpResponse(null, { status: 200 })),
-      http.post('/api/admin/media', () => HttpResponse.json(mockMediaItem)),
+      http.post('/api/admin/media', () => new HttpResponse(null, { status: 202 })),
     );
 
     const { result } = renderHook(() => useUpload(), { wrapper: makeWrapper() });
     const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
 
-    let returned: MediaItem | undefined;
     await act(async () => {
-      returned = await result.current.upload(file);
+      await result.current.upload(file);
     });
 
-    expect(returned).toEqual(mockMediaItem);
     expect(result.current.status).toBe('done');
     expect(result.current.progress).toBe(100);
   });
@@ -104,7 +87,7 @@ describe('useUpload', () => {
   it('sets status to error when S3 upload fails', async () => {
     server.use(
       http.post('/api/admin/media/presign', () =>
-        HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', key: 'media/test.jpg' }),
+        HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', mediaId: 'new-media-id', storageKey: 'media/test.jpg' }),
       ),
       http.put('http://localhost/s3/upload', () => new HttpResponse(null, { status: 500 })),
     );
@@ -131,10 +114,10 @@ describe('useUpload', () => {
     for (const mimeType of allowedTypes) {
       server.use(
         http.post('/api/admin/media/presign', () =>
-          HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', key: `media/file` }),
+          HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', mediaId: 'new-media-id', storageKey: `media/file` }),
         ),
         http.put('http://localhost/s3/upload', () => new HttpResponse(null, { status: 200 })),
-        http.post('/api/admin/media', () => HttpResponse.json(mockMediaItem)),
+        http.post('/api/admin/media', () => new HttpResponse(null, { status: 202 })),
       );
 
       const queryClient = new QueryClient({

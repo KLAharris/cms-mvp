@@ -25,15 +25,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Navigate } from 'react-router-dom';
 
 import { createApiKey, listApiKeys, revokeApiKey } from '../api/api-keys.api';
-import type { ApiKey, ApiKeyStatus, CreateApiKeyResponse } from '../types/api-keys.types';
+import type { ApiKey, CreateApiKeyResponse } from '../types/api-keys.types';
 import { useUiStore } from '../../../shared/store/ui.store';
 import { useAuthStore } from '../../auth/store/auth.store';
 
-function statusColor(status: ApiKeyStatus): 'success' | 'error' {
-  return status === 'active' ? 'success' : 'error';
+function statusColor(revokedAt: string | null): 'success' | 'error' {
+  return revokedAt === null ? 'success' : 'error';
 }
 
-function formatLastUsed(date?: string): string {
+function formatLastUsed(date: string | null): string {
   if (!date) return 'Never';
   return new Date(date).toLocaleDateString();
 }
@@ -52,7 +52,7 @@ function KeyRowMenu({ apiKey, onRevoke }: KeyRowMenuProps): ReactElement {
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => { setAnchorEl(null); }}>
         <MenuItem
-          disabled={apiKey.status === 'revoked'}
+          disabled={apiKey.revokedAt !== null}
           onClick={() => {
             setAnchorEl(null);
             onRevoke(apiKey);
@@ -116,7 +116,7 @@ function ApiKeysContent(): ReactElement {
 
   const handleCopyKey = () => {
     if (createdKey) {
-      void navigator.clipboard.writeText(createdKey.key).then(() => {
+      void navigator.clipboard.writeText(createdKey.rawKey).then(() => {
         setCopied(true);
         setTimeout(() => { setCopied(false); }, 2000);
       });
@@ -129,7 +129,7 @@ function ApiKeysContent(): ReactElement {
     }
   };
 
-  const items = data?.items ?? [];
+  const items = data ?? [];
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -158,7 +158,6 @@ function ApiKeysContent(): ReactElement {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Prefix</TableCell>
               <TableCell>Last used</TableCell>
               <TableCell>Status</TableCell>
               <TableCell />
@@ -167,7 +166,7 @@ function ApiKeysContent(): ReactElement {
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center">
+                <TableCell colSpan={4} align="center">
                   <Typography color="text.secondary">No API keys yet</Typography>
                 </TableCell>
               </TableRow>
@@ -175,16 +174,11 @@ function ApiKeysContent(): ReactElement {
               items.map((key) => (
                 <TableRow key={key.id}>
                   <TableCell>{key.name}</TableCell>
-                  <TableCell>
-                    <Typography variant="bodyMedium" sx={{ fontFamily: 'monospace' }}>
-                      {key.prefix}
-                    </Typography>
-                  </TableCell>
                   <TableCell>{formatLastUsed(key.lastUsedAt)}</TableCell>
                   <TableCell>
                     <Chip
-                      label={key.status.charAt(0).toUpperCase() + key.status.slice(1)}
-                      color={statusColor(key.status)}
+                      label={key.revokedAt === null ? 'Active' : 'Revoked'}
+                      color={statusColor(key.revokedAt)}
                       size="small"
                     />
                   </TableCell>
@@ -261,7 +255,7 @@ function ApiKeysContent(): ReactElement {
               sx={{ flex: 1, fontFamily: 'monospace' }}
               data-testid="created-key-value"
             >
-              {createdKey?.key}
+              {createdKey?.rawKey}
             </Typography>
             <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
               <IconButton size="small" onClick={handleCopyKey} aria-label="Copy key">

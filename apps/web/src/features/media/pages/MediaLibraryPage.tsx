@@ -38,6 +38,7 @@ import {
   MEDIA_QUERY_KEY,
 } from '../hooks/useMedia';
 import { useUpload } from '../hooks/useUpload';
+import { getMediaUrl } from '../types/media.types';
 import type { MediaFilterType, MediaItem } from '../types/media.types';
 import { useUiStore } from '../../../shared/store/ui.store';
 
@@ -85,25 +86,22 @@ function MediaDetailDrawer({ item, onClose, onDelete }: MediaDrawerProps): React
       {item.mimeType.startsWith('image/') && (
         <Box
           component="img"
-          src={item.url}
+          src={getMediaUrl(item)}
           alt={item.altText ?? item.filename}
           sx={{ width: '100%', borderRadius: 1, mb: 2 }}
         />
       )}
 
       <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 1 }}>
-        Size: {formatBytes(item.size)}
+        Size: {formatBytes(item.sizeBytes)}
       </Typography>
       {item.width !== undefined && item.height !== undefined && (
         <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 1 }}>
           Dimensions: {item.width}×{item.height}
         </Typography>
       )}
-      <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 1 }}>
-        Uploaded by: {item.uploadedBy.name}
-      </Typography>
       <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 2 }}>
-        Used in {item.usedInCount} {item.usedInCount === 1 ? 'piece' : 'pieces'} of content
+        Uploaded by: {item.uploadedBy}
       </Typography>
 
       <TextField
@@ -137,7 +135,6 @@ function MediaDetailDrawer({ item, onClose, onDelete }: MediaDrawerProps): React
           variant="outlined"
           color="error"
           onClick={onDelete}
-          disabled={item.usedInCount > 0}
         >
           Delete
         </Button>
@@ -414,7 +411,7 @@ export function MediaLibraryPage(): ReactElement {
               {item.mimeType.startsWith('image/') ? (
                 <Box
                   component="img"
-                  src={item.url}
+                  src={getMediaUrl(item)}
                   alt={item.altText ?? item.filename}
                   sx={{ width: '100%', height: '120px', objectFit: 'cover', display: 'block' }}
                 />
@@ -488,7 +485,7 @@ export function MediaLibraryPage(): ReactElement {
                   <IconButton
                     size="small"
                     sx={{ bgcolor: 'background.paper' }}
-                    onClick={() => { copyUrl(item.url); }}
+                    onClick={() => { copyUrl(getMediaUrl(item)); }}
                     aria-label="Copy URL"
                   >
                     <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
@@ -502,7 +499,6 @@ export function MediaLibraryPage(): ReactElement {
                     sx={{ bgcolor: 'background.paper' }}
                     onClick={() => { setSingleDeleteId(item.id); }}
                     aria-label="Delete"
-                    disabled={item.usedInCount > 0}
                   >
                     <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
                       delete
@@ -542,7 +538,7 @@ export function MediaLibraryPage(): ReactElement {
               {item.mimeType.startsWith('image/') ? (
                 <Box
                   component="img"
-                  src={item.url}
+                  src={getMediaUrl(item)}
                   alt={item.altText ?? item.filename}
                   sx={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 0.5 }}
                 />
@@ -566,7 +562,7 @@ export function MediaLibraryPage(): ReactElement {
                   {item.filename}
                 </Typography>
                 <Typography variant="bodyMedium" color="text.secondary">
-                  {formatBytes(item.size)}
+                  {formatBytes(item.sizeBytes)}
                 </Typography>
               </Box>
             </Box>

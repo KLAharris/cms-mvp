@@ -159,6 +159,7 @@ function UsersPageContent(): ReactElement {
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState<UserRole>('author');
 
   const [editRoleUser, setEditRoleUser] = useState<UserItem | null>(null);
@@ -167,7 +168,7 @@ function UsersPageContent(): ReactElement {
   const [userToDeactivate, setUserToDeactivate] = useState<UserItem | null>(null);
 
   const handleInvite = () => {
-    inviteMutation.mutate({ email: inviteEmail, role: inviteRole });
+    inviteMutation.mutate({ email: inviteEmail, name: inviteName, role: inviteRole });
   };
 
   const handleEditRole = (user: UserItem) => {
@@ -264,12 +265,19 @@ function UsersPageContent(): ReactElement {
         <DialogTitle>Invite user</DialogTitle>
         <DialogContent>
           <TextField
+            label="Name"
+            value={inviteName}
+            onChange={(e) => { setInviteName(e.target.value); }}
+            fullWidth
+            sx={{ mt: 1, mb: 2 }}
+          />
+          <TextField
             label="Email"
             type="email"
             value={inviteEmail}
             onChange={(e) => { setInviteEmail(e.target.value); }}
             fullWidth
-            sx={{ mt: 1, mb: 2 }}
+            sx={{ mb: 2 }}
           />
           <FormControl fullWidth>
             <InputLabel id="invite-role-label">Role</InputLabel>

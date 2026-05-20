@@ -68,6 +68,7 @@ export function useUpdateContent(id: string) {
     mutationFn: (data: Partial<ContentItem>) => updateContent(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['content', id] });
+      void queryClient.invalidateQueries({ queryKey: ['content'] });
     },
   });
 }

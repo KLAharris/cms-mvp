@@ -33,6 +33,7 @@ import type { ContentType } from '../types/content.types';
 import { updateContent } from '../api/content.api';
 import { slugify } from '../utils/slugify';
 import { MediaPickerDialog } from '../../../shared/components/MediaPickerDialog';
+import { getMediaUrl } from '../../media/types/media.types';
 import type { MediaItem } from '../../media/types/media.types';
 
 interface ContentEditorPageProps {
@@ -514,7 +515,7 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
               <Box sx={{ mb: 1 }}>
                 <Box
                   component="img"
-                  src={socialImage.url}
+                  src={getMediaUrl(socialImage)}
                   alt={socialImage.altText ?? socialImage.filename}
                   sx={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 1, mb: 0.5 }}
                 />
@@ -544,7 +545,7 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
               <Box>
                 <Box
                   component="img"
-                  src={featuredImage.url}
+                  src={getMediaUrl(featuredImage)}
                   alt={featuredImage.altText ?? featuredImage.filename}
                   sx={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 1, mb: 0.5 }}
                 />
