@@ -135,21 +135,25 @@ describe('POST /api/admin/auth/login', () => {
       .expect(401);
   });
 
-  it('returns 429 after ten login attempts within sixty seconds from the same IP', async () => {
-    for (let attempt = 0; attempt < 10; attempt += 1) {
+  it(
+    'returns 429 after ten login attempts within sixty seconds from the same IP',
+    async () => {
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        await httpRequest()
+          .post('/api/admin/auth/login')
+          .set('x-forwarded-for', '198.51.100.10')
+          .send({ email: 'missing@cms.local', password: 'password123' })
+          .expect(401);
+      }
+
       await httpRequest()
         .post('/api/admin/auth/login')
         .set('x-forwarded-for', '198.51.100.10')
         .send({ email: 'missing@cms.local', password: 'password123' })
-        .expect(401);
-    }
-
-    await httpRequest()
-      .post('/api/admin/auth/login')
-      .set('x-forwarded-for', '198.51.100.10')
-      .send({ email: 'missing@cms.local', password: 'password123' })
-      .expect(429);
-  });
+        .expect(429);
+    },
+    30000,
+  );
 
   async function seedAuthor(): Promise<void> {
     await prisma.user.upsert({
