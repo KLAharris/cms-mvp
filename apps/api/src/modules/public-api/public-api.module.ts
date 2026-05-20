@@ -41,14 +41,23 @@ import { ListPublishedPages } from './application/use-cases/list-published-pages
     {
       provide: 'REDIS_CLIENT',
       useFactory: (configService: ConfigService) => {
-        const redis = new Redis({
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
-          password: configService.get('REDIS_PASSWORD') || undefined,
-          enableOfflineQueue: false,
-          maxRetriesPerRequest: 1,
-          retryStrategy: () => null,
-        });
+        const redisUrl = configService.get<string>('REDIS_URL');
+        const redis = redisUrl
+          ? new Redis(redisUrl, {
+              enableOfflineQueue: false,
+              enableReadyCheck: false,
+              maxRetriesPerRequest: 1,
+              retryStrategy: () => null,
+            })
+          : new Redis({
+              host: configService.get('REDIS_HOST', 'localhost'),
+              port: configService.get<number>('REDIS_PORT', 6379),
+              password: configService.get('REDIS_PASSWORD') || undefined,
+              enableOfflineQueue: false,
+              enableReadyCheck: false,
+              maxRetriesPerRequest: 1,
+              retryStrategy: () => null,
+            });
 
         redis.on('error', () => undefined);
 

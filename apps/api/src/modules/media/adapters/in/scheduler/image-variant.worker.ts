@@ -11,7 +11,7 @@ export class ImageVariantWorker implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private readonly generateVariants: GenerateMediaVariantsUseCase,
-    private readonly redisConnection: { host: string; port: number },
+    private readonly redisConnection: { host: string; port: number; password?: string; enableReadyCheck?: boolean },
   ) {}
 
   onModuleInit(): void {
