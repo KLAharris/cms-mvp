@@ -131,7 +131,7 @@ export function DashboardPage(): ReactElement {
                 </List>
               ) : (
                 <List dense>
-                  {auditData?.items.map((event: AuditEvent) => (
+                  {(auditData?.items ?? []).map((event: AuditEvent) => (
                     <ListItem key={event.id} alignItems="flex-start">
                       <ListItemIcon sx={{ minWidth: 36 }}>
                         <span className="material-symbols-rounded" style={{ fontSize: 20 }}>

@@ -90,7 +90,8 @@ export function useContentEditor(id: string) {
         body: snapshot.body,
         tags: snapshot.tags,
         category: snapshot.category,
-        seo: snapshot.seo,
+        seoTitle: snapshot.seo?.metaTitle,
+        seoDescription: snapshot.seo?.metaDescription,
       }),
     ).subscribe((status) => {
       setAutosaveStatus(status);

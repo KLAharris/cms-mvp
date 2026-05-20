@@ -269,7 +269,7 @@ export function ContentListPage({ type }: ContentListPageProps): ReactElement {
                     <TableCell><Skeleton width={40} /></TableCell>
                   </TableRow>
                 ))
-              : data && data.items.length === 0
+              : data && (data.items?.length ?? 0) === 0
                 ? (
                     <TableRow>
                       <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
@@ -279,7 +279,7 @@ export function ContentListPage({ type }: ContentListPageProps): ReactElement {
                       </TableCell>
                     </TableRow>
                   )
-                : data?.items.map((item) => (
+                : (data?.items ?? []).map((item) => (
                     <TableRow
                       key={item.id}
                       hover
@@ -295,7 +295,7 @@ export function ContentListPage({ type }: ContentListPageProps): ReactElement {
                         <StatusChip status={item.status} />
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">{item.author.name}</Typography>
+                        <Typography variant="body2">{item.author?.name ?? item.authorId}</Typography>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" color="text.secondary">

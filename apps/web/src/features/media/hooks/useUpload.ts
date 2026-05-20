@@ -35,9 +35,10 @@ export function useUpload() {
       setState({ status: 'uploading', progress: 0 });
 
       try {
-        const { uploadUrl, key } = await presignMedia({
+        const { uploadUrl, mediaId } = await presignMedia({
           filename: file.name,
           mimeType: file.type,
+          sizeBytes: file.size,
         });
 
         setState({ status: 'uploading', progress: 30 });
@@ -46,13 +47,7 @@ export function useUpload() {
 
         setState({ status: 'uploading', progress: 80 });
 
-        const item = await finalizeMedia({
-          key,
-          filename: file.name,
-          mimeType: file.type,
-          size: file.size,
-          altText: opts?.altText,
-        });
+        const item = await finalizeMedia({ mediaId });
 
         setState({ status: 'done', progress: 100 });
         await queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] });

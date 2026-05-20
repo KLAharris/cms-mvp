@@ -58,19 +58,17 @@ export interface MediaListResponse {
 export interface PresignRequest {
   filename: string;
   mimeType: string;
+  sizeBytes: number;
 }
 
 export interface PresignResponse {
+  mediaId: string;
   uploadUrl: string;
-  key: string;
+  storageKey: string;
 }
 
 export interface FinalizeMediaRequest {
-  key: string;
-  filename: string;
-  mimeType: string;
-  size: number;
-  altText?: string;
+  mediaId: string;
 }
 
 export interface UpdateMediaRequest {

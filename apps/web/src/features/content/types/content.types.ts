@@ -19,7 +19,8 @@ export interface ContentItem {
   slug: string;
   type: ContentType;
   status: ContentStatus;
-  author: ContentAuthor;
+  authorId: string;
+  author?: ContentAuthor;
   body?: unknown;
   tags: string[];
   category?: string;
