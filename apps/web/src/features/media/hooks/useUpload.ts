@@ -10,16 +10,12 @@ import {
 } from '../types/media.types';
 import { MEDIA_QUERY_KEY } from './useMedia';
 
-interface UploadOptions {
-  altText?: string;
-}
-
 export function useUpload() {
   const queryClient = useQueryClient();
   const [state, setState] = useState<UploadState>({ status: 'idle', progress: 0 });
 
   const upload = useCallback(
-    async (file: File, opts?: UploadOptions): Promise<MediaItem> => {
+    async (file: File): Promise<MediaItem> => {
       if (!(ALLOWED_MEDIA_TYPES as string[]).includes(file.type)) {
         const err = `Unsupported file type: ${file.type}`;
         setState({ status: 'error', progress: 0, error: err });

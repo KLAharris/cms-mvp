@@ -472,17 +472,17 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
                 label="Meta Title"
                 size="small"
                 fullWidth
-                error={(metaTitle ?? '').length > 70}
+                error={metaTitle.length > 70}
                 slotProps={{ htmlInput: { maxLength: 150 } }}
               />
-              <FormHelperText error={(metaTitle ?? '').length > 70}>
-                {(metaTitle ?? '').length > 70 ? 'Too long' : ''}
+              <FormHelperText error={metaTitle.length > 70}>
+                {metaTitle.length > 70 ? 'Too long' : ''}
               </FormHelperText>
               <Typography
                 variant="bodyMedium"
-                color={(metaTitle ?? '').length > 70 ? 'error' : 'text.secondary'}
+                color={metaTitle.length > 70 ? 'error' : 'text.secondary'}
               >
-                {String((metaTitle ?? '').length)}/70
+                {String(metaTitle.length)}/70
               </Typography>
             </Box>
 
@@ -495,17 +495,17 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
                 fullWidth
                 multiline
                 rows={3}
-                error={(metaDescription ?? '').length > 160}
+                error={metaDescription.length > 160}
                 slotProps={{ htmlInput: { maxLength: 300 } }}
               />
-              <FormHelperText error={(metaDescription ?? '').length > 160}>
-                {(metaDescription ?? '').length > 160 ? 'Too long' : ''}
+              <FormHelperText error={metaDescription.length > 160}>
+                {metaDescription.length > 160 ? 'Too long' : ''}
               </FormHelperText>
               <Typography
                 variant="bodyMedium"
-                color={(metaDescription ?? '').length > 160 ? 'error' : 'text.secondary'}
+                color={metaDescription.length > 160 ? 'error' : 'text.secondary'}
               >
-                {String((metaDescription ?? '').length)}/160
+                {String(metaDescription.length)}/160
               </Typography>
             </Box>
 

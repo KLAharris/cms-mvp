@@ -269,7 +269,7 @@ export function ContentListPage({ type }: ContentListPageProps): ReactElement {
                     <TableCell><Skeleton width={40} /></TableCell>
                   </TableRow>
                 ))
-              : data && (data.items?.length ?? 0) === 0
+              : data && data.items.length === 0
                 ? (
                     <TableRow>
                       <TableCell colSpan={5} align="center" sx={{ py: 6 }}>

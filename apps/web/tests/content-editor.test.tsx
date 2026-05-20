@@ -19,6 +19,7 @@ const draftItem: ContentItem = {
   slug: 'my-draft-article',
   type: 'article',
   status: 'draft',
+  authorId: 'user-1',
   author: { id: 'user-1', name: 'Alice', email: 'alice@example.com' },
   tags: [],
   body: { type: 'doc', content: [] },
@@ -87,13 +88,16 @@ function renderEditor(
 describe('ContentEditorPage', () => {
   beforeEach(() => {
     server.use(
-      http.get('/api/admin/content/content-1', () => HttpResponse.json(draftItem)),
-      http.get('/api/admin/content/content-2', () => HttpResponse.json(inReviewItem)),
-      http.get('/api/admin/content/content-3', () => HttpResponse.json(publishedItem)),
+      http.get('/api/admin/content/content-1', () => HttpResponse.json({ data: draftItem })),
+      http.get('/api/admin/content/content-2', () => HttpResponse.json({ data: inReviewItem })),
+      http.get('/api/admin/content/content-3', () => HttpResponse.json({ data: publishedItem })),
       http.patch('/api/admin/content/:id', ({ params }) => {
         const id = params['id'] as string;
-        return HttpResponse.json({ ...draftItem, id });
+        return HttpResponse.json({ data: { ...draftItem, id } });
       }),
+      http.get('/api/admin/media', () =>
+        HttpResponse.json({ items: [], total: 0, page: 1, pageSize: 50 }),
+      ),
     );
   });
 
