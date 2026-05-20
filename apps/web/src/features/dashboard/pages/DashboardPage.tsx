@@ -131,7 +131,7 @@ export function DashboardPage(): ReactElement {
                 </List>
               ) : (
                 <List dense>
-                  {auditData?.items.map((event: AuditEvent) => (
+                  {(auditData?.items ?? []).map((event: AuditEvent) => (
                     <ListItem key={event.id} alignItems="flex-start">
                       <ListItemIcon sx={{ minWidth: 36 }}>
                         <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
@@ -139,8 +139,8 @@ export function DashboardPage(): ReactElement {
                         </span>
                       </ListItemIcon>
                       <ListItemText
-                        primary={`${event.action}: ${event.targetTitle}`}
-                        secondary={`${event.actorName} · ${relativeTime(event.createdAt)}`}
+                        primary={`${event.action}: ${event.targetId}`}
+                        secondary={`${event.actorId} · ${relativeTime(event.timestamp)}`}
                       />
                     </ListItem>
                   ))}

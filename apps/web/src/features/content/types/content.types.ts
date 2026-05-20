@@ -19,7 +19,8 @@ export interface ContentItem {
   slug: string;
   type: ContentType;
   status: ContentStatus;
-  author: ContentAuthor;
+  authorId: string;
+  author?: ContentAuthor;
   body?: unknown;
   tags: string[];
   category?: string;
@@ -32,7 +33,7 @@ export interface ContentItem {
 
 export interface ContentListParams {
   type?: ContentType;
-  title?: string;
+  titleSearch?: string;
   status?: ContentStatus;
   mine?: boolean;
   lastDays?: number;
@@ -49,10 +50,10 @@ export interface ContentListResponse {
   pageSize: number;
 }
 
-export interface AuditEvent {
+export interface ContentCreateResult {
   id: string;
-  action: string;
-  actorName: string;
-  targetTitle: string;
-  createdAt: string;
+  type: ContentType;
+  title: string;
+  slug: string;
+  status: ContentStatus;
 }

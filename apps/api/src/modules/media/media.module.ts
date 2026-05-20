@@ -62,11 +62,14 @@ export {
   OBJECT_STORAGE,
 } from './media-tokens';
 
-function redisConnectionFromUrl(redisUrl: string): { host: string; port: number } {
+function redisConnectionFromUrl(redisUrl: string): { host: string; port: number; password?: string; enableReadyCheck: boolean } {
   const parsed = new URL(redisUrl);
+  const password = parsed.password ? decodeURIComponent(parsed.password) : undefined;
   return {
     host: parsed.hostname,
     port: Number(parsed.port || 6379),
+    enableReadyCheck: false,
+    ...(password !== undefined ? { password } : {}),
   };
 }
 

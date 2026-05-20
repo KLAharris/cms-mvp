@@ -83,9 +83,9 @@ function AuditLogContent(): ReactElement {
         <TextField
           label="Actor"
           size="small"
-          value={params.actor ?? ''}
+          value={params.actorId ?? ''}
           onChange={(e) => {
-            setParams((p) => ({ ...p, actor: e.target.value || undefined, page: 1 }));
+            setParams((p) => ({ ...p, actorId: e.target.value || undefined, page: 1 }));
           }}
           sx={{ minWidth: 160 }}
         />
@@ -125,9 +125,9 @@ function AuditLogContent(): ReactElement {
           label="From"
           type="date"
           size="small"
-          value={params.from ?? ''}
+          value={params.dateFrom ?? ''}
           onChange={(e) => {
-            setParams((p) => ({ ...p, from: e.target.value || undefined, page: 1 }));
+            setParams((p) => ({ ...p, dateFrom: e.target.value || undefined, page: 1 }));
           }}
           slotProps={{ inputLabel: { shrink: true } }}
         />
@@ -135,9 +135,9 @@ function AuditLogContent(): ReactElement {
           label="To"
           type="date"
           size="small"
-          value={params.to ?? ''}
+          value={params.dateTo ?? ''}
           onChange={(e) => {
-            setParams((p) => ({ ...p, to: e.target.value || undefined, page: 1 }));
+            setParams((p) => ({ ...p, dateTo: e.target.value || undefined, page: 1 }));
           }}
           slotProps={{ inputLabel: { shrink: true } }}
         />
@@ -169,9 +169,9 @@ function AuditLogContent(): ReactElement {
               items.map((event) => (
                 <TableRow key={event.id}>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    {formatTimestamp(event.createdAt)}
+                    {formatTimestamp(event.timestamp)}
                   </TableCell>
-                  <TableCell>{event.actorName}</TableCell>
+                  <TableCell>{event.actorId}</TableCell>
                   <TableCell>
                     <Chip label={event.action} size="small" />
                   </TableCell>

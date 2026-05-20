@@ -279,7 +279,7 @@ export function ContentListPage({ type }: ContentListPageProps): ReactElement {
                       </TableCell>
                     </TableRow>
                   )
-                : data?.items.map((item) => (
+                : (data?.items ?? []).map((item) => (
                     <TableRow
                       key={item.id}
                       hover
@@ -295,7 +295,7 @@ export function ContentListPage({ type }: ContentListPageProps): ReactElement {
                         <StatusChip status={item.status} />
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">{item.author.name}</Typography>
+                        <Typography variant="body2">{item.author?.name ?? item.authorId}</Typography>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" color="text.secondary">

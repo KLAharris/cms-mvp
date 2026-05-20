@@ -12,30 +12,32 @@ import { MediaPickerDialog } from '../src/shared/components/MediaPickerDialog';
 import { lightTheme } from '../src/shared/theme/theme';
 import type { MediaItem, MediaListResponse } from '../src/features/media/types/media.types';
 
-const mockUploader = { id: 'user-1', name: 'Alice', email: 'alice@example.com' };
-
 const mockItems: MediaItem[] = [
   {
     id: 'media-1',
     filename: 'hero.jpg',
     mimeType: 'image/jpeg',
-    size: 102400,
-    url: 'https://cdn.example.com/hero.jpg',
-    uploadedBy: mockUploader,
-    usedInCount: 0,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
+    sizeBytes: 102400,
+    uploadedBy: 'user-1',
+    uploadedAt: '2024-01-01T00:00:00Z',
+    status: 'ready',
+    requiresSanitization: false,
+    variants: {
+      original: { url: 'https://cdn.example.com/hero.jpg', expiresAt: '2025-01-01T00:00:00Z' },
+    },
   },
   {
     id: 'media-2',
     filename: 'report.pdf',
     mimeType: 'application/pdf',
-    size: 51200,
-    url: 'https://cdn.example.com/report.pdf',
-    uploadedBy: mockUploader,
-    usedInCount: 0,
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-02T00:00:00Z',
+    sizeBytes: 51200,
+    uploadedBy: 'user-1',
+    uploadedAt: '2024-01-02T00:00:00Z',
+    status: 'ready',
+    requiresSanitization: false,
+    variants: {
+      original: { url: 'https://cdn.example.com/report.pdf', expiresAt: '2025-01-01T00:00:00Z' },
+    },
   },
 ];
 

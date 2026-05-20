@@ -41,6 +41,7 @@ export function StatusChip({ status }: StatusChipProps): ReactElement {
   const config = STATUS_CONFIG[status];
   return (
     <Chip
+      data-testid="status-chip"
       label={config.label}
       size="small"
       sx={{

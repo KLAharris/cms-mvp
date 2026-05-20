@@ -79,6 +79,7 @@ function redisConnectionFromUrl(redisUrl: string): RedisConnection {
   return {
     host: parsed.hostname,
     port: Number(parsed.port || 6379),
+    enableReadyCheck: false,
     ...(password !== undefined ? { password } : {}),
   };
 }

@@ -19,26 +19,38 @@ export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
 export type MediaFilterType = 'all' | 'image' | 'pdf';
 
-export interface MediaUploader {
-  id: string;
-  name: string;
-  email: string;
+export interface MediaVariantUrl {
+  url: string;
+  expiresAt: string;
 }
 
 export interface MediaItem {
   id: string;
   filename: string;
   mimeType: string;
-  size: number;
-  url: string;
+  sizeBytes: number;
   altText?: string;
   caption?: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  status: string;
   width?: number;
   height?: number;
-  uploadedBy: MediaUploader;
-  usedInCount: number;
-  createdAt: string;
-  updatedAt: string;
+  requiresSanitization: boolean;
+  variants: {
+    original?: MediaVariantUrl;
+    thumbnail?: MediaVariantUrl;
+    medium?: MediaVariantUrl;
+  };
+}
+
+export function getMediaUrl(item: MediaItem): string {
+  return (
+    item.variants.original?.url ??
+    item.variants.medium?.url ??
+    item.variants.thumbnail?.url ??
+    ''
+  );
 }
 
 export interface MediaListParams {
@@ -58,19 +70,17 @@ export interface MediaListResponse {
 export interface PresignRequest {
   filename: string;
   mimeType: string;
+  sizeBytes: number;
 }
 
 export interface PresignResponse {
+  mediaId: string;
   uploadUrl: string;
-  key: string;
+  storageKey: string;
 }
 
 export interface FinalizeMediaRequest {
-  key: string;
-  filename: string;
-  mimeType: string;
-  size: number;
-  altText?: string;
+  mediaId: string;
 }
 
 export interface UpdateMediaRequest {

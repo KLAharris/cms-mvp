@@ -5,7 +5,7 @@ import { JobEnqueuer, JobPayload } from '../ports/job-enqueuer.port';
 export class BullMQJobEnqueuer implements JobEnqueuer {
   private readonly queues = new Map<string, Queue>();
 
-  constructor(private readonly redisConnection: { host: string; port: number }) {}
+  constructor(private readonly redisConnection: { host: string; port: number; password?: string; enableReadyCheck?: boolean }) {}
 
   async enqueue(queueName: string, payload: JobPayload): Promise<void> {
     const queue = this.getOrCreateQueue(queueName);

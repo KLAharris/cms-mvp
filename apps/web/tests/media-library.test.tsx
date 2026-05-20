@@ -13,30 +13,32 @@ import { lightTheme } from '../src/shared/theme/theme';
 import { useAuthStore } from '../src/features/auth/store/auth.store';
 import type { MediaItem, MediaListResponse } from '../src/features/media/types/media.types';
 
-const mockUploader = { id: 'user-1', name: 'Alice', email: 'alice@example.com' };
-
 const mockItems: MediaItem[] = [
   {
     id: 'media-1',
     filename: 'hero.jpg',
     mimeType: 'image/jpeg',
-    size: 102400,
-    url: 'https://cdn.example.com/hero.jpg',
-    uploadedBy: mockUploader,
-    usedInCount: 2,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
+    sizeBytes: 102400,
+    uploadedBy: 'user-1',
+    uploadedAt: '2024-01-01T00:00:00Z',
+    status: 'ready',
+    requiresSanitization: false,
+    variants: {
+      original: { url: 'https://cdn.example.com/hero.jpg', expiresAt: '2025-01-01T00:00:00Z' },
+    },
   },
   {
     id: 'media-2',
     filename: 'team.png',
     mimeType: 'image/png',
-    size: 204800,
-    url: 'https://cdn.example.com/team.png',
-    uploadedBy: mockUploader,
-    usedInCount: 0,
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-02T00:00:00Z',
+    sizeBytes: 204800,
+    uploadedBy: 'user-1',
+    uploadedAt: '2024-01-02T00:00:00Z',
+    status: 'ready',
+    requiresSanitization: false,
+    variants: {
+      original: { url: 'https://cdn.example.com/team.png', expiresAt: '2025-01-01T00:00:00Z' },
+    },
   },
 ];
 
@@ -182,12 +184,10 @@ describe('MediaLibraryPage', () => {
     server.use(
       http.get('/api/admin/media', () => HttpResponse.json(mockListResponse)),
       http.post('/api/admin/media/presign', () =>
-        HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', key: 'key' }),
+        HttpResponse.json({ uploadUrl: 'http://localhost/s3/upload', mediaId: 'new-id', storageKey: 'media/key' }),
       ),
       http.put('http://localhost/s3/upload', () => new HttpResponse(null, { status: 200 })),
-      http.post('/api/admin/media', () =>
-        HttpResponse.json(mockItems[0]),
-      ),
+      http.post('/api/admin/media', () => new HttpResponse(null, { status: 202 })),
     );
 
     renderMediaLibrary();

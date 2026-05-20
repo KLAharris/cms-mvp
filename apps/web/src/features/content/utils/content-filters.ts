@@ -31,7 +31,7 @@ export function buildContentParams(
   }
 
   if (filters.title.length > 0) {
-    params.title = filters.title;
+    params.titleSearch = filters.title;
   }
 
   return params;

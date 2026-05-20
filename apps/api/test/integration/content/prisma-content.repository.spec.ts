@@ -45,7 +45,7 @@ describe.skipIf(!hasDatabase)('PrismaContentRepository', () => {
       datasources: { db: { url: process.env.TEST_DATABASE_URL } },
     });
     repository = new PrismaContentRepository(prisma);
-  });
+  }, 30000);
 
   beforeEach(async () => {
     await prisma.contentVersion.deleteMany();

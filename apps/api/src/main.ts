@@ -14,6 +14,10 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe());
+  app.enableCors({
+    origin: process.env.FRONTEND_BASE_URL ?? 'http://localhost:5173',
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('CMS Public API')

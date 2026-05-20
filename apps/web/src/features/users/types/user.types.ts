@@ -20,6 +20,7 @@ export interface UserListResponse {
 
 export interface InviteUserRequest {
   email: string;
+  name: string;
   role: UserRole;
 }
 

@@ -6,7 +6,7 @@ import { type ReactNode } from 'react';
 
 import { server } from './msw-setup';
 import { useContentList } from '../src/features/content/hooks/useContentList';
-import type { ContentListResponse, ContentItem } from '../src/features/content/types/content.types';
+import type { ContentItem } from '../src/features/content/types/content.types';
 
 const mockItems: ContentItem[] = [
   {
@@ -15,6 +15,7 @@ const mockItems: ContentItem[] = [
     slug: 'article-one',
     type: 'article',
     status: 'published',
+    authorId: 'user-1',
     author: { id: 'user-1', name: 'Alice', email: 'alice@example.com' },
     tags: [],
     createdAt: '2024-01-01T00:00:00Z',
@@ -26,6 +27,7 @@ const mockItems: ContentItem[] = [
     slug: 'article-two',
     type: 'article',
     status: 'draft',
+    authorId: 'user-1',
     author: { id: 'user-1', name: 'Alice', email: 'alice@example.com' },
     tags: ['react'],
     createdAt: '2024-01-03T00:00:00Z',
@@ -37,6 +39,7 @@ const mockItems: ContentItem[] = [
     slug: 'article-three',
     type: 'article',
     status: 'in_review',
+    authorId: 'user-2',
     author: { id: 'user-2', name: 'Bob', email: 'bob@example.com' },
     tags: [],
     createdAt: '2024-01-05T00:00:00Z',
@@ -44,11 +47,14 @@ const mockItems: ContentItem[] = [
   },
 ];
 
-const mockListResponse: ContentListResponse = {
-  items: mockItems,
-  total: 3,
-  page: 1,
-  pageSize: 20,
+const mockListEnvelope = {
+  data: mockItems,
+  pagination: {
+    page: 1,
+    page_size: 20,
+    total: 3,
+    total_pages: 1,
+  },
 };
 
 function makeWrapper() {
@@ -69,7 +75,7 @@ describe('useContentList', () => {
   it('returns data when API responds successfully', async () => {
     server.use(
       http.get('/api/admin/content', () => {
-        return HttpResponse.json(mockListResponse);
+        return HttpResponse.json(mockListEnvelope);
       }),
     );
 
@@ -94,7 +100,7 @@ describe('useContentList', () => {
     server.use(
       http.get('/api/admin/content', async () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        return HttpResponse.json(mockListResponse);
+        return HttpResponse.json(mockListEnvelope);
       }),
     );
 
@@ -132,7 +138,10 @@ describe('useContentList', () => {
     server.use(
       http.get('/api/admin/content', ({ request }) => {
         capturedUrl = request.url;
-        return HttpResponse.json({ items: [], total: 0, page: 1, pageSize: 20 });
+        return HttpResponse.json({
+          data: [],
+          pagination: { page: 1, page_size: 20, total: 0, total_pages: 0 },
+        });
       }),
     );
 

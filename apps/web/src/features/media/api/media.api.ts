@@ -14,11 +14,6 @@ export async function listMedia(params: MediaListParams): Promise<MediaListRespo
   return response.data;
 }
 
-export async function getMedia(id: string): Promise<MediaItem> {
-  const response = await api.get<MediaItem>(`/api/admin/media/${id}`);
-  return response.data;
-}
-
 export async function presignMedia(req: PresignRequest): Promise<PresignResponse> {
   const response = await api.post<PresignResponse>('/api/admin/media/presign', req);
   return response.data;
@@ -35,9 +30,8 @@ export async function uploadToStorage(uploadUrl: string, file: File): Promise<vo
   }
 }
 
-export async function finalizeMedia(req: FinalizeMediaRequest): Promise<MediaItem> {
-  const response = await api.post<MediaItem>('/api/admin/media', req);
-  return response.data;
+export async function finalizeMedia(req: FinalizeMediaRequest): Promise<void> {
+  await api.post('/api/admin/media', req);
 }
 
 export async function updateMedia(id: string, data: UpdateMediaRequest): Promise<MediaItem> {
@@ -50,5 +44,5 @@ export async function deleteMedia(id: string): Promise<void> {
 }
 
 export async function bulkDeleteMedia(ids: string[]): Promise<void> {
-  await api.delete('/api/admin/media', { data: { ids } });
+  await Promise.all(ids.map((id) => deleteMedia(id)));
 }

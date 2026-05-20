@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { type ReactElement, useState, useDeferredValue } from 'react';
 
+import { getMediaUrl } from '../../features/media/types/media.types';
 import { useMedia } from '../../features/media/hooks/useMedia';
 import type { MediaFilterType, MediaItem } from '../../features/media/types/media.types';
 
@@ -124,7 +125,7 @@ export function MediaPickerDialog({
                   {item.mimeType.startsWith('image/') ? (
                     <Box
                       component="img"
-                      src={item.url}
+                      src={getMediaUrl(item)}
                       alt={item.altText ?? item.filename}
                       sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />

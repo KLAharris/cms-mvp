@@ -11,7 +11,7 @@ import { server } from './msw-setup';
 import { ContentListPage } from '../src/features/content/pages/ContentListPage';
 import { lightTheme } from '../src/shared/theme/theme';
 import { useAuthStore } from '../src/features/auth/store/auth.store';
-import type { ContentListResponse, ContentItem } from '../src/features/content/types/content.types';
+import type { ContentItem } from '../src/features/content/types/content.types';
 
 const mockItems: ContentItem[] = [
   {
@@ -20,6 +20,7 @@ const mockItems: ContentItem[] = [
     slug: 'my-first-article',
     type: 'article',
     status: 'published',
+    authorId: 'user-1',
     author: { id: 'user-1', name: 'Alice Smith', email: 'alice@example.com' },
     tags: [],
     createdAt: '2024-01-01T00:00:00Z',
@@ -31,6 +32,7 @@ const mockItems: ContentItem[] = [
     slug: 'draft-post',
     type: 'article',
     status: 'draft',
+    authorId: 'user-2',
     author: { id: 'user-2', name: 'Bob Jones', email: 'bob@example.com' },
     tags: [],
     createdAt: '2024-01-02T00:00:00Z',
@@ -38,11 +40,24 @@ const mockItems: ContentItem[] = [
   },
 ];
 
-const mockListResponse: ContentListResponse = {
-  items: mockItems,
-  total: 2,
-  page: 1,
-  pageSize: 20,
+const mockListEnvelope = {
+  data: mockItems,
+  pagination: {
+    page: 1,
+    page_size: 20,
+    total: 2,
+    total_pages: 1,
+  },
+};
+
+const emptyListEnvelope = {
+  data: [],
+  pagination: {
+    page: 1,
+    page_size: 20,
+    total: 0,
+    total_pages: 0,
+  },
 };
 
 function renderContentList(type: 'article' | 'page' = 'article') {
@@ -87,7 +102,7 @@ describe('ContentListPage', () => {
 
   it('renders page title "Articles" for article type', () => {
     server.use(
-      http.get('/api/admin/content', () => HttpResponse.json(mockListResponse)),
+      http.get('/api/admin/content', () => HttpResponse.json(mockListEnvelope)),
     );
 
     renderContentList('article');
@@ -97,7 +112,7 @@ describe('ContentListPage', () => {
   it('renders page title "Pages" for page type', () => {
     server.use(
       http.get('/api/admin/content', () =>
-        HttpResponse.json({ items: [], total: 0, page: 1, pageSize: 20 }),
+        HttpResponse.json(emptyListEnvelope),
       ),
     );
 
@@ -107,7 +122,7 @@ describe('ContentListPage', () => {
 
   it('renders search field', () => {
     server.use(
-      http.get('/api/admin/content', () => HttpResponse.json(mockListResponse)),
+      http.get('/api/admin/content', () => HttpResponse.json(mockListEnvelope)),
     );
 
     renderContentList();
@@ -116,7 +131,7 @@ describe('ContentListPage', () => {
 
   it('renders filter chips: All, Draft, In Review, Published, Mine, Last 30 days', () => {
     server.use(
-      http.get('/api/admin/content', () => HttpResponse.json(mockListResponse)),
+      http.get('/api/admin/content', () => HttpResponse.json(mockListEnvelope)),
     );
 
     renderContentList();
@@ -131,7 +146,7 @@ describe('ContentListPage', () => {
 
   it('renders table with columns Title, Status, Author, Updated', async () => {
     server.use(
-      http.get('/api/admin/content', () => HttpResponse.json(mockListResponse)),
+      http.get('/api/admin/content', () => HttpResponse.json(mockListEnvelope)),
     );
 
     renderContentList();
@@ -155,7 +170,7 @@ describe('ContentListPage', () => {
     server.use(
       http.get('/api/admin/content', async () => {
         await new Promise(() => undefined); // never resolves
-        return HttpResponse.json(mockListResponse);
+        return HttpResponse.json(mockListEnvelope);
       }),
     );
 
@@ -169,7 +184,7 @@ describe('ContentListPage', () => {
   it('renders empty state when no items', async () => {
     server.use(
       http.get('/api/admin/content', () =>
-        HttpResponse.json({ items: [], total: 0, page: 1, pageSize: 20 }),
+        HttpResponse.json(emptyListEnvelope),
       ),
     );
 
@@ -182,7 +197,7 @@ describe('ContentListPage', () => {
 
   it('renders items in table when data loads', async () => {
     server.use(
-      http.get('/api/admin/content', () => HttpResponse.json(mockListResponse)),
+      http.get('/api/admin/content', () => HttpResponse.json(mockListEnvelope)),
     );
 
     renderContentList();
@@ -195,7 +210,7 @@ describe('ContentListPage', () => {
 
   it('shows status chip with correct label', async () => {
     server.use(
-      http.get('/api/admin/content', () => HttpResponse.json(mockListResponse)),
+      http.get('/api/admin/content', () => HttpResponse.json(mockListEnvelope)),
     );
 
     renderContentList();
@@ -216,19 +231,20 @@ describe('ContentListPage', () => {
     const user = userEvent.setup();
 
     server.use(
-      http.get('/api/admin/content', () => HttpResponse.json(mockListResponse)),
+      http.get('/api/admin/content', () => HttpResponse.json(mockListEnvelope)),
       http.post('/api/admin/content', () =>
-        HttpResponse.json({
+        HttpResponse.json({ data: {
           id: 'new-id',
           title: 'Untitled',
           slug: 'untitled',
           type: 'article',
           status: 'draft',
+          authorId: 'user-1',
           author: { id: 'user-1', name: 'Alice', email: 'alice@example.com' },
           tags: [],
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-01T00:00:00Z',
-        }),
+        } }),
       ),
     );
 

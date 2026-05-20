@@ -11,7 +11,7 @@ import { server } from './msw-setup';
 import { UsersPage } from '../src/features/users/pages/UsersPage';
 import { lightTheme } from '../src/shared/theme/theme';
 import { useAuthStore } from '../src/features/auth/store/auth.store';
-import type { UserItem, UserListResponse } from '../src/features/users/types/user.types';
+import type { UserItem } from '../src/features/users/types/user.types';
 
 const mockUsers: UserItem[] = [
   {
@@ -41,11 +41,9 @@ const mockUsers: UserItem[] = [
   },
 ];
 
-const mockListResponse: UserListResponse = {
-  items: mockUsers,
-  total: 3,
-  page: 1,
-  pageSize: 20,
+const mockListEnvelope = {
+  data: mockUsers,
+  pagination: { page: 1, page_size: 20, total: 3, total_pages: 1 },
 };
 
 function renderUsers(role: string = 'admin') {
@@ -83,7 +81,7 @@ function renderUsers(role: string = 'admin') {
 
 describe('UsersPage', () => {
   beforeEach(() => {
-    server.use(http.get('/api/admin/users', () => HttpResponse.json(mockListResponse)));
+    server.use(http.get('/api/admin/users', () => HttpResponse.json(mockListEnvelope)));
   });
 
   it('redirects non-admin users to dashboard', () => {
@@ -159,22 +157,16 @@ describe('UsersPage', () => {
 
   it('submits invite and shows success', async () => {
     server.use(
-      http.post('/api/admin/users/invite', () =>
-        HttpResponse.json({
-          id: 'user-new',
-          name: 'New User',
-          email: 'new@example.com',
-          role: 'author',
-          status: 'invited',
-          createdAt: '2024-01-04T00:00:00Z',
-        }),
-      ),
+      http.post('/api/admin/users', () => new HttpResponse(null, { status: 201 })),
     );
 
     const user = userEvent.setup();
     renderUsers();
 
     await user.click(screen.getByRole('button', { name: /invite user/i }));
+
+    const nameInput = screen.getByLabelText(/name/i);
+    await user.type(nameInput, 'New User');
 
     const emailInput = screen.getByLabelText(/email/i);
     await user.type(emailInput, 'new@example.com');

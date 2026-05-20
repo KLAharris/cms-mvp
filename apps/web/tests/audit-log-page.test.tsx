@@ -11,36 +11,34 @@ import { server } from './msw-setup';
 import { AuditLogPage } from '../src/features/audit/pages/AuditLogPage';
 import { lightTheme } from '../src/shared/theme/theme';
 import { useAuthStore } from '../src/features/auth/store/auth.store';
-import type { AuditEvent, AuditListResponse } from '../src/features/audit/types/audit.types';
+import type { AuditEvent } from '../src/features/audit/types/audit.types';
 
 const mockEvents: AuditEvent[] = [
   {
     id: 'event-1',
     action: 'content.published',
-    actor: { id: 'user-1', name: 'Alice Smith', email: 'alice@example.com' },
-    actorName: 'Alice Smith',
+    actorId: 'user-alice',
+    actorIp: '127.0.0.1',
     targetType: 'content',
-    targetTitle: 'Q2 Report',
+    targetId: 'content-1',
     summary: 'Published article "Q2 Report"',
-    createdAt: '2024-06-01T10:00:00Z',
+    timestamp: '2024-06-01T10:00:00Z',
   },
   {
     id: 'event-2',
     action: 'user.invited',
-    actor: { id: 'user-1', name: 'Alice Smith', email: 'alice@example.com' },
-    actorName: 'Alice Smith',
+    actorId: 'user-alice',
+    actorIp: '127.0.0.1',
     targetType: 'user',
-    targetTitle: 'bob@example.com',
+    targetId: 'user-new',
     summary: 'Invited user bob@example.com',
-    createdAt: '2024-06-01T09:00:00Z',
+    timestamp: '2024-06-01T09:00:00Z',
   },
 ];
 
-const mockResponse: AuditListResponse = {
-  items: mockEvents,
-  total: 2,
-  page: 1,
-  pageSize: 20,
+const mockEnvelope = {
+  data: mockEvents,
+  pagination: { page: 1, page_size: 20, total: 2, total_pages: 1 },
 };
 
 function renderAuditLog(role: string = 'admin') {
@@ -78,7 +76,7 @@ function renderAuditLog(role: string = 'admin') {
 
 describe('AuditLogPage', () => {
   beforeEach(() => {
-    server.use(http.get('/api/admin/audit', () => HttpResponse.json(mockResponse)));
+    server.use(http.get('/api/admin/audit', () => HttpResponse.json(mockEnvelope)));
   });
 
   it('redirects non-admin users to dashboard', () => {
@@ -95,7 +93,7 @@ describe('AuditLogPage', () => {
     renderAuditLog();
 
     await waitFor(() => {
-      expect(screen.getAllByText('Alice Smith').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('user-alice').length).toBeGreaterThan(0);
     });
 
     expect(screen.getByRole('columnheader', { name: /timestamp/i })).toBeInTheDocument();
@@ -109,7 +107,7 @@ describe('AuditLogPage', () => {
     renderAuditLog();
 
     await waitFor(() => {
-      expect(screen.getAllByText('Alice Smith').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('user-alice').length).toBeGreaterThan(0);
     });
 
     expect(screen.getByText(/published article/i)).toBeInTheDocument();
@@ -152,7 +150,7 @@ describe('AuditLogPage', () => {
     server.use(
       http.get('/api/admin/audit', ({ request }) => {
         capturedUrl = request.url;
-        return HttpResponse.json({ items: [], total: 0, page: 1, pageSize: 20 });
+        return HttpResponse.json({ data: [], pagination: { page: 1, page_size: 20, total: 0, total_pages: 0 } });
       }),
     );
 
@@ -162,7 +160,7 @@ describe('AuditLogPage', () => {
     await user.type(actorInput, 'alice');
 
     await waitFor(() => {
-      expect(capturedUrl).toContain('actor=alice');
+      expect(capturedUrl).toContain('actorId=alice');
     });
   });
 

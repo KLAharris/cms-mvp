@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -10,6 +11,7 @@ import {
   FormHelperText,
   InputBase,
   Paper,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
@@ -20,6 +22,7 @@ import Link from '@tiptap/extension-link';
 import CodeBlock from '@tiptap/extension-code-block';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Underline from '@tiptap/extension-underline';
+import { useQueryClient } from '@tanstack/react-query';
 import { type ReactElement, useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 
@@ -28,7 +31,9 @@ import { StatusChip } from '../components/StatusChip';
 import { useAuthStore } from '../../auth/store/auth.store';
 import type { ContentType } from '../types/content.types';
 import { updateContent } from '../api/content.api';
+import { slugify } from '../utils/slugify';
 import { MediaPickerDialog } from '../../../shared/components/MediaPickerDialog';
+import { getMediaUrl } from '../../media/types/media.types';
 import type { MediaItem } from '../../media/types/media.types';
 
 interface ContentEditorPageProps {
@@ -204,6 +209,7 @@ function TipTapToolbar({ editor }: { editor: Editor }): ReactElement {
 export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElement {
   const { id = 'new' } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const role = user?.role ?? 'author';
 
@@ -220,9 +226,11 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
   const { register, watch, setValue, formState: { isDirty } } = form;
   const titleValue = watch('title');
   const slugValue = watch('slug');
+  const categoryValue = watch('category');
   const metaTitle = watch('seo.metaTitle');
   const metaDescription = watch('seo.metaDescription');
 
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -266,17 +274,20 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
 
   const handleSaveDraft = useCallback(() => {
     if (!content) return;
-    void updateContent(content.id, {
+    updateContent(content.id, {
       title: titleValue,
-      slug: slugValue,
+      slug: slugify(slugValue),
       body: editor.getJSON(),
-      seo: {
-        metaTitle: metaTitle,
-        metaDescription: metaDescription,
-      },
+      seoTitle: metaTitle,
+      seoDescription: metaDescription,
       tags,
+      category: categoryValue || null,
+    }).then(() => {
+      void queryClient.invalidateQueries({ queryKey: ['content'] });
+    }).catch(() => {
+      setSaveError('Failed to save draft. Please try again.');
     });
-  }, [content, titleValue, slugValue, editor, metaTitle, metaDescription, tags]);
+  }, [content, titleValue, slugValue, editor, metaTitle, metaDescription, tags, categoryValue, queryClient]);
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -350,6 +361,10 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
           {/* Slug field */}
           <TextField
             {...register('slug')}
+            value={slugValue}
+            onChange={(e) => {
+              setValue('slug', slugify(e.target.value), { shouldDirty: true });
+            }}
             label="Slug"
             size="small"
             fullWidth
@@ -500,7 +515,7 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
               <Box sx={{ mb: 1 }}>
                 <Box
                   component="img"
-                  src={socialImage.url}
+                  src={getMediaUrl(socialImage)}
                   alt={socialImage.altText ?? socialImage.filename}
                   sx={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 1, mb: 0.5 }}
                 />
@@ -530,7 +545,7 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
               <Box>
                 <Box
                   component="img"
-                  src={featuredImage.url}
+                  src={getMediaUrl(featuredImage)}
                   alt={featuredImage.altText ?? featuredImage.filename}
                   sx={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 1, mb: 0.5 }}
                 />
@@ -660,6 +675,16 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={saveError !== null}
+        autoHideDuration={4000}
+        onClose={() => { setSaveError(null); }}
+      >
+        <Alert severity="error" onClose={() => { setSaveError(null); }}>
+          {saveError}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

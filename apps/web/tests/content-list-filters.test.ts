@@ -72,13 +72,13 @@ describe('buildContentParams', () => {
   it('adds title search to params when title is non-empty', () => {
     const filters: FilterState = { ...defaultFilters, title: 'React hooks' };
     const params = buildContentParams(type, filters);
-    expect(params.title).toBe('React hooks');
+    expect(params.titleSearch).toBe('React hooks');
   });
 
-  it('omits title from params when title is empty string', () => {
+  it('omits titleSearch from params when title is empty string', () => {
     const filters: FilterState = { ...defaultFilters, title: '' };
     const params = buildContentParams(type, filters);
-    expect(params).not.toHaveProperty('title');
+    expect(params).not.toHaveProperty('titleSearch');
   });
 
   it('includes page number in params', () => {
@@ -106,7 +106,7 @@ describe('buildContentParams', () => {
       status: 'draft',
       mine: true,
       lastDays: 30,
-      title: 'test',
+      titleSearch: 'test',
       page: 2,
     });
   });
