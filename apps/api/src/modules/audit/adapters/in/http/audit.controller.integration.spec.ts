@@ -103,9 +103,9 @@ describe('AuditController integration', () => {
       ],
       pagination: {
         page: 1,
-        pageSize: 10,
+        page_size: 10,
         total: 1,
-        totalPages: 1,
+        total_pages: 1,
       },
     });
   });
