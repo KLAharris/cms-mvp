@@ -1,6 +1,3 @@
-# Private specification docs (not for public repo)
-docs/
-
 # Dependencies
 node_modules/
 .pnp
