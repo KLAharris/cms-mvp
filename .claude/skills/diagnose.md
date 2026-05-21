@@ -31,64 +31,61 @@ Open `docs/runbook.md` and navigate to the matching section. Follow the **Diagno
 
 Check first whether it is a new variant of a known issue (e.g., a different module with a depcruise violation — still use §7 fix pattern). If it is, apply that fix.
 
-If genuinely new, run the two-phase investigation below.
+If genuinely new, run the three-phase investigation below.
 
 ---
 
-### Phase A — Adaptive Questioning
+### Phase A — Adaptive Questioning (code-first)
 
 Goal: collect enough context so Phase B (5 Whys) starts with facts, not guesses.
 
-Ask **one question at a time**. After each answer, decide the next question based on what was just learned. Stop when you have: error category, environment, full error text, and what changed recently.
+**Before asking the user anything**, investigate the code autonomously:
 
-**Before asking any question:** check if a partial `docs/rootcause/<slug>.json` already exists with a `diagnostics[]` array. If it does, read those answers and skip questions already covered.
+1. Read the file and line number from the stack trace
+2. Run `git log --oneline -5` to check recent changes
+3. Run `git diff HEAD~1` to see what changed
+4. Check relevant config files (`.env.example`, `vitest.config.ts`, `ci.yml`)
+5. Grep for the failing symbol across the codebase
 
-Branch on the first answer:
+Only ask the user a question if the code investigation does not reveal the answer. Ask one question at a time and branch based on the answer:
 
 ```
-Where is it failing?
-├── CI only
-│   ├── Which CI step? (lint / typecheck / test / build)
-│   ├── Full error output from the failing step?
-│   └── Did it pass on the last push? What changed since?
-├── Local only
-│   ├── What command triggered it?
-│   ├── Full error output?
-│   └── Any recent env changes? (.env, docker, packages)
-└── Both CI and local
-    ├── Full error output?
-    ├── Does it fail consistently or intermittently?
-    └── What changed recently? (schema, deps, config)
+Where is it failing? (ask only if stack trace doesn't make it obvious)
+├── CI only  → check .github/workflows/ci.yml and recent git log
+├── Local only → check .env, docker-compose, recent file changes
+└── Both → check code change that affected both environments
 ```
 
-Store each answer immediately into `diagnostics[]` in the rootcause JSON (create the file if it does not exist yet):
+Store each finding and each user answer immediately into `diagnostics[]` in the rootcause JSON (create the file if it does not exist yet):
 
 ```json
 {
   "id": "<slug>",
   "date": "<today>",
   "diagnostics": [
-    { "q": "Where is it failing?", "a": "CI only" },
-    { "q": "Which CI step?", "a": "Test (API)" }
+    { "q": "Stack trace file read", "a": "Line 47: contentType accessed on undefined req.file" },
+    { "q": "git log", "a": "Last commit modified media.controller.ts" }
   ]
 }
 ```
 
+Stop Phase A when you have: error category, affected file, and what changed recently.
+
 ---
 
-### Phase B — 5 Whys
+### Phase B — 5 Whys (autonomous — no user questions)
 
-Once Adaptive Questioning has enough context, drill to the root condition. Ask one why at a time and wait for the answer before continuing.
+Use the context gathered in Phase A to drill to the root condition. Do not ask the user anything in this phase — investigate the code for each answer.
 
-| Why | Probe |
-|-----|-------|
-| Why 1 | Why did this specific thing fail? (immediate cause) |
-| Why 2 | Why did that happen? (system behavior) |
-| Why 3 | Why was it allowed to happen? (missing constraint) |
-| Why 4 | Why didn't an existing check catch it? (prevention gap) |
-| Why 5 | What structural condition allows it to recur? (root condition) |
+| Why | Probe | How to investigate |
+|-----|-------|--------------------|
+| Why 1 | Why did this specific thing fail? | Read the failing file at the error line |
+| Why 2 | Why did that happen? | Trace the call chain — read callers and dependencies |
+| Why 3 | Why was it allowed to happen? | Check for missing guards, validation, or null checks |
+| Why 4 | Why didn't an existing check catch it? | Check CI config, depcruise rules, vitest config |
+| Why 5 | What structural condition allows it to recur? | Look for the same pattern elsewhere in the codebase |
 
-Stop at Why 5 or earlier if the root condition is clear. Do not keep asking after the root is found.
+Stop at Why 5 or earlier if the root condition is clear. If code investigation hits a dead end at any Why, state what was found and what is still unknown — do not ask the user to fill the gap unless it is truly unknowable from code alone.
 
 ---
 
@@ -119,9 +116,10 @@ Prevent: <one-line prevention note>
 
 **If new bug (Steps 4A–4C):**
 ```
-No match in signature table — starting investigation.
-[Adaptive Questioning questions appear here, one at a time]
-[5 Whys questions appear here, one at a time]
+No match in signature table — investigating.
+[Code findings from Phase A appear here]
+[Ask user only if code doesn't reveal the answer]
+[5 Whys conclusions appear here — no user questions]
 Root condition: <what was found>
 Rootcause entry written: docs/rootcause/<slug>.json
 Signature table updated: <new row added above>
