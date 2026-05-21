@@ -28,8 +28,8 @@ Objective, automatable checks only. No "looks reasonable" items.
 - [ ] Unit tests for all use cases using in-memory fakes
 - [ ] Integration tests for all HTTP endpoints using Supertest
 - [ ] No pre-existing tests broken
-- [ ] `pnpm --filter api tsc --noEmit` exits 0
-- [ ] `pnpm --filter api lint` exits 0
+- [ ] `pnpm --filter @cms/api typecheck` exits 0
+- [ ] `pnpm --filter @cms/api lint` exits 0
 
 ---
 
@@ -38,9 +38,9 @@ Objective, automatable checks only. No "looks reasonable" items.
 Every command must exit 0 at the end of the task:
 
 ```bash
-pnpm --filter api vitest run src/modules/<module>
-pnpm --filter api tsc --noEmit
-pnpm --filter api lint
+pnpm --filter @cms/api exec vitest run src/modules/<module>
+pnpm --filter @cms/api typecheck
+pnpm --filter @cms/api lint
 ```
 
 ---
