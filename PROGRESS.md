@@ -24,6 +24,19 @@ _Nothing blocked._
 
 ## Recently Done
 
+### 2026-05-21 — Operational tooling: runbook, skills, harness, rootcause entries
+
+- **Task checkboxes**: ticked all DoD items across slices 1–9 (19 task files). Two items in slice-01-phase1 left annotated with implementation notes — `RefreshToken` entity and `PrismaRefreshTokenRepository` were implemented as JWT + Redis blocklist (`redis-token-blocklist.adapter.ts`), same security properties achieved.
+- **slice-03-phase3 error fixed**: file was a duplicate of phase2 content. Rewrote with correct phase3 content (SEO metadata, content versioning, full-text search) — all items ticked.
+- **10 rootcause entries created** in `docs/rootcause/`: redis-teardown-race-condition, rate-limit-test-timeout, web-missing-dev-script, resend-eager-init-crash, notification-service-barrel-depcruise, media-security-missing-validation, depcruise-16-architecture-violations, integration-test-fk-cleanup-order, testcontainers-timeout-public-content, users-test-neon-cold-start.
+- **TipTap duplicate extension bug fixed**: `ContentEditorPage.tsx` was adding `Heading`, `CodeBlock`, `HorizontalRule` explicitly on top of `StarterKit` which already includes them. Fixed via `StarterKit.configure({ heading: false })` and removing the duplicate explicit imports.
+- **Runbook built**: `docs/runbook.md` — 10 sections, one per rootcause. Each section: symptom → diagnose → fix → prevent.
+- **Skills built**: `.claude/skills/diagnose.md` (matches error to rootcause + fix) and `.claude/skills/prevent.md` (runs 7 prevention checks: depcruise, typecheck, lint, barrel imports, test timeouts, console.log, auth guard coverage).
+- **CI harness updated** (`.github/workflows/ci.yml`): added `timeout-minutes: 20`, moved depcruise first, split API/web into separate named steps, added missing web test step.
+- **Claude Code hooks added** (`.claude/settings.json`): depcruise runs automatically after editing `apps/api/src/`; schema change reminder triggers on `prisma/schema.prisma` edits.
+- **vitest.config.ts updated**: `hookTimeout: 60000` (was 30000, covers RC1/RC9 Testcontainers), `testTimeout: 15000` (was default 5000, covers RC2 rate-limit test).
+- All checks passing: typecheck ✅ lint ✅ depcruise 0 violations ✅ API 707 tests ✅ web 141 tests ✅
+
 ### 2026-05-20 — CMS-020 · E2E tests, seed script, docs, accessibility
 - Playwright E2E suite added covering login → create → publish → public API flow
 - Seed script added (`apps/api/prisma/seed.ts`) for local dev and CI

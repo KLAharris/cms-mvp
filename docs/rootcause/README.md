@@ -13,6 +13,7 @@ One JSON file per bug, written before the fix is applied. Use this to spot recur
   "rootcause": "Why it happened — the actual technical reason",
   "fix": "What was changed to resolve it",
   "recurrence_risk": "low | medium | high",
+  "automation_gap": "Optional — if this bug cannot be caught by CI or hooks, explain why here",
   "tags": ["minio", "redis", "auth", "prisma", ...]
 }
 ```
