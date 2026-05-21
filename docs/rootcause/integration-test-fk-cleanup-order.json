@@ -1,0 +1,10 @@
+{
+  "id": "integration-test-fk-cleanup-order",
+  "date": "2026-05-18",
+  "ticket": "CMS-012",
+  "symptom": "Audit module integration tests failed intermittently with foreign key constraint violations when run in parallel with other integration tests",
+  "rootcause": "The afterEach cleanup in integration tests deleted rows from parent tables before child tables had been cleaned up, violating FK constraints. When tests ran in parallel, cleanup from one test would conflict with active rows from another test's setup",
+  "fix": "Reversed the deletion order in cleanup hooks to respect FK constraints (children deleted before parents). Added per-test database isolation using transactions where feasible",
+  "recurrence_risk": "medium",
+  "tags": ["testing", "prisma", "integration", "foreign-key", "isolation", "testcontainers"]
+}

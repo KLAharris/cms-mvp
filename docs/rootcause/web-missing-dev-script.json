@@ -1,0 +1,10 @@
+{
+  "id": "web-missing-dev-script",
+  "date": "2026-05-19",
+  "ticket": "CMS-018",
+  "symptom": "pnpm --filter @cms/web dev failed with 'Missing script: dev'",
+  "rootcause": "apps/web/package.json was created without a dev script entry; only build and preview were declared",
+  "fix": "Added 'dev': 'vite' to the scripts section of apps/web/package.json",
+  "recurrence_risk": "low",
+  "tags": ["web", "config", "vite", "package.json"]
+}

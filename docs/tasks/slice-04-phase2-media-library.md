@@ -36,32 +36,32 @@ Requires Phase 1 (upload pipeline). Content module must be available for referen
 
 ### Application (`src/modules/media/application/`)
 
-- [ ] `ListMediaUseCase` — paginated, filters: uploadedBy, dateFrom, dateTo, search (filename)
-- [ ] `GetMediaUseCase` — single item with all metadata and variant URLs
-- [ ] `UpdateMediaMetadataUseCase` — update altText and/or caption
-- [ ] `DeleteMediaUseCase` — checks references, blocks delete if referenced; force flag for Admins
-- [ ] Unit tests with fakes
+- [x] `ListMediaUseCase` — paginated, filters: uploadedBy, dateFrom, dateTo, search (filename)
+- [x] `GetMediaUseCase` — single item with all metadata and variant URLs
+- [x] `UpdateMediaMetadataUseCase` — update altText and/or caption
+- [x] `DeleteMediaUseCase` — checks references, blocks delete if referenced; force flag for Admins
+- [x] Unit tests with fakes
 
 ### Persistence (`src/modules/media/adapters/out/persistence/`)
 
-- [ ] `PrismaMediaRepository` extended: findMany (with filters), update metadata, delete
-- [ ] Reference check query: find any non-deleted content item referencing this mediaId
-- [ ] Integration tests
+- [x] `PrismaMediaRepository` extended: findMany (with filters), update metadata, delete
+- [x] Reference check query: find any non-deleted content item referencing this mediaId
+- [x] Integration tests
 
 ### HTTP (`src/modules/media/adapters/in/http/`)
 
-- [ ] `GET /api/admin/media` — all roles, paginated + filters
-- [ ] `GET /api/admin/media/:id` — single item
-- [ ] `PATCH /api/admin/media/:id` — update altText/caption
-- [ ] `DELETE /api/admin/media/:id` — blocked if referenced; ?force=true Admin only
-- [ ] 409 when delete blocked by reference
-- [ ] Integration tests
+- [x] `GET /api/admin/media` — all roles, paginated + filters
+- [x] `GET /api/admin/media/:id` — single item
+- [x] `PATCH /api/admin/media/:id` — update altText/caption
+- [x] `DELETE /api/admin/media/:id` — blocked if referenced; ?force=true Admin only
+- [x] 409 when delete blocked by reference
+- [x] Integration tests
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/media` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/media` exits 0
 
 ---
 

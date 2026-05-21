@@ -40,41 +40,41 @@ Requires Slice 1 and Slice 2. No lifecycle transitions yet (Phase 2). No SEO fie
 
 ### Domain (`src/modules/content/domain/`)
 
-- [ ] `Content` entity with: id, type (article/page), title, slug, body, status (draft only for now), authorId, featuredImageId, tags, category, parentId, deletedAt, createdAt, updatedAt
-- [ ] `ContentType` and `ContentStatus` enums
-- [ ] Slug generation logic (URL-safe, title-derived)
-- [ ] Unit tests 100% on domain
+- [x] `Content` entity with: id, type (article/page), title, slug, body, status (draft only for now), authorId, featuredImageId, tags, category, parentId, deletedAt, createdAt, updatedAt
+- [x] `ContentType` and `ContentStatus` enums
+- [x] Slug generation logic (URL-safe, title-derived)
+- [x] Unit tests 100% on domain
 
 ### Application (`src/modules/content/application/`)
 
-- [ ] `CreateContentUseCase` — creates draft, auto-generates slug, enforces role
-- [ ] `UpdateContentUseCase` — updates fields, Author restricted to own content
-- [ ] `GetContentUseCase` — single item, RBAC applied
-- [ ] `ListContentUseCase` — filters: type, status, author, tag, date range; paginated 25/page max 100; title search
-- [ ] `DeleteContentUseCase` — soft delete (sets deletedAt)
-- [ ] Unit tests with fakes
+- [x] `CreateContentUseCase` — creates draft, auto-generates slug, enforces role
+- [x] `UpdateContentUseCase` — updates fields, Author restricted to own content
+- [x] `GetContentUseCase` — single item, RBAC applied
+- [x] `ListContentUseCase` — filters: type, status, author, tag, date range; paginated 25/page max 100; title search
+- [x] `DeleteContentUseCase` — soft delete (sets deletedAt)
+- [x] Unit tests with fakes
 
 ### Persistence (`src/modules/content/adapters/out/persistence/`)
 
-- [ ] `PrismaContentRepository` — save, findById, findMany (with filters), softDelete
-- [ ] Slug uniqueness enforced at DB level (unique index on type + slug)
-- [ ] Integration tests
+- [x] `PrismaContentRepository` — save, findById, findMany (with filters), softDelete
+- [x] Slug uniqueness enforced at DB level (unique index on type + slug)
+- [x] Integration tests
 
 ### HTTP (`src/modules/content/adapters/in/http/`)
 
-- [ ] `POST /api/admin/content` — Editor/Author/Admin
-- [ ] `GET /api/admin/content` — all roles, RBAC applied
-- [ ] `GET /api/admin/content/:id` — all roles, RBAC applied
-- [ ] `PATCH /api/admin/content/:id` — Editor/Author/Admin
-- [ ] `DELETE /api/admin/content/:id` — Editor/Admin
-- [ ] Slug collision returns 409
-- [ ] Integration tests
+- [x] `POST /api/admin/content` — Editor/Author/Admin
+- [x] `GET /api/admin/content` — all roles, RBAC applied
+- [x] `GET /api/admin/content/:id` — all roles, RBAC applied
+- [x] `PATCH /api/admin/content/:id` — Editor/Author/Admin
+- [x] `DELETE /api/admin/content/:id` — Editor/Admin
+- [x] Slug collision returns 409
+- [x] Integration tests
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
 
 ---
 

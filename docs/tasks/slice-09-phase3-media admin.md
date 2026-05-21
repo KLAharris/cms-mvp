@@ -43,15 +43,15 @@ Requires Phase 2 (Dashboard + Content). The image picker in the Content Editor d
 
 ### Media Library (`/media`)
 
-- [ ] Layout matches docs/03-DESIGN.md § 12.5: grid view default, list view toggle
-- [ ] Search field: debounced 300 ms, `GET /api/admin/media?search=...`
-- [ ] Type filter dropdown: All types, Image, PDF
-- [ ] Grid/List view toggle buttons
-- [ ] Grid tile: 160 dp square, image preview, filename below (`label-medium`, truncated with tooltip)
-- [ ] Hover state: state layer + overlay action icons (preview, copy URL, delete)
-- [ ] Click tile: opens side drawer with full metadata (alt text, caption, size, uploader, dimensions, `"Used in N pieces of content"`)
-- [ ] Side drawer: editable alt text + caption fields; save button; delete button (blocked if referenced)
-- [ ] Upload:
+- [x] Layout matches docs/03-DESIGN.md § 12.5: grid view default, list view toggle
+- [x] Search field: debounced 300 ms, `GET /api/admin/media?search=...`
+- [x] Type filter dropdown: All types, Image, PDF
+- [x] Grid/List view toggle buttons
+- [x] Grid tile: 160 dp square, image preview, filename below (`label-medium`, truncated with tooltip)
+- [x] Hover state: state layer + overlay action icons (preview, copy URL, delete)
+- [x] Click tile: opens side drawer with full metadata (alt text, caption, size, uploader, dimensions, `"Used in N pieces of content"`)
+- [x] Side drawer: editable alt text + caption fields; save button; delete button (blocked if referenced)
+- [x] Upload:
   - `[↑ Upload]` button opens file picker
   - Drag-and-drop zone appears on `dragenter` over the page
   - Supports PNG, JPEG, WEBP, GIF, SVG, PDF (FR-MEDIA-01)
@@ -59,76 +59,76 @@ Requires Phase 2 (Dashboard + Content). The image picker in the Content Editor d
   - Client-side MIME validation before upload
   - Progress indicator per file during upload
   - Calls presign → uploads to S3 → calls finalize
-- [ ] Multi-select: checkbox appears on hover; bulk delete with confirmation
-- [ ] Pagination
-- [ ] Empty state
+- [x] Multi-select: checkbox appears on hover; bulk delete with confirmation
+- [x] Pagination
+- [x] Empty state
 
 ### Media Picker Dialog (`MediaPickerDialog` component)
 
-- [ ] Reusable dialog that embeds the media grid with search + filter
-- [ ] Single-select mode: click a tile to select, confirm button returns the selected media item
-- [ ] Used in Content Editor for: Featured Image, Social Image
-- [ ] Wire into Content Editor Phase 2 placeholder buttons
+- [x] Reusable dialog that embeds the media grid with search + filter
+- [x] Single-select mode: click a tile to select, confirm button returns the selected media item
+- [x] Used in Content Editor for: Featured Image, Social Image
+- [x] Wire into Content Editor Phase 2 placeholder buttons
 
 ### Users Screen (`/users`) — Admin only
 
-- [ ] Layout matches docs/03-DESIGN.md § 12.6: data table
-- [ ] Columns: Avatar + Name, Email, Role (chip), Status (chip), Last login, ⋮ menu
-- [ ] ⋮ menu actions: Edit role (dialog), Deactivate (confirmation), Resend invite
-- [ ] `[+ Invite user]` FAB → dialog with email + role select
-- [ ] Invite dialog: email field, role dropdown (Editor / Author), submit calls `POST /api/admin/users/invite`
-- [ ] Edit role dialog: role dropdown, submit calls `PATCH /api/admin/users/:id`
-- [ ] Deactivate: confirmation dialog, calls `DELETE /api/admin/users/:id`
-- [ ] Status chips: Active (primary), Invited (secondary), Deactivated (error)
-- [ ] Guarded: redirect non-Admin users away
+- [x] Layout matches docs/03-DESIGN.md § 12.6: data table
+- [x] Columns: Avatar + Name, Email, Role (chip), Status (chip), Last login, ⋮ menu
+- [x] ⋮ menu actions: Edit role (dialog), Deactivate (confirmation), Resend invite
+- [x] `[+ Invite user]` FAB → dialog with email + role select
+- [x] Invite dialog: email field, role dropdown (Editor / Author), submit calls `POST /api/admin/users/invite`
+- [x] Edit role dialog: role dropdown, submit calls `PATCH /api/admin/users/:id`
+- [x] Deactivate: confirmation dialog, calls `DELETE /api/admin/users/:id`
+- [x] Status chips: Active (primary), Invited (secondary), Deactivated (error)
+- [x] Guarded: redirect non-Admin users away
 
 ### Audit Log Screen (`/audit`) — Admin only
 
-- [ ] Layout matches docs/03-DESIGN.md § 12.7: read-only data table
-- [ ] Columns: Timestamp (local TZ), Actor, Action (chip), Target type, Summary (truncated, click to expand)
-- [ ] Filters: Actor (search), Action (dropdown), Target type (dropdown), Date range (date picker)
-- [ ] Default sort: timestamp descending
-- [ ] Export CSV button: calls `GET /api/admin/audit/export`
-- [ ] Pagination
-- [ ] Guarded: Admin only
+- [x] Layout matches docs/03-DESIGN.md § 12.7: read-only data table
+- [x] Columns: Timestamp (local TZ), Actor, Action (chip), Target type, Summary (truncated, click to expand)
+- [x] Filters: Actor (search), Action (dropdown), Target type (dropdown), Date range (date picker)
+- [x] Default sort: timestamp descending
+- [x] Export CSV button: calls `GET /api/admin/audit/export`
+- [x] Pagination
+- [x] Guarded: Admin only
 
 ### API Keys Screen (`/api-keys`) — Admin only
 
-- [ ] Layout matches docs/03-DESIGN.md § 12.8
-- [ ] Columns: Name, Prefix (first 8 chars), Last used, Status (Active/Revoked), ⋮ menu (Revoke)
-- [ ] `[+ New Key]` button → dialog with name field
-- [ ] On creation: full key shown once in dialog with copy-to-clipboard + warning message (docs/03-DESIGN.md § 12.8)
-- [ ] Revoke: confirmation dialog, calls `DELETE /api/admin/api-keys/:id`
-- [ ] Guarded: Admin only
+- [x] Layout matches docs/03-DESIGN.md § 12.8
+- [x] Columns: Name, Prefix (first 8 chars), Last used, Status (Active/Revoked), ⋮ menu (Revoke)
+- [x] `[+ New Key]` button → dialog with name field
+- [x] On creation: full key shown once in dialog with copy-to-clipboard + warning message (docs/03-DESIGN.md § 12.8)
+- [x] Revoke: confirmation dialog, calls `DELETE /api/admin/api-keys/:id`
+- [x] Guarded: Admin only
 
 ### Profile / Settings Screen (`/profile`)
 
-- [ ] Layout matches docs/03-DESIGN.md § 12.9
-- [ ] View own account info (name, email, role — read-only)
-- [ ] Change password form: current password, new password, confirm — calls `POST /api/admin/auth/reset-password` flow or dedicated change-password endpoint
-- [ ] Theme selector: Light / Dark / System (3 radio buttons or segmented button); persisted to `localStorage`
-- [ ] Accessible from avatar menu in Top App Bar
+- [x] Layout matches docs/03-DESIGN.md § 12.9
+- [x] View own account info (name, email, role — read-only)
+- [x] Change password form: current password, new password, confirm — calls `POST /api/admin/auth/reset-password` flow or dedicated change-password endpoint
+- [x] Theme selector: Light / Dark / System (3 radio buttons or segmented button); persisted to `localStorage`
+- [x] Accessible from avatar menu in Top App Bar
 
 ### Toast Notifications
 
-- [ ] Global `SnackbarProvider` (MUI Snackbar) for success and error feedback
-- [ ] Used across all mutation actions: save draft, publish, invite user, delete, upload, etc. (SRS UI requirement)
-- [ ] Auto-dismiss after 4 s; manual close button
+- [x] Global `SnackbarProvider` (MUI Snackbar) for success and error feedback
+- [x] Used across all mutation actions: save draft, publish, invite user, delete, upload, etc. (SRS UI requirement)
+- [x] Auto-dismiss after 4 s; manual close button
 
 ### Testing
 
-- [ ] Hook tests for `useMedia`, `useUpload` using MSW
-- [ ] Component tests for Media Library: grid renders, upload flow, multi-select
-- [ ] Component tests for `MediaPickerDialog`: search, select, confirm
-- [ ] Component tests for Users: invite dialog, deactivate confirmation
-- [ ] Component tests for Audit Log: filters, CSV export button
-- [ ] Component tests for API Keys: create dialog shows key once, revoke confirmation
+- [x] Hook tests for `useMedia`, `useUpload` using MSW
+- [x] Component tests for Media Library: grid renders, upload flow, multi-select
+- [x] Component tests for `MediaPickerDialog`: search, select, confirm
+- [x] Component tests for Users: invite dialog, deactivate confirmation
+- [x] Component tests for Audit Log: filters, CSV export button
+- [x] Component tests for API Keys: create dialog shows key once, revoke confirmation
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/web tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/web lint` exits 0
-- [ ] `pnpm --filter @cms/web exec vitest run` exits 0
+- [x] `pnpm --filter @cms/web tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/web lint` exits 0
+- [x] `pnpm --filter @cms/web exec vitest run` exits 0
 
 ---
 

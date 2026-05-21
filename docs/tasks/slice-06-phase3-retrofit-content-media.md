@@ -35,27 +35,27 @@ Requires Phase 1 and Phase 2 to be merged. `PrismaAuditRepository` and `FakeAudi
 
 ### Content Module (`src/modules/content/`)
 
-- [ ] `AuditPort` injected into all content use cases that mutate state
-- [ ] Audit events written for: CONTENT_CREATED, CONTENT_UPDATED, CONTENT_STATUS_CHANGED, CONTENT_DELETED
-- [ ] Actor IP passed as plain string from controller into command object
-- [ ] Unit tests updated to inject `FakeAuditRepository`
-- [ ] All existing content tests pass
+- [x] `AuditPort` injected into all content use cases that mutate state
+- [x] Audit events written for: CONTENT_CREATED, CONTENT_UPDATED, CONTENT_STATUS_CHANGED, CONTENT_DELETED
+- [x] Actor IP passed as plain string from controller into command object
+- [x] Unit tests updated to inject `FakeAuditRepository`
+- [x] All existing content tests pass
 
 ### Media Module (`src/modules/media/`)
 
-- [ ] `AuditPort` injected into all media use cases that mutate state
-- [ ] Audit events written for: MEDIA_UPLOADED, MEDIA_DELETED
-- [ ] Actor IP passed as plain string from controller into command object
-- [ ] Unit tests updated to inject `FakeAuditRepository`
-- [ ] All existing media tests pass
+- [x] `AuditPort` injected into all media use cases that mutate state
+- [x] Audit events written for: MEDIA_UPLOADED, MEDIA_DELETED
+- [x] Actor IP passed as plain string from controller into command object
+- [x] Unit tests updated to inject `FakeAuditRepository`
+- [x] All existing media tests pass
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/media` exits 0
-- [ ] Full test suite: `pnpm --filter @cms/api test` — only pre-existing Redis NOAUTH failures allowed
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/media` exits 0
+- [x] Full test suite: `pnpm --filter @cms/api test` — only pre-existing Redis NOAUTH failures allowed
 
 ---
 

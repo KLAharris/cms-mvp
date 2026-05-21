@@ -37,37 +37,37 @@ Requires Phase 1 and Phase 2. This phase closes out Slice 5.
 
 ### Envelope Fix
 
-- [ ] All 4 existing public list endpoints return `{ data: [...], pagination: { page, pageSize, total, totalPages } }`
-- [ ] No pagination fields at response root level
-- [ ] Existing tests updated to match new shape
+- [x] All 4 existing public list endpoints return `{ data: [...], pagination: { page, pageSize, total, totalPages } }`
+- [x] No pagination fields at response root level
+- [x] Existing tests updated to match new shape
 
 ### Media Endpoint
 
-- [ ] `GET /api/v1/media/:id` — returns metadata: filename, mimeType, size, altText, caption, variants (thumbnail, medium, original URLs)
-- [ ] ApiKeyGuard applied
-- [ ] 404 for non-existent media
-- [ ] Integration test
+- [x] `GET /api/v1/media/:id` — returns metadata: filename, mimeType, size, altText, caption, variants (thumbnail, medium, original URLs)
+- [x] ApiKeyGuard applied
+- [x] 404 for non-existent media
+- [x] Integration test
 
 ### Rate Limiting
 
-- [ ] `ApiKeyThrottlerGuard` — 60 req/min per API key
-- [ ] 429 Too Many Requests when exceeded
-- [ ] Rate limit applied to all 5 public endpoints
-- [ ] Integration test for rate limit enforcement
+- [x] `ApiKeyThrottlerGuard` — 60 req/min per API key
+- [x] 429 Too Many Requests when exceeded
+- [x] Rate limit applied to all 5 public endpoints
+- [x] Integration test for rate limit enforcement
 
 ### OpenAPI
 
-- [ ] OAS 3.1 decorators on: GET /api/v1/articles, GET /api/v1/articles/:slug, GET /api/v1/pages, GET /api/v1/pages/:slug, GET /api/v1/media/:id
-- [ ] Swagger UI accessible at `/docs`
-- [ ] Redoc accessible at `/redoc`
-- [ ] X-API-Key security scheme defined in spec
+- [x] OAS 3.1 decorators on: GET /api/v1/articles, GET /api/v1/articles/:slug, GET /api/v1/pages, GET /api/v1/pages/:slug, GET /api/v1/media/:id
+- [x] Swagger UI accessible at `/docs`
+- [x] Redoc accessible at `/redoc`
+- [x] X-API-Key security scheme defined in spec
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/public-api` exits 0
-- [ ] CI green (pre-existing Redis NOAUTH failures only)
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/public-api` exits 0
+- [x] CI green (pre-existing Redis NOAUTH failures only)
 
 ---
 

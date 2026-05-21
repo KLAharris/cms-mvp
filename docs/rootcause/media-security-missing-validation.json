@@ -1,0 +1,10 @@
+{
+  "id": "media-security-missing-validation",
+  "date": "2026-05-19",
+  "ticket": "CMS-007",
+  "symptom": "Any file type could be uploaded by spoofing the Content-Type header; one media route was accessible without authentication",
+  "rootcause": "Two separate issues: (1) The finalize endpoint only validated the declared MIME type but did not read the actual file bytes to check magic bytes, so a client could upload a malicious file disguised as an image. (2) One media HTTP route was missing the JwtAuthGuard decorator",
+  "fix": "(1) Added magic byte validation in FinalizeUploadUseCase via the MimeValidatorPort — SharpMimeValidator reads actual file bytes. (2) Applied JwtAuthGuard to the unguarded route",
+  "recurrence_risk": "high",
+  "tags": ["media", "security", "validation", "mime", "magic-bytes", "auth-guard"]
+}

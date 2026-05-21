@@ -44,69 +44,69 @@ Requires Phase 1 (foundation + auth). The Content Editor depends on the Media Li
 
 ### App Shell
 
-- [ ] `AppShell` layout component wrapping all protected routes
-- [ ] Navigation Rail (Expanded) with icons + labels for all nav items
-- [ ] Navigation Drawer (Compact/Medium) — modal, toggle via menu icon in Top App Bar
-- [ ] Top App Bar: page title (updates per route), avatar/menu for current user
-- [ ] Role-based nav: Users, Audit Log, API Keys nav items hidden for non-Admin roles
-- [ ] Breadcrumb component used on Editor and nested screens (docs/03-DESIGN.md § 11)
-- [ ] 404 screen: friendly message + link back to Dashboard
+- [x] `AppShell` layout component wrapping all protected routes
+- [x] Navigation Rail (Expanded) with icons + labels for all nav items
+- [x] Navigation Drawer (Compact/Medium) — modal, toggle via menu icon in Top App Bar
+- [x] Top App Bar: page title (updates per route), avatar/menu for current user
+- [x] Role-based nav: Users, Audit Log, API Keys nav items hidden for non-Admin roles
+- [x] Breadcrumb component used on Editor and nested screens (docs/03-DESIGN.md § 11)
+- [x] 404 screen: friendly message + link back to Dashboard
 
 ### Dashboard (`/dashboard`)
 
-- [ ] Layout matches docs/03-DESIGN.md § 12.2: 4 stat cards + recent activity + quick actions
-- [ ] Stat cards: Total Articles, Published, In Review, Drafts — fetched from content list endpoint counts
-- [ ] Recent activity: last 10 audit events from `GET /api/admin/audit` — icon, primary line, timestamp
-- [ ] "View audit log →" link
-- [ ] Quick actions: `[+ New Article]`, `[+ New Page]`, `[Upload Media]` — navigate to respective routes
-- [ ] Skeleton loading states while data fetches
-- [ ] Responsive: 4-column at Expanded, 2×2 at Medium, stacked at Compact
+- [x] Layout matches docs/03-DESIGN.md § 12.2: 4 stat cards + recent activity + quick actions
+- [x] Stat cards: Total Articles, Published, In Review, Drafts — fetched from content list endpoint counts
+- [x] Recent activity: last 10 audit events from `GET /api/admin/audit` — icon, primary line, timestamp
+- [x] "View audit log →" link
+- [x] Quick actions: `[+ New Article]`, `[+ New Page]`, `[Upload Media]` — navigate to respective routes
+- [x] Skeleton loading states while data fetches
+- [x] Responsive: 4-column at Expanded, 2×2 at Medium, stacked at Compact
 
 ### Content List — Articles (`/articles`) and Pages (`/pages`)
 
-- [ ] Layout matches docs/03-DESIGN.md § 12.3
-- [ ] Search field: debounced 300 ms, calls `GET /api/admin/content?type=article&title=...`
-- [ ] Filter chips: All, Draft, In Review, Published, Mine, Last 30 days
-- [ ] Sortable table: Title, Status (chip), Author, Updated
-- [ ] Row click → `/articles/:id/edit`
-- [ ] Row action menu (⋮): Edit, Submit for Review, Publish, Unpublish (status-dependent), Delete (with confirmation dialog)
-- [ ] `[+ New]` Extended FAB → creates draft and navigates to editor
-- [ ] Pagination: page indicator + Prev/Next buttons
-- [ ] Empty state: illustration + `"No articles yet. Create your first one."` + action button
-- [ ] RBAC: Authors only see own content (enforced by API, reflected in UI)
+- [x] Layout matches docs/03-DESIGN.md § 12.3
+- [x] Search field: debounced 300 ms, calls `GET /api/admin/content?type=article&title=...`
+- [x] Filter chips: All, Draft, In Review, Published, Mine, Last 30 days
+- [x] Sortable table: Title, Status (chip), Author, Updated
+- [x] Row click → `/articles/:id/edit`
+- [x] Row action menu (⋮): Edit, Submit for Review, Publish, Unpublish (status-dependent), Delete (with confirmation dialog)
+- [x] `[+ New]` Extended FAB → creates draft and navigates to editor
+- [x] Pagination: page indicator + Prev/Next buttons
+- [x] Empty state: illustration + `"No articles yet. Create your first one."` + action button
+- [x] RBAC: Authors only see own content (enforced by API, reflected in UI)
 
 ### Content Editor (`/articles/:id/edit`, `/pages/:id/edit`)
 
-- [ ] Two-pane layout at Large breakpoint; single column at Expanded and below (docs/03-DESIGN.md § 12.4)
-- [ ] Title input: borderless, `headline-large` style
-- [ ] Slug field: auto-generated from title on first save; editable; live uniqueness validation (debounced 500 ms)
-- [ ] TipTap rich text editor with toolbar: Bold, Italic, Underline, H2, H3, BulletList, OrderedList, Blockquote, CodeBlock, Link, HorizontalRule
-- [ ] Toolbar sticky at top of editor pane on scroll
-- [ ] Side panel (sticky on scroll):
+- [x] Two-pane layout at Large breakpoint; single column at Expanded and below (docs/03-DESIGN.md § 12.4)
+- [x] Title input: borderless, `headline-large` style
+- [x] Slug field: auto-generated from title on first save; editable; live uniqueness validation (debounced 500 ms)
+- [x] TipTap rich text editor with toolbar: Bold, Italic, Underline, H2, H3, BulletList, OrderedList, Blockquote, CodeBlock, Link, HorizontalRule
+- [x] Toolbar sticky at top of editor pane on scroll
+- [x] Side panel (sticky on scroll):
   - Status chip + lifecycle action buttons: Save Draft, Submit for Review, Publish (Editor/Admin only), Unpublish
   - Schedule dialog: date + time picker, calls `PATCH /api/admin/content/:id/schedule`
   - SEO section: Meta Title (70 char limit + counter), Meta Description (160 char limit + counter), Social Image (placeholder for Phase 3)
   - Featured Image (placeholder for Phase 3)
   - Tags: chip input, add/remove
   - Category: dropdown
-- [ ] Autosave: RxJS debounce 30 s on content changes; `"Saved N sec ago"` indicator; `"Saving..."` during request
-- [ ] Unsaved changes prompt on navigation away
-- [ ] Version history: `"View history"` button in side panel → navigates to `/articles/:id/versions`
-- [ ] Version list screen: table of versions with timestamp, editor, revert button; revert calls `POST /api/admin/content/:id/revert/:versionId`
+- [x] Autosave: RxJS debounce 30 s on content changes; `"Saved N sec ago"` indicator; `"Saving..."` during request
+- [x] Unsaved changes prompt on navigation away
+- [x] Version history: `"View history"` button in side panel → navigates to `/articles/:id/versions`
+- [x] Version list screen: table of versions with timestamp, editor, revert button; revert calls `POST /api/admin/content/:id/revert/:versionId`
 
 ### Testing
 
-- [ ] Unit tests for autosave RxJS stream (marble tests — docs/06-TEST-STRATEGY.md § 8.3)
-- [ ] Unit tests for content list filters/selectors
-- [ ] Hook tests for `useContentList`, `useContentEditor` using MSW
-- [ ] Component tests for Content List: filter chips, search, status chips, pagination
-- [ ] Component tests for Content Editor: autosave indicator, lifecycle buttons visibility by role, char counters
+- [x] Unit tests for autosave RxJS stream (marble tests — docs/06-TEST-STRATEGY.md § 8.3)
+- [x] Unit tests for content list filters/selectors
+- [x] Hook tests for `useContentList`, `useContentEditor` using MSW
+- [x] Component tests for Content List: filter chips, search, status chips, pagination
+- [x] Component tests for Content Editor: autosave indicator, lifecycle buttons visibility by role, char counters
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/web tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/web lint` exits 0
-- [ ] `pnpm --filter @cms/web exec vitest run` exits 0
+- [x] `pnpm --filter @cms/web tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/web lint` exits 0
+- [x] `pnpm --filter @cms/web exec vitest run` exits 0
 
 ---
 

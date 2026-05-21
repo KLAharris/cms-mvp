@@ -1,0 +1,10 @@
+{
+  "id": "testcontainers-timeout-public-content",
+  "date": "2026-05-18",
+  "ticket": "CMS-009",
+  "symptom": "prisma-public-content.repository.spec.ts timed out in CI before any test ran",
+  "rootcause": "The Testcontainers Postgres container startup time exceeded the default Vitest test timeout. The container needed to pull the image, start, and run Prisma migrations before the first test could execute",
+  "fix": "Increased the Vitest hookTimeout for this spec file to allow sufficient time for Testcontainers startup and migration",
+  "recurrence_risk": "low",
+  "tags": ["testing", "testcontainers", "postgres", "timeout", "public-api"]
+}

@@ -34,25 +34,25 @@ Requires Phase 1 to be merged. `PrismaAuditRepository` and `FakeAuditRepository`
 
 ### Auth Module (`src/modules/auth/`)
 
-- [ ] `noop-audit-logger.adapter.ts` deleted
-- [ ] `auth.module.ts` wired to `PrismaAuditRepository` from the audit module
-- [ ] `login`, `logout`, `refresh` use cases confirmed writing real audit events
-- [ ] All existing auth audit tests pass with `FakeAuditRepository`
-- [ ] No test imports `noop-audit-logger`
+- [x] `noop-audit-logger.adapter.ts` deleted
+- [x] `auth.module.ts` wired to `PrismaAuditRepository` from the audit module
+- [x] `login`, `logout`, `refresh` use cases confirmed writing real audit events
+- [x] All existing auth audit tests pass with `FakeAuditRepository`
+- [x] No test imports `noop-audit-logger`
 
 ### Users Module (`src/modules/users/`)
 
-- [ ] `users.module.ts` wired to `PrismaAuditRepository` from the audit module
-- [ ] `invite-user`, `deactivate-user`, `update-user` use cases confirmed writing real audit events
-- [ ] All existing users audit tests pass with `FakeAuditRepository`
+- [x] `users.module.ts` wired to `PrismaAuditRepository` from the audit module
+- [x] `invite-user`, `deactivate-user`, `update-user` use cases confirmed writing real audit events
+- [x] All existing users audit tests pass with `FakeAuditRepository`
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/users` exits 0
-- [ ] No pre-existing tests broken
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/users` exits 0
+- [x] No pre-existing tests broken
 
 ---
 

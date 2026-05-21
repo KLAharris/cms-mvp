@@ -36,32 +36,32 @@ Requires Phase 1 (auth core) to be merged. Email adapter can be a noop/stub for 
 
 ### Domain (`src/modules/auth/domain/`)
 
-- [ ] `PasswordResetToken` entity with token hash, userId, expiresAt, usedAt
-- [ ] Unit tests on token expiry and single-use logic
+- [x] `PasswordResetToken` entity with token hash, userId, expiresAt, usedAt
+- [x] Unit tests on token expiry and single-use logic
 
 ### Application (`src/modules/auth/application/`)
 
-- [ ] `RequestPasswordResetUseCase` — generates token, sends email (via noop adapter), writes audit event
-- [ ] `ResetPasswordUseCase` — validates token, updates password hash, invalidates token, invalidates all refresh tokens for user
-- [ ] Unit tests with fakes
+- [x] `RequestPasswordResetUseCase` — generates token, sends email (via noop adapter), writes audit event
+- [x] `ResetPasswordUseCase` — validates token, updates password hash, invalidates token, invalidates all refresh tokens for user
+- [x] Unit tests with fakes
 
 ### Persistence (`src/modules/auth/adapters/out/persistence/`)
 
-- [ ] `PrismaPasswordResetTokenRepository` — save, findByHash, markUsed
-- [ ] Integration tests
+- [x] `PrismaPasswordResetTokenRepository` — save, findByHash, markUsed
+- [x] Integration tests
 
 ### HTTP (`src/modules/auth/adapters/in/http/`)
 
-- [ ] `POST /api/auth/forgot-password` — accepts email, always returns 200 (no enumeration)
-- [ ] `POST /api/auth/reset-password` — accepts token + new password
-- [ ] Rate limiting: 5 req/hr/IP on forgot-password
-- [ ] Integration tests
+- [x] `POST /api/auth/forgot-password` — accepts email, always returns 200 (no enumeration)
+- [x] `POST /api/auth/reset-password` — accepts token + new password
+- [x] Rate limiting: 5 req/hr/IP on forgot-password
+- [x] Integration tests
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
 
 ---
 

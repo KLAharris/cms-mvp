@@ -38,39 +38,39 @@ Requires Slice 1 Phase 1 (JWT + guards). Email invite uses noop adapter — real
 
 ### Domain (`src/modules/users/domain/`)
 
-- [ ] `User` entity with id, email, name, role (ADMIN/EDITOR/AUTHOR), status (active/deactivated/invited), lastLoginAt
-- [ ] `InviteToken` entity with token hash, email, role, expiresAt
-- [ ] Domain rule: cannot deactivate last Admin
-- [ ] Unit tests 100% on domain invariants
+- [x] `User` entity with id, email, name, role (ADMIN/EDITOR/AUTHOR), status (active/deactivated/invited), lastLoginAt
+- [x] `InviteToken` entity with token hash, email, role, expiresAt
+- [x] Domain rule: cannot deactivate last Admin
+- [x] Unit tests 100% on domain invariants
 
 ### Application (`src/modules/users/application/`)
 
-- [ ] `InviteUserUseCase` — generates invite token, sends email (noop), writes audit
-- [ ] `ListUsersUseCase` — paginated list with name, email, role, status, lastLoginAt
-- [ ] `UpdateUserUseCase` — update name and/or role, writes audit
-- [ ] `DeactivateUserUseCase` — deactivates user, blocks login, writes audit; rejects if last Admin
-- [ ] Unit tests with fakes for all use cases
+- [x] `InviteUserUseCase` — generates invite token, sends email (noop), writes audit
+- [x] `ListUsersUseCase` — paginated list with name, email, role, status, lastLoginAt
+- [x] `UpdateUserUseCase` — update name and/or role, writes audit
+- [x] `DeactivateUserUseCase` — deactivates user, blocks login, writes audit; rejects if last Admin
+- [x] Unit tests with fakes for all use cases
 
 ### Persistence (`src/modules/users/adapters/out/persistence/`)
 
-- [ ] `PrismaUserRepository` — findAll, findById, save, deactivate
-- [ ] `PrismaInviteTokenRepository` — save, findByHash, markUsed
-- [ ] Integration tests
+- [x] `PrismaUserRepository` — findAll, findById, save, deactivate
+- [x] `PrismaInviteTokenRepository` — save, findByHash, markUsed
+- [x] Integration tests
 
 ### HTTP (`src/modules/users/adapters/in/http/`)
 
-- [ ] `POST /api/admin/users/invite` — Admin only
-- [ ] `GET /api/admin/users` — Admin only, paginated
-- [ ] `PATCH /api/admin/users/:id` — Admin only
-- [ ] `DELETE /api/admin/users/:id` — Admin only (soft deactivate)
-- [ ] 401/403 on unauthorized access
-- [ ] Integration tests with Supertest
+- [x] `POST /api/admin/users/invite` — Admin only
+- [x] `GET /api/admin/users` — Admin only, paginated
+- [x] `PATCH /api/admin/users/:id` — Admin only
+- [x] `DELETE /api/admin/users/:id` — Admin only (soft deactivate)
+- [x] 401/403 on unauthorized access
+- [x] Integration tests with Supertest
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/users` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/users` exits 0
 
 ---
 

@@ -40,36 +40,36 @@ Requires Slice 1 (auth). MinIO must be running locally. BullMQ and Redis require
 
 ### Domain (`src/modules/media/domain/`)
 
-- [ ] `MediaItem` entity: id, filename, mimeType, size, storageKey, altText, caption, uploadedBy, uploadedAt, variants (thumbnail, medium, original URLs)
-- [ ] `MediaStoragePort` interface: generatePresignedUploadUrl, generatePresignedDownloadUrl, deleteObject
-- [ ] `MimeValidatorPort` interface: validateMimeConsistency
-- [ ] Unit tests 100% on domain
+- [x] `MediaItem` entity: id, filename, mimeType, size, storageKey, altText, caption, uploadedBy, uploadedAt, variants (thumbnail, medium, original URLs)
+- [x] `MediaStoragePort` interface: generatePresignedUploadUrl, generatePresignedDownloadUrl, deleteObject
+- [x] `MimeValidatorPort` interface: validateMimeConsistency
+- [x] Unit tests 100% on domain
 
 ### Application (`src/modules/media/application/`)
 
-- [ ] `RequestUploadUseCase` — generates presigned URL, returns to client
-- [ ] `FinalizeUploadUseCase` — called after client upload, validates magic bytes, persists metadata, enqueues variant job
-- [ ] `GenerateVariantsJob` — BullMQ worker, generates thumbnail + medium, updates media item with variant keys
-- [ ] Unit tests with fakes
+- [x] `RequestUploadUseCase` — generates presigned URL, returns to client
+- [x] `FinalizeUploadUseCase` — called after client upload, validates magic bytes, persists metadata, enqueues variant job
+- [x] `GenerateVariantsJob` — BullMQ worker, generates thumbnail + medium, updates media item with variant keys
+- [x] Unit tests with fakes
 
 ### Persistence + Storage (`src/modules/media/adapters/out/`)
 
-- [ ] `PrismaMediaRepository` — save, findById, update variants
-- [ ] `MinioStorageAdapter` implements `MediaStoragePort`
-- [ ] `SharpMimeValidator` implements `MimeValidatorPort` (magic byte check)
-- [ ] Integration tests
+- [x] `PrismaMediaRepository` — save, findById, update variants
+- [x] `MinioStorageAdapter` implements `MediaStoragePort`
+- [x] `SharpMimeValidator` implements `MimeValidatorPort` (magic byte check)
+- [x] Integration tests
 
 ### HTTP (`src/modules/media/adapters/in/http/`)
 
-- [ ] `POST /api/admin/media/upload-url` — returns presigned URL + mediaId
-- [ ] `POST /api/admin/media/:id/finalize` — called after client upload
-- [ ] Integration tests
+- [x] `POST /api/admin/media/upload-url` — returns presigned URL + mediaId
+- [x] `POST /api/admin/media/:id/finalize` — called after client upload
+- [x] Integration tests
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/media` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/media` exits 0
 
 ---
 

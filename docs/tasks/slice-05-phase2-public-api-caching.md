@@ -38,34 +38,34 @@ Requires Phase 1 (ApiKeyGuard). Requires Slice 3 Phase 2 (content lifecycle — 
 
 ### Application (`src/modules/public-api/application/`)
 
-- [ ] `ListPublishedArticlesUseCase` — returns published articles only, paginated
-- [ ] `GetPublishedArticleUseCase` — by slug, published only
-- [ ] `ListPublishedPagesUseCase` — returns published pages only, paginated
-- [ ] `GetPublishedPageUseCase` — by slug, published only
-- [ ] Draft/in_review/unpublished content NEVER returned — enforced at repository layer
-- [ ] Unit tests with fakes — including test that Draft is never returned
+- [x] `ListPublishedArticlesUseCase` — returns published articles only, paginated
+- [x] `GetPublishedArticleUseCase` — by slug, published only
+- [x] `ListPublishedPagesUseCase` — returns published pages only, paginated
+- [x] `GetPublishedPageUseCase` — by slug, published only
+- [x] Draft/in_review/unpublished content NEVER returned — enforced at repository layer
+- [x] Unit tests with fakes — including test that Draft is never returned
 
 ### Cache (`src/modules/public-api/adapters/out/cache/`)
 
-- [ ] `RedisCacheAdapter` — get, set, invalidate by pattern
-- [ ] Cache miss → DB query → store in Redis
-- [ ] Integration tests
+- [x] `RedisCacheAdapter` — get, set, invalidate by pattern
+- [x] Cache miss → DB query → store in Redis
+- [x] Integration tests
 
 ### HTTP (`src/modules/public-api/adapters/in/http/`)
 
-- [ ] `GET /api/v1/articles` — paginated, ApiKeyGuard
-- [ ] `GET /api/v1/articles/:slug` — single article, ApiKeyGuard
-- [ ] `GET /api/v1/pages` — paginated, ApiKeyGuard
-- [ ] `GET /api/v1/pages/:slug` — single page, ApiKeyGuard
-- [ ] Cache-Control, ETag, Last-Modified headers on all responses
-- [ ] 404 for unpublished/nonexistent content
-- [ ] Integration tests
+- [x] `GET /api/v1/articles` — paginated, ApiKeyGuard
+- [x] `GET /api/v1/articles/:slug` — single article, ApiKeyGuard
+- [x] `GET /api/v1/pages` — paginated, ApiKeyGuard
+- [x] `GET /api/v1/pages/:slug` — single page, ApiKeyGuard
+- [x] Cache-Control, ETag, Last-Modified headers on all responses
+- [x] 404 for unpublished/nonexistent content
+- [x] Integration tests
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/public-api` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/public-api` exits 0
 
 ---
 

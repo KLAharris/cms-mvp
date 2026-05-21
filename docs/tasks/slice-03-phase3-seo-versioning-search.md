@@ -5,32 +5,31 @@ applies_to: apps/api/src/modules/content/
 last_reviewed: 2026-05-18
 ---
 
-# Slice 3 Phase 2 — Content Lifecycle, Scheduling & Hard Delete
+# Slice 3 Phase 3 — SEO Fields, Content Versioning & Full-Text Search
 
 ## Goal
 
-Implement the full content lifecycle state machine (Draft → In Review → Published → Unpublished → Archived), scheduled publishing via BullMQ, and the 30-day hard delete background job. Invalid transitions return 409.
+Add SEO metadata fields (seoTitle, seoDescription, socialImage) to content, implement content versioning (snapshot on every update, list versions, revert to version), and add title-based full-text search to the list endpoint.
 
 ## Sequencing
 
-Requires Phase 1 (content CRUD). BullMQ and Redis must be running.
+Requires Phase 1 (CRUD) and Phase 2 (lifecycle) to be merged. No new queue dependencies.
 
 ## Context to Load
 
 - `.claude/templates/CONTEXT.md`
-- `docs/02-Software-Requirements-Specification.md` § 5.4 (FR-CONTENT-04, FR-CONTENT-06, FR-CONTENT-07, FR-CONTENT-12, FR-CONTENT-13)
+- `docs/02-Software-Requirements-Specification.md` § 5.4 (FR-CONTENT-08, FR-CONTENT-09, FR-CONTENT-10, FR-CONTENT-11)
 - `docs/04-ARCH.md` § 4
 
 ---
 
 ## Locked Design Decisions
 
-- Lifecycle: Draft → In Review → Published → Unpublished → Archived
-- Invalid transitions: HTTP 409
-- Publish requirements: non-empty Title, Body, Slug, SEO meta description (FR-CONTENT-06)
-- Scheduled publish: `scheduled_at` future timestamp → BullMQ job transitions to Published at that time
-- Unpublish removes from public API within 60s (cache TTL accounts for this)
-- Hard delete: BullMQ cron job runs daily, hard-deletes items where `deletedAt` < now - 30 days
+- SEO fields: `seoTitle` (max 70 chars), `seoDescription` (max 160 chars), `socialImageId` (FK → MediaItem, optional)
+- Versioning: snapshot created on every successful update; stored in `ContentVersion` table
+- Versioning retention: pruned to last 50 versions per content item by BullMQ cron (weekly)
+- Revert: replaces current content fields with versioned snapshot, creates a new version record
+- Search: case-insensitive partial match on `title` field via `ILIKE` (no full-text index needed for MVP scale)
 
 ---
 
@@ -38,36 +37,42 @@ Requires Phase 1 (content CRUD). BullMQ and Redis must be running.
 
 ### Domain (`src/modules/content/domain/`)
 
-- [ ] `ContentLifecycleService` domain service — enforces all valid/invalid transitions
-- [ ] All transition combinations tested: valid transitions pass, invalid return domain error
-- [ ] `PublishRequirementsChecker` — validates title, body, slug, SEO description before publish
-- [ ] Unit tests 100% on lifecycle and publish requirements
+- [x] `SeoMetadata` value object with `seoTitle` (string, max 70) and `seoDescription` (string, max 160)
+- [x] `ContentVersion` entity with id, contentId, snapshot (full content fields), createdAt, createdBy
+- [x] Unit tests 100% on domain value objects
 
 ### Application (`src/modules/content/application/`)
 
-- [ ] `SubmitForReviewUseCase` — Draft → In Review (Author or Editor)
-- [ ] `PublishContentUseCase` — In Review → Published (Editor/Admin only); validates publish requirements
-- [ ] `UnpublishContentUseCase` — Published → Unpublished (Editor/Admin only)
-- [ ] `ArchiveContentUseCase` — Unpublished → Archived
-- [ ] `SchedulePublishUseCase` — sets `scheduled_at`, enqueues BullMQ job
-- [ ] `HardDeleteJob` — BullMQ cron, hard-deletes soft-deleted items older than 30 days
-- [ ] Unit tests with fakes for all use cases
+- [x] `ListVersionsUseCase` — returns paginated version list for a content item (newest first)
+- [x] `RevertContentUseCase` — replaces current content with a version snapshot; creates a new version record; enforces RBAC
+- [x] `UpdateContentUseCase` extended — creates version snapshot before applying update
+- [x] `ListContentUseCase` extended — accepts optional `title` query param, applies ILIKE filter
+- [x] Unit tests with fakes
+
+### Persistence (`src/modules/content/adapters/out/persistence/`)
+
+- [x] `PrismaContentVersionRepository` — save, findByContentId (paginated), findById
+- [x] Prisma schema: `ContentVersion` model added
+- [x] Migration created under `apps/api/prisma/migrations/`
+- [x] `PrismaContentRepository` extended: `findMany` accepts `search` string for ILIKE filter
+- [x] Integration tests
 
 ### HTTP (`src/modules/content/adapters/in/http/`)
 
-- [ ] `PATCH /api/admin/content/:id/submit` — submit for review
-- [ ] `PATCH /api/admin/content/:id/publish` — publish
-- [ ] `PATCH /api/admin/content/:id/unpublish` — unpublish
-- [ ] `PATCH /api/admin/content/:id/archive` — archive
-- [ ] `PATCH /api/admin/content/:id/schedule` — set scheduled_at
-- [ ] Invalid transition returns 409 with clear error
-- [ ] Integration tests
+- [x] `GET /api/admin/content/:id/versions` — paginated version list
+- [x] `POST /api/admin/content/:id/revert/:versionId` — revert to version
+- [x] `GET /api/admin/content` extended — `?title=` query param for search
+- [x] Integration tests
+
+### Scheduler (`src/modules/content/adapters/in/scheduler/`)
+
+- [x] `VersionPruningJob` — BullMQ cron (weekly), hard-deletes versions beyond the 50-version limit per content item
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
 
 ---
 
@@ -76,34 +81,30 @@ Requires Phase 1 (content CRUD). BullMQ and Redis must be running.
 ```bash
 pnpm --filter @cms/api exec vitest run src/modules/content
 
-# Full lifecycle flow
-CONTENT_ID=$(curl -fsS -X POST http://localhost:3000/api/admin/content \
-  -H "Authorization: Bearer $EDITOR_JWT" \
-  -H "Content-Type: application/json" \
-  -d '{"type":"article","title":"Test","body":"<p>Hello</p>","slug":"test","seoDescription":"Test description"}' | jq -r .id)
+# List versions
+curl -fsS -H "Authorization: Bearer $EDITOR_JWT" \
+  "http://localhost:3000/api/admin/content/$CONTENT_ID/versions" | jq .
 
-curl -fsS -X PATCH http://localhost:3000/api/admin/content/$CONTENT_ID/submit \
+# Revert
+curl -fsS -X POST \
+  "http://localhost:3000/api/admin/content/$CONTENT_ID/revert/$VERSION_ID" \
   -H "Authorization: Bearer $EDITOR_JWT" | jq .status
-# expect: "in_review"
 
-curl -fsS -X PATCH http://localhost:3000/api/admin/content/$CONTENT_ID/publish \
-  -H "Authorization: Bearer $EDITOR_JWT" | jq .status
-# expect: "published"
-
-# Invalid transition — publish again
-# expect: 409
+# Search
+curl -fsS -H "Authorization: Bearer $EDITOR_JWT" \
+  "http://localhost:3000/api/admin/content?title=hello" | jq .
 ```
 
 ---
 
 ## Rollback
 
-Revert branch. BullMQ jobs are additive — no schema migration for the job queue.
+Revert branch. Drop `content_versions` table. Remove `seoTitle`, `seoDescription`, `socialImageId` columns from `content` table via `prisma migrate reset`.
 
 ---
 
 ## Out of Scope
 
-- SEO fields (Phase 3)
-- Content versioning (Phase 3)
-- Public API visibility (Slice 5)
+- Full-text index (Postgres `tsvector`) — deferred post-MVP; ILIKE sufficient at MVP scale
+- SEO preview in admin SPA (Slice 9)
+- Version diff view (post-MVP)

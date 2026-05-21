@@ -45,47 +45,47 @@ Depends on Slices 1–3 (Auth + Users) being merged — the use cases that call 
 
 ### Domain (`src/modules/notification/domain/`)
 
-- [ ] `IEmailSenderPort` interface with two methods:
+- [x] `IEmailSenderPort` interface with two methods:
   - `sendPasswordResetEmail(to: string, resetLink: string): Promise<void>`
   - `sendInviteEmail(to: string, inviteLink: string, role: string): Promise<void>`
-- [ ] `EmailJob` discriminated union:
+- [x] `EmailJob` discriminated union:
   ```ts
   | { type: 'password-reset'; to: string; resetLink: string }
   | { type: 'invite'; to: string; inviteLink: string; role: string }
   ```
-- [ ] Unit tests 100% on any domain type guards or value objects introduced
+- [x] Unit tests 100% on any domain type guards or value objects introduced
 
 ### Application (`src/modules/notification/application/`)
 
-- [ ] `NotificationService` — constructs full links from `FRONTEND_BASE_URL` env var, delegates to `EmailQueueProducer`
+- [x] `NotificationService` — constructs full links from `FRONTEND_BASE_URL` env var, delegates to `EmailQueueProducer`
   - `sendPasswordResetEmail(to, token)` — assembles `${FRONTEND_BASE_URL}/reset-password?token=${token}`, enqueues job `{ type: 'password-reset', to, resetLink }`
   - `sendInviteEmail(to, token, role)` — assembles `${FRONTEND_BASE_URL}/accept-invite?token=${token}`, enqueues job `{ type: 'invite', to, inviteLink, role }`
-- [ ] Unit tests for `NotificationService` using `FakeEmailQueueProducer` (in-memory, no I/O):
+- [x] Unit tests for `NotificationService` using `FakeEmailQueueProducer` (in-memory, no I/O):
   - enqueues a `password-reset` job with correct `to` and a `resetLink` that starts with `FRONTEND_BASE_URL`
   - enqueues an `invite` job with correct `to`, `role`, and assembled `inviteLink`
   - propagates error if producer throws
 
 ### Infrastructure — Queue Producer (`src/modules/notification/adapters/out/queue/`)
 
-- [ ] `EmailQueueProducer` — wraps BullMQ `Queue`; `enqueue(job: EmailJob): Promise<void>`
-- [ ] BullMQ job options: `attempts: 3`, `backoff: { type: 'exponential', delay: 5000 }`
-- [ ] Queue name exported as constant: `EMAIL_QUEUE_NAME = 'email.queue'`
+- [x] `EmailQueueProducer` — wraps BullMQ `Queue`; `enqueue(job: EmailJob): Promise<void>`
+- [x] BullMQ job options: `attempts: 3`, `backoff: { type: 'exponential', delay: 5000 }`
+- [x] Queue name exported as constant: `EMAIL_QUEUE_NAME = 'email.queue'`
 
 ### Infrastructure — Worker (`src/modules/notification/adapters/out/worker/`)
 
-- [ ] `EmailWorkerProcessor` — BullMQ `Worker` on `email.queue`
+- [x] `EmailWorkerProcessor` — BullMQ `Worker` on `email.queue`
   - Routes `'password-reset'` jobs → `ResendEmailSenderAdapter.sendPasswordResetEmail`
   - Routes `'invite'` jobs → `ResendEmailSenderAdapter.sendInviteEmail`
   - On any error: logs `{ jobId: job.id, type: job.data.type, to: job.data.to, error: err.message }` then rethrows
-- [ ] Unknown `type` values throw `UnhandledEmailJobTypeError` — prevents silent no-ops when a new type is added without updating the processor
+- [x] Unknown `type` values throw `UnhandledEmailJobTypeError` — prevents silent no-ops when a new type is added without updating the processor
 
 ### Infrastructure — Resend Adapter (`src/modules/notification/adapters/out/email/`)
 
-- [ ] `ResendEmailSenderAdapter` implements `IEmailSenderPort`
+- [x] `ResendEmailSenderAdapter` implements `IEmailSenderPort`
   - `sendPasswordResetEmail(to, resetLink)` — calls `resend.emails.send` with `to`, `from` (env `RESEND_FROM_ADDRESS`), `subject: 'Reset your password'`, and `html` body containing the link
   - `sendInviteEmail(to, inviteLink, role)` — calls `resend.emails.send` with `to`, `from`, `subject: "You've been invited"`, and `html` body containing the link and role
-- [ ] `RESEND_API_KEY` and `RESEND_FROM_ADDRESS` read via `ConfigService`; module fails fast on startup if either is absent
-- [ ] Integration tests filling the existing placeholder at `test/integration/resend-email-sender.adapter.spec.ts`:
+- [x] `RESEND_API_KEY` and `RESEND_FROM_ADDRESS` read via `ConfigService`; module fails fast on startup if either is absent
+- [x] Integration tests filling the existing placeholder at `test/integration/resend-email-sender.adapter.spec.ts`:
   - Mock `resend.emails.send` with `vi.fn()`
   - `sendPasswordResetEmail` — asserts correct `to`, `subject`, and that `html` contains the reset link
   - `sendInviteEmail` — asserts correct `to`, `subject`, and that `html` contains the invite link and role
@@ -93,18 +93,18 @@ Depends on Slices 1–3 (Auth + Users) being merged — the use cases that call 
 
 ### Module Wiring (`src/modules/notification/notification.module.ts`)
 
-- [ ] `NotificationModule` declares and exports `NotificationService`
-- [ ] Registers BullMQ queue and worker via `BullModule.registerQueue` / `BullModule.registerWorker`
-- [ ] `AuthModule` and `UserModule` import `NotificationModule` and inject `NotificationService` into the relevant use cases (`ForgotPasswordUseCase`, `InviteUserUseCase`)
+- [x] `NotificationModule` declares and exports `NotificationService`
+- [x] Registers BullMQ queue and worker via `BullModule.registerQueue` / `BullModule.registerWorker`
+- [x] `AuthModule` and `UserModule` import `NotificationModule` and inject `NotificationService` into the relevant use cases (`ForgotPasswordUseCase`, `InviteUserUseCase`)
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/notification` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run test/integration/resend-email-sender.adapter.spec.ts` exits 0
-- [ ] Coverage ≥ 98% on notification module
-- [ ] No `any` in new files (TypeScript strict)
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/notification` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run test/integration/resend-email-sender.adapter.spec.ts` exits 0
+- [x] Coverage ≥ 98% on notification module
+- [x] No `any` in new files (TypeScript strict)
 
 ---
 

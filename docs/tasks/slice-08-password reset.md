@@ -42,22 +42,22 @@ Requires Slice 7 (NotificationModule) to be merged — `NotificationService.send
 
 ### Domain (`src/modules/auth/domain/`)
 
-- [ ] `PasswordResetToken` entity with fields: `id`, `tokenHash`, `userId`, `expiresAt`, `usedAt` (nullable)
-- [ ] Domain logic: `isExpired()` — returns true if `expiresAt` < now
-- [ ] Domain logic: `isUsed()` — returns true if `usedAt` is not null
-- [ ] Domain logic: `isValid()` — returns true if not expired and not used
-- [ ] `PasswordResetTokenPort` interface: `save()`, `findByHash()`, `markUsed()`
-- [ ] Unit tests 100% on domain entity logic
+- [x] `PasswordResetToken` entity with fields: `id`, `tokenHash`, `userId`, `expiresAt`, `usedAt` (nullable)
+- [x] Domain logic: `isExpired()` — returns true if `expiresAt` < now
+- [x] Domain logic: `isUsed()` — returns true if `usedAt` is not null
+- [x] Domain logic: `isValid()` — returns true if not expired and not used
+- [x] `PasswordResetTokenPort` interface: `save()`, `findByHash()`, `markUsed()`
+- [x] Unit tests 100% on domain entity logic
 
 ### Schema (`apps/api/prisma/schema.prisma`)
 
-- [ ] `PasswordResetToken` model added with fields: `id`, `tokenHash` (unique), `userId` (FK → User), `expiresAt`, `usedAt` (nullable), `createdAt`
-- [ ] `passwordChangedAt` (nullable DateTime) added to `User` model
-- [ ] Migration created under `apps/api/prisma/migrations/`
+- [x] `PasswordResetToken` model added with fields: `id`, `tokenHash` (unique), `userId` (FK → User), `expiresAt`, `usedAt` (nullable), `createdAt`
+- [x] `passwordChangedAt` (nullable DateTime) added to `User` model
+- [x] Migration created under `apps/api/prisma/migrations/`
 
 ### Application (`src/modules/auth/application/`)
 
-- [ ] `RequestPasswordResetUseCase`:
+- [x] `RequestPasswordResetUseCase`:
   - Accepts `email`
   - Looks up user by email — if not found or deactivated, returns silently (no error, no email)
   - Generates a cryptographically random raw token, stores `sha256` hash
@@ -65,7 +65,7 @@ Requires Slice 7 (NotificationModule) to be merged — `NotificationService.send
   - Persists `PasswordResetToken`
   - Calls `NotificationService.sendPasswordResetEmail(user.email, token)` — passes raw token
   - Always returns void (caller always gets 200)
-- [ ] `ResetPasswordUseCase`:
+- [x] `ResetPasswordUseCase`:
   - Accepts `token` (raw) and `newPassword`
   - Hashes token, looks up `PasswordResetToken` by hash
   - Rejects if not found, expired, or already used — throws `InvalidResetTokenError`
@@ -74,41 +74,41 @@ Requires Slice 7 (NotificationModule) to be merged — `NotificationService.send
   - Updates `User.passwordHash` and sets `User.passwordChangedAt` to now
   - Marks token as used (`usedAt` = now)
   - All above in a single transaction
-- [ ] `RefreshUseCase` updated: after validating JWT, check `User.passwordChangedAt` — if token `iat` < `passwordChangedAt`, reject with 401
-- [ ] Unit tests for all three use cases using fakes:
+- [x] `RefreshUseCase` updated: after validating JWT, check `User.passwordChangedAt` — if token `iat` < `passwordChangedAt`, reject with 401
+- [x] Unit tests for all three use cases using fakes:
   - `RequestPasswordResetUseCase`: unknown email → silent return; known email → token saved + email sent
   - `ResetPasswordUseCase`: valid token → password updated + token marked used + `passwordChangedAt` set; expired token → rejected; used token → rejected
   - `RefreshUseCase`: token issued before `passwordChangedAt` → rejected
 
 ### Persistence (`src/modules/auth/adapters/out/persistence/`)
 
-- [ ] `PrismaPasswordResetTokenRepository` implements `PasswordResetTokenPort`
+- [x] `PrismaPasswordResetTokenRepository` implements `PasswordResetTokenPort`
   - `save(token)` — inserts new row
   - `findByHash(hash)` — returns token or null
   - `markUsed(id)` — sets `usedAt` to now
-- [ ] Integration tests against Testcontainers Postgres
+- [x] Integration tests against Testcontainers Postgres
 
 ### HTTP (`src/modules/auth/adapters/in/http/`)
 
-- [ ] `POST /api/admin/auth/forgot-password`:
+- [x] `POST /api/admin/auth/forgot-password`:
   - Accepts `{ email: string }` — Zod validated
   - Always returns `200 { message: "If that email exists you will receive a reset link" }`
   - Rate limited: 5 req/hr/IP via NestJS Throttler
   - No auth guard required (public endpoint)
-- [ ] `POST /api/admin/auth/reset-password`:
+- [x] `POST /api/admin/auth/reset-password`:
   - Accepts `{ token: string, password: string }` — Zod validated
   - Returns `200` on success
   - Returns `400` with `INVALID_RESET_TOKEN` error code on invalid/expired/used token
   - No auth guard required (public endpoint)
-- [ ] Integration tests for both endpoints using Supertest
+- [x] Integration tests for both endpoints using Supertest
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api run depcruise` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
-- [ ] Coverage ≥ 98% on changed auth module files
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api run depcruise` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
+- [x] Coverage ≥ 98% on changed auth module files
 
 ---
 

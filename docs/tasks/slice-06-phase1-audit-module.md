@@ -37,40 +37,40 @@ Must ship before Phase 2 and Phase 3. The real Prisma adapter built here replace
 
 ### Domain (`src/modules/audit/domain/`)
 
-- [ ] `AuditEvent` entity with fields: id, timestamp (UTC), actorId, actorIp, action (enum), targetType, targetId, summary
-- [ ] `AuditAction` enum covers: USER_LOGIN, USER_LOGIN_FAILED, USER_LOGOUT, USER_CREATED, USER_UPDATED, USER_DEACTIVATED, CONTENT_CREATED, CONTENT_UPDATED, CONTENT_STATUS_CHANGED, CONTENT_DELETED, MEDIA_UPLOADED, MEDIA_DELETED
-- [ ] `AuditPort` interface exposes only `save()` and `findMany()` — no update, no delete methods exist anywhere
-- [ ] Unit tests 100% on domain entity
+- [x] `AuditEvent` entity with fields: id, timestamp (UTC), actorId, actorIp, action (enum), targetType, targetId, summary
+- [x] `AuditAction` enum covers: USER_LOGIN, USER_LOGIN_FAILED, USER_LOGOUT, USER_CREATED, USER_UPDATED, USER_DEACTIVATED, CONTENT_CREATED, CONTENT_UPDATED, CONTENT_STATUS_CHANGED, CONTENT_DELETED, MEDIA_UPLOADED, MEDIA_DELETED
+- [x] `AuditPort` interface exposes only `save()` and `findMany()` — no update, no delete methods exist anywhere
+- [x] Unit tests 100% on domain entity
 
 ### Application (`src/modules/audit/application/`)
 
-- [ ] `WriteAuditEventUseCase` — creates and persists an audit event
-- [ ] `ListAuditEventsUseCase` — filters by actorId, action, targetType, dateFrom, dateTo; paginated
-- [ ] `ExportAuditCsvUseCase` — returns all matching events as CSV string
-- [ ] Unit tests for all use cases using `FakeAuditRepository` (in-memory, no I/O)
+- [x] `WriteAuditEventUseCase` — creates and persists an audit event
+- [x] `ListAuditEventsUseCase` — filters by actorId, action, targetType, dateFrom, dateTo; paginated
+- [x] `ExportAuditCsvUseCase` — returns all matching events as CSV string
+- [x] Unit tests for all use cases using `FakeAuditRepository` (in-memory, no I/O)
 
 ### Persistence (`src/modules/audit/adapters/out/persistence/`)
 
-- [ ] `PrismaAuditRepository` implements `AuditPort`
-- [ ] No `update()` or `delete()` methods exist — not even private
-- [ ] Prisma schema: `AuditEvent` model added
-- [ ] Migration created under `apps/api/prisma/migrations/`
-- [ ] Integration tests against Testcontainers Postgres
+- [x] `PrismaAuditRepository` implements `AuditPort`
+- [x] No `update()` or `delete()` methods exist — not even private
+- [x] Prisma schema: `AuditEvent` model added
+- [x] Migration created under `apps/api/prisma/migrations/`
+- [x] Integration tests against Testcontainers Postgres
 
 ### HTTP (`src/modules/audit/adapters/in/http/`)
 
-- [ ] `GET /api/admin/audit` — Admin only, filters: actorId, action, targetType, dateFrom, dateTo; pagination; returns `{ data: [...], pagination: { page, pageSize, total, totalPages } }`
-- [ ] `GET /api/admin/audit/export` — Admin only, same filters, returns `text/csv` with `Content-Disposition: attachment; filename="audit.csv"`
-- [ ] 401 for unauthenticated, 403 for non-Admin
-- [ ] Zod validation on all query params
-- [ ] Integration tests for both endpoints using Supertest
+- [x] `GET /api/admin/audit` — Admin only, filters: actorId, action, targetType, dateFrom, dateTo; pagination; returns `{ data: [...], pagination: { page, pageSize, total, totalPages } }`
+- [x] `GET /api/admin/audit/export` — Admin only, same filters, returns `text/csv` with `Content-Disposition: attachment; filename="audit.csv"`
+- [x] 401 for unauthenticated, 403 for non-Admin
+- [x] Zod validation on all query params
+- [x] Integration tests for both endpoints using Supertest
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/audit` exits 0
-- [ ] Coverage ≥ 98% on audit module
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/audit` exits 0
+- [x] Coverage ≥ 98% on audit module
 
 ---
 

@@ -1,0 +1,10 @@
+{
+  "id": "depcruise-16-architecture-violations",
+  "date": "2026-05-19",
+  "ticket": "CMS-014",
+  "symptom": "pnpm --filter @cms/api run depcruise reported 16 violations across multiple modules",
+  "rootcause": "Prisma-generated types (PrismaClient, Prisma.ContentCreateInput, etc.) were being imported directly into application and domain layer files across auth, users, content, and media modules. This violated the hexagonal architecture rule that domain and application layers must not depend on infrastructure types",
+  "fix": "Restructured imports in all affected modules — Prisma types confined to adapters/out/persistence layer; application and domain layers use their own plain TypeScript interfaces and entities",
+  "recurrence_risk": "high",
+  "tags": ["depcruise", "architecture", "hexagonal", "prisma", "dependency-inversion"]
+}

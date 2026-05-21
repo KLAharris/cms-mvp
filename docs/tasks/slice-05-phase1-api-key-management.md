@@ -37,34 +37,34 @@ Requires Slice 1 (auth + JWT). Foundation for Slice 5 Phase 2 (public endpoints)
 
 ### Domain (`src/modules/auth/domain/`)
 
-- [ ] `ApiKey` entity: id, name, keyHash, createdBy, createdAt, lastUsedAt, revokedAt
-- [ ] Unit tests on key hash comparison logic
+- [x] `ApiKey` entity: id, name, keyHash, createdBy, createdAt, lastUsedAt, revokedAt
+- [x] Unit tests on key hash comparison logic
 
 ### Application (`src/modules/auth/application/`)
 
-- [ ] `CreateApiKeyUseCase` — generates raw key, stores hash, returns raw key once
-- [ ] `ListApiKeysUseCase` — returns all keys (no raw values, hashes never exposed)
-- [ ] `RevokeApiKeyUseCase` — sets revokedAt
-- [ ] Unit tests with fakes
+- [x] `CreateApiKeyUseCase` — generates raw key, stores hash, returns raw key once
+- [x] `ListApiKeysUseCase` — returns all keys (no raw values, hashes never exposed)
+- [x] `RevokeApiKeyUseCase` — sets revokedAt
+- [x] Unit tests with fakes
 
 ### Persistence
 
-- [ ] `PrismaApiKeyRepository` — save, findAll, findByHash, revoke
-- [ ] Integration tests
+- [x] `PrismaApiKeyRepository` — save, findAll, findByHash, revoke
+- [x] Integration tests
 
 ### HTTP + Guard
 
-- [ ] `POST /api/admin/auth/api-keys` — Admin only, returns `{ id, name, key: "<raw>" }`
-- [ ] `GET /api/admin/auth/api-keys` — Admin only
-- [ ] `DELETE /api/admin/auth/api-keys/:id` — Admin only (revoke)
-- [ ] `ApiKeyGuard` — hashes `X-API-Key` header, looks up in DB, rejects if not found or revoked
-- [ ] Integration tests
+- [x] `POST /api/admin/auth/api-keys` — Admin only, returns `{ id, name, key: "<raw>" }`
+- [x] `GET /api/admin/auth/api-keys` — Admin only
+- [x] `DELETE /api/admin/auth/api-keys/:id` — Admin only (revoke)
+- [x] `ApiKeyGuard` — hashes `X-API-Key` header, looks up in DB, rejects if not found or revoked
+- [x] Integration tests
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
 
 ---
 

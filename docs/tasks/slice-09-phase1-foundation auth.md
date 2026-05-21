@@ -43,66 +43,66 @@ Requires Slices 1–8 merged and CI green. This is the first frontend phase — 
 
 ### Project Setup (`apps/web/`)
 
-- [ ] `vite.config.ts` configured with path aliases (`@/` → `src/`)
-- [ ] TypeScript strict mode enabled
-- [ ] ESLint + Prettier configured consistent with backend
-- [ ] MUI v6 installed and configured with MD3 theme:
+- [x] `vite.config.ts` configured with path aliases (`@/` → `src/`)
+- [x] TypeScript strict mode enabled
+- [x] ESLint + Prettier configured consistent with backend
+- [x] MUI v6 installed and configured with MD3 theme:
   - Seed color from `docs/03-DESIGN.md` § 6
   - Roboto Flex font loaded
   - Material Symbols icon font loaded
   - Light and dark theme variants
-- [ ] `ThemeProvider` wraps the app with system preference detection (`prefers-color-scheme`)
-- [ ] React Router v6 set up with route structure:
+- [x] `ThemeProvider` wraps the app with system preference detection (`prefers-color-scheme`)
+- [x] React Router v6 set up with route structure:
   - `/login` — public
   - `/forgot-password` — public
   - `/reset-password` — public
   - `/` → redirect to `/dashboard` — protected
   - `*` → 404 screen
-- [ ] Axios instance at `src/lib/api.ts` with base URL, auth interceptor, and 401 handler
-- [ ] TanStack Query `QueryClient` configured with sensible defaults (stale time, retry)
-- [ ] Zustand auth store: `useAuthStore` with `user`, `accessToken`, `login()`, `logout()`, `isAuthenticated`
-- [ ] `ProtectedRoute` component redirects unauthenticated users to `/login`
+- [x] Axios instance at `src/lib/api.ts` with base URL, auth interceptor, and 401 handler
+- [x] TanStack Query `QueryClient` configured with sensible defaults (stale time, retry)
+- [x] Zustand auth store: `useAuthStore` with `user`, `accessToken`, `login()`, `logout()`, `isAuthenticated`
+- [x] `ProtectedRoute` component redirects unauthenticated users to `/login`
 
 ### Login Screen (`/login`)
 
-- [ ] Layout matches `docs/03-DESIGN.md` § 12.1: centered card, logo 64 dp top-centered, 24 dp gap
-- [ ] Email field (outlined), password field (outlined, toggle visibility)
-- [ ] Submit button calls `POST /api/admin/auth/login`; on success stores token in Zustand + redirects to `/dashboard`
-- [ ] Error banner above form on invalid credentials (`"Email or password is incorrect."`)
-- [ ] Lockout state: generic message shown, no count revealed (FR-AUTH-06)
-- [ ] "Forgot password?" link → `/forgot-password`
-- [ ] Loading state on submit button
-- [ ] Keyboard: Enter submits form; focus management on error
+- [x] Layout matches `docs/03-DESIGN.md` § 12.1: centered card, logo 64 dp top-centered, 24 dp gap
+- [x] Email field (outlined), password field (outlined, toggle visibility)
+- [x] Submit button calls `POST /api/admin/auth/login`; on success stores token in Zustand + redirects to `/dashboard`
+- [x] Error banner above form on invalid credentials (`"Email or password is incorrect."`)
+- [x] Lockout state: generic message shown, no count revealed (FR-AUTH-06)
+- [x] "Forgot password?" link → `/forgot-password`
+- [x] Loading state on submit button
+- [x] Keyboard: Enter submits form; focus management on error
 
 ### Forgot Password Screen (`/forgot-password`)
 
-- [ ] Email field, submit button
-- [ ] Calls `POST /api/admin/auth/forgot-password`
-- [ ] Always shows success message regardless of whether email exists (no enumeration — SEC-11): `"If that email is registered you will receive a reset link shortly."`
-- [ ] Back to login link
+- [x] Email field, submit button
+- [x] Calls `POST /api/admin/auth/forgot-password`
+- [x] Always shows success message regardless of whether email exists (no enumeration — SEC-11): `"If that email is registered you will receive a reset link shortly."`
+- [x] Back to login link
 
 ### Reset Password Screen (`/reset-password?token=...`)
 
-- [ ] Reads `token` from query params
-- [ ] New password + confirm password fields with visibility toggle
-- [ ] Client-side validation: passwords match, minimum 12 chars, at least one letter and one digit (FR-AUTH-02)
-- [ ] Calls `POST /api/admin/auth/reset-password` with token + password
-- [ ] On success: shows confirmation message + redirects to `/login` after 3 s
-- [ ] On invalid/expired token: shows error message `"This reset link is invalid or has expired."`
+- [x] Reads `token` from query params
+- [x] New password + confirm password fields with visibility toggle
+- [x] Client-side validation: passwords match, minimum 12 chars, at least one letter and one digit (FR-AUTH-02)
+- [x] Calls `POST /api/admin/auth/reset-password` with token + password
+- [x] On success: shows confirmation message + redirects to `/login` after 3 s
+- [x] On invalid/expired token: shows error message `"This reset link is invalid or has expired."`
 
 ### Testing
 
-- [ ] Unit tests for `useAuthStore` — login, logout, token persistence
-- [ ] Unit tests for `ProtectedRoute` — redirects unauthenticated users
-- [ ] Component tests for Login screen — happy path, error state, loading state
-- [ ] Component tests for Forgot Password screen — always shows success
-- [ ] Component tests for Reset Password screen — validation, success, expired token
+- [x] Unit tests for `useAuthStore` — login, logout, token persistence
+- [x] Unit tests for `ProtectedRoute` — redirects unauthenticated users
+- [x] Component tests for Login screen — happy path, error state, loading state
+- [x] Component tests for Forgot Password screen — always shows success
+- [x] Component tests for Reset Password screen — validation, success, expired token
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/web tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/web lint` exits 0
-- [ ] `pnpm --filter @cms/web exec vitest run` exits 0
+- [x] `pnpm --filter @cms/web tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/web lint` exits 0
+- [x] `pnpm --filter @cms/web exec vitest run` exits 0
 
 ---
 

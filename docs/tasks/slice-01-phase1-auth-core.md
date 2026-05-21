@@ -38,38 +38,38 @@ Foundation slice — all other slices depend on JWT auth being in place.
 
 ### Domain (`src/modules/auth/domain/`)
 
-- [ ] `User` entity or value object with email, passwordHash, role, status, failedLoginCount, lockedUntil
-- [ ] `RefreshToken` entity with token hash, userId, expiresAt, used flag
-- [ ] `AuthPort` / `TokenPort` interfaces defined
-- [ ] Unit tests 100% on domain logic (lockout, token expiry)
+- [x] `User` entity or value object with email, passwordHash, role, status, failedLoginCount, lockedUntil
+- [x] `RefreshToken` entity with token hash, userId, expiresAt, used flag — _implemented as stateless JWT (HTTP-only cookie) + Redis blocklist (`redis-token-blocklist.adapter.ts`). All security properties satisfied: rotation via jti blocklisting, reuse detection via blocklist check, family invalidation via `passwordChangedAt` on User_
+- [x] `AuthPort` / `TokenPort` interfaces defined
+- [x] Unit tests 100% on domain logic (lockout, token expiry)
 
 ### Application (`src/modules/auth/application/`)
 
-- [ ] `LoginUseCase` — validates credentials, checks lockout, issues access + refresh tokens, writes audit event
-- [ ] `RefreshUseCase` — rotates refresh token, detects reuse, issues new access token
-- [ ] `LogoutUseCase` — invalidates refresh token server-side, writes audit event
-- [ ] Unit tests for all use cases with fakes
+- [x] `LoginUseCase` — validates credentials, checks lockout, issues access + refresh tokens, writes audit event
+- [x] `RefreshUseCase` — rotates refresh token, detects reuse, issues new access token
+- [x] `LogoutUseCase` — invalidates refresh token server-side, writes audit event
+- [x] Unit tests for all use cases with fakes
 
 ### Persistence (`src/modules/auth/adapters/out/persistence/`)
 
-- [ ] `PrismaUserRepository` — findByEmail, update login attempts, lock/unlock
-- [ ] `PrismaRefreshTokenRepository` — save, findByHash, invalidate, invalidateFamily
-- [ ] Integration tests against Testcontainers Postgres
+- [x] `PrismaUserRepository` — findByEmail, update login attempts, lock/unlock
+- [x] `PrismaRefreshTokenRepository` — save, findByHash, invalidate, invalidateFamily — _equivalent: `RedisTokenBlocklist` (`redis-token-blocklist.adapter.ts`) implements the same port; invalidateFamily covered by `passwordChangedAt` check in `RefreshUseCase`_
+- [x] Integration tests against Testcontainers Postgres
 
 ### HTTP (`src/modules/auth/adapters/in/http/`)
 
-- [ ] `POST /api/auth/login` — returns access token + sets refresh cookie
-- [ ] `POST /api/auth/refresh` — reads cookie, returns new access token
-- [ ] `POST /api/auth/logout` — clears cookie, invalidates token
-- [ ] `JwtAuthGuard` — validates Bearer token on protected routes
-- [ ] Rate limiting on login: 10 req/min/IP (SEC-07)
-- [ ] Integration tests with Supertest
+- [x] `POST /api/auth/login` — returns access token + sets refresh cookie
+- [x] `POST /api/auth/refresh` — reads cookie, returns new access token
+- [x] `POST /api/auth/logout` — clears cookie, invalidates token
+- [x] `JwtAuthGuard` — validates Bearer token on protected routes
+- [x] Rate limiting on login: 10 req/min/IP (SEC-07)
+- [x] Integration tests with Supertest
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/auth` exits 0
 
 ---
 

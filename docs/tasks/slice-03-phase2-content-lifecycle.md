@@ -38,36 +38,36 @@ Requires Phase 1 (content CRUD). BullMQ and Redis must be running.
 
 ### Domain (`src/modules/content/domain/`)
 
-- [ ] `ContentLifecycleService` domain service — enforces all valid/invalid transitions
-- [ ] All transition combinations tested: valid transitions pass, invalid return domain error
-- [ ] `PublishRequirementsChecker` — validates title, body, slug, SEO description before publish
-- [ ] Unit tests 100% on lifecycle and publish requirements
+- [x] `ContentLifecycleService` domain service — enforces all valid/invalid transitions
+- [x] All transition combinations tested: valid transitions pass, invalid return domain error
+- [x] `PublishRequirementsChecker` — validates title, body, slug, SEO description before publish
+- [x] Unit tests 100% on lifecycle and publish requirements
 
 ### Application (`src/modules/content/application/`)
 
-- [ ] `SubmitForReviewUseCase` — Draft → In Review (Author or Editor)
-- [ ] `PublishContentUseCase` — In Review → Published (Editor/Admin only); validates publish requirements
-- [ ] `UnpublishContentUseCase` — Published → Unpublished (Editor/Admin only)
-- [ ] `ArchiveContentUseCase` — Unpublished → Archived
-- [ ] `SchedulePublishUseCase` — sets `scheduled_at`, enqueues BullMQ job
-- [ ] `HardDeleteJob` — BullMQ cron, hard-deletes soft-deleted items older than 30 days
-- [ ] Unit tests with fakes for all use cases
+- [x] `SubmitForReviewUseCase` — Draft → In Review (Author or Editor)
+- [x] `PublishContentUseCase` — In Review → Published (Editor/Admin only); validates publish requirements
+- [x] `UnpublishContentUseCase` — Published → Unpublished (Editor/Admin only)
+- [x] `ArchiveContentUseCase` — Unpublished → Archived
+- [x] `SchedulePublishUseCase` — sets `scheduled_at`, enqueues BullMQ job
+- [x] `HardDeleteJob` — BullMQ cron, hard-deletes soft-deleted items older than 30 days
+- [x] Unit tests with fakes for all use cases
 
 ### HTTP (`src/modules/content/adapters/in/http/`)
 
-- [ ] `PATCH /api/admin/content/:id/submit` — submit for review
-- [ ] `PATCH /api/admin/content/:id/publish` — publish
-- [ ] `PATCH /api/admin/content/:id/unpublish` — unpublish
-- [ ] `PATCH /api/admin/content/:id/archive` — archive
-- [ ] `PATCH /api/admin/content/:id/schedule` — set scheduled_at
-- [ ] Invalid transition returns 409 with clear error
-- [ ] Integration tests
+- [x] `PATCH /api/admin/content/:id/submit` — submit for review
+- [x] `PATCH /api/admin/content/:id/publish` — publish
+- [x] `PATCH /api/admin/content/:id/unpublish` — unpublish
+- [x] `PATCH /api/admin/content/:id/archive` — archive
+- [x] `PATCH /api/admin/content/:id/schedule` — set scheduled_at
+- [x] Invalid transition returns 409 with clear error
+- [x] Integration tests
 
 ### Quality
 
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/api exec vitest run src/modules/content` exits 0
 
 ---
 

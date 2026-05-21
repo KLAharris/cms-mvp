@@ -1,0 +1,10 @@
+{
+  "id": "resend-eager-init-crash",
+  "date": "2026-05-19",
+  "ticket": "CMS-015",
+  "symptom": "API failed to start locally with 'RESEND_API_KEY is required' even for developers not using the email feature",
+  "rootcause": "ResendEmailSenderAdapter instantiated the Resend SDK client eagerly in its constructor, which called ConfigService.getOrThrow('RESEND_API_KEY') at module startup time. Developers without this env var set could not start the API at all",
+  "fix": "Changed the Resend client to be lazy-initialized on first use — ConfigService is called only when sendPasswordResetEmail or sendInviteEmail is actually invoked",
+  "recurrence_risk": "medium",
+  "tags": ["notification", "resend", "config", "startup", "env"]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "notification-service-barrel-depcruise",
+  "date": "2026-05-19",
+  "ticket": "CMS-015",
+  "symptom": "depcruise reported an architecture violation: AuthModule and UserModule were importing NotificationService from its internal path instead of the public barrel",
+  "rootcause": "The import was written as a direct internal path (e.g., .../notification/application/notification.service) rather than going through the module's public index.ts barrel. This broke the hexagonal boundary rule that cross-module imports must use the public API",
+  "fix": "Changed all cross-module imports of NotificationService to use the notification module's public index.ts barrel",
+  "recurrence_risk": "medium",
+  "tags": ["depcruise", "architecture", "notification", "hexagonal", "barrel"]
+}

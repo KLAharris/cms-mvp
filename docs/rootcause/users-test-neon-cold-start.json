@@ -1,0 +1,10 @@
+{
+  "id": "users-test-neon-cold-start",
+  "date": "2026-05-19",
+  "ticket": "CMS-016",
+  "symptom": "Users integration test timed out on the first CI run of the day with a connection timeout error",
+  "rootcause": "The users integration test was pointed at the Neon cloud Postgres branch (TEST_DATABASE_URL). Neon free tier suspends the database after inactivity and takes 3-5 seconds to wake on first connection. This exceeded the test connection timeout and caused intermittent CI failures",
+  "fix": "Migrated the users integration test from Neon to a local Testcontainers Postgres instance, eliminating the cold-start dependency",
+  "recurrence_risk": "low",
+  "tags": ["testing", "testcontainers", "neon", "postgres", "cold-start", "ci", "users"]
+}

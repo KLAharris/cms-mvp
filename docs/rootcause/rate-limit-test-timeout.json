@@ -1,0 +1,10 @@
+{
+  "id": "rate-limit-test-timeout",
+  "date": "2026-05-20",
+  "ticket": "CMS-020",
+  "symptom": "Rate-limiting integration test timed out consistently in CI",
+  "rootcause": "Test exercised the 60 req/min ApiKeyThrottlerGuard by sending 61 requests. Sending 61 HTTP requests serially takes ~6-8 seconds, which exceeded Vitest's default 5-second test timeout",
+  "fix": "Increased the per-test timeout to 15 seconds for the rate-limiting spec",
+  "recurrence_risk": "low",
+  "tags": ["testing", "rate-limit", "vitest", "timeout", "public-api"]
+}

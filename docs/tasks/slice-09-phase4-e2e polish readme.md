@@ -44,96 +44,96 @@ Requires Phases 1–3 complete. All screens must be built before E2E tests are w
 
 Implement the flows from docs/06-TEST-STRATEGY.md § 9.2.2:
 
-- [ ] **E2E-01**: Admin invites user → user accepts → user logs in
-- [ ] **E2E-02**: Editor logs in → creates draft → submits → publishes → appears in public API
-- [ ] **E2E-03**: Author submits for review → editor rejects with note → author edits → editor approves
-- [ ] **E2E-04**: Editor unpublishes article → disappears from public API within 60 s
-- [ ] **E2E-05**: Author uploads image → embeds in article → publishes → image visible publicly
-- [ ] **E2E-06**: User wrong password 5 times → locked → generic error shown
-- [ ] **E2E-07**: User clicks forgot password → receives email → resets → logs in
-- [ ] **E2E-08**: Admin creates API key → fetches public articles with it → revokes → fetch fails
-- [ ] **E2E-09**: Editor schedules article for future → time passes → auto-publishes
-- [ ] **E2E-10**: Admin deactivates user → user is logged out → cannot log back in
+- [x] **E2E-01**: Admin invites user → user accepts → user logs in
+- [x] **E2E-02**: Editor logs in → creates draft → submits → publishes → appears in public API
+- [x] **E2E-03**: Author submits for review → editor rejects with note → author edits → editor approves
+- [x] **E2E-04**: Editor unpublishes article → disappears from public API within 60 s
+- [x] **E2E-05**: Author uploads image → embeds in article → publishes → image visible publicly
+- [x] **E2E-06**: User wrong password 5 times → locked → generic error shown
+- [x] **E2E-07**: User clicks forgot password → receives email → resets → logs in
+- [x] **E2E-08**: Admin creates API key → fetches public articles with it → revokes → fetch fails
+- [x] **E2E-09**: Editor schedules article for future → time passes → auto-publishes
+- [x] **E2E-10**: Admin deactivates user → user is logged out → cannot log back in
 
 Page objects to create (in `test/e2e/pages/`):
 
-- [ ] `LoginPage`
-- [ ] `ForgotPasswordPage`
-- [ ] `ResetPasswordPage`
-- [ ] `DashboardPage`
-- [ ] `ContentListPage`
-- [ ] `ContentEditorPage`
-- [ ] `MediaLibraryPage`
-- [ ] `UsersPage`
-- [ ] `AuditLogPage`
-- [ ] `ApiKeysPage`
+- [x] `LoginPage`
+- [x] `ForgotPasswordPage`
+- [x] `ResetPasswordPage`
+- [x] `DashboardPage`
+- [x] `ContentListPage`
+- [x] `ContentEditorPage`
+- [x] `MediaLibraryPage`
+- [x] `UsersPage`
+- [x] `AuditLogPage`
+- [x] `ApiKeysPage`
 
 ### Accessibility
 
-- [ ] `axe-core` scan passes (zero violations) on: Login, Dashboard, Content List, Content Editor, Media Library, Users, Audit Log
-- [ ] All interactive elements reachable by keyboard (Tab key navigation)
-- [ ] Skip-to-content link at top of page (visible on focus) — docs/03-DESIGN.md § 17
-- [ ] All images have alt text
-- [ ] All form fields have visible labels
-- [ ] Color contrast meets WCAG 2.1 AA on both light and dark themes
-- [ ] Lighthouse a11y score ≥ 95 in CI
+- [x] `axe-core` scan passes (zero violations) on: Login, Dashboard, Content List, Content Editor, Media Library, Users, Audit Log
+- [x] All interactive elements reachable by keyboard (Tab key navigation)
+- [x] Skip-to-content link at top of page (visible on focus) — docs/03-DESIGN.md § 17
+- [x] All images have alt text
+- [x] All form fields have visible labels
+- [x] Color contrast meets WCAG 2.1 AA on both light and dark themes
+- [x] Lighthouse a11y score ≥ 95 in CI
 
 ### Loading + Empty + Error States
 
 Per docs/03-DESIGN.md § 14:
 
-- [ ] Skeleton screens on initial load for: Dashboard, Content List, Media Library
-- [ ] Empty states with illustration + action button for: Content List, Media Library, Users, API Keys
-- [ ] Error states: inline error messages for form validation; error banner for API failures
-- [ ] 404 screen: friendly message + link back to Dashboard
-- [ ] 403 screen: `"You don't have permission to view this."` + link back
-- [ ] Loading state on all action buttons (spinner while request in flight)
+- [x] Skeleton screens on initial load for: Dashboard, Content List, Media Library
+- [x] Empty states with illustration + action button for: Content List, Media Library, Users, API Keys
+- [x] Error states: inline error messages for form validation; error banner for API failures
+- [x] 404 screen: friendly message + link back to Dashboard
+- [x] 403 screen: `"You don't have permission to view this."` + link back
+- [x] Loading state on all action buttons (spinner while request in flight)
 
 ### README (`README.md` at repo root)
 
-- [ ] Project summary — what the CMS is, who it is for
-- [ ] Architecture overview with diagram (hexagonal backend + reactive frontend)
-- [ ] Full tech stack table with one-line rationale per technology
-- [ ] Complete feature list (Slices 1–9)
-- [ ] Getting started — clone, install, env vars, migrate, seed, run backend + frontend
-- [ ] Environment variables reference table (all vars, required/optional, example values)
-- [ ] Running tests — unit, integration, E2E, full suite
-- [ ] CI/CD pipeline description
-- [ ] Project structure — annotated directory tree
-- [ ] Key design decisions (3–5 decisions with rationale)
-- [ ] Links to `/docs` (Swagger UI) and `/redoc`
-- [ ] README renders correctly on GitHub
+- [x] Project summary — what the CMS is, who it is for
+- [x] Architecture overview with diagram (hexagonal backend + reactive frontend)
+- [x] Full tech stack table with one-line rationale per technology
+- [x] Complete feature list (Slices 1–9)
+- [x] Getting started — clone, install, env vars, migrate, seed, run backend + frontend
+- [x] Environment variables reference table (all vars, required/optional, example values)
+- [x] Running tests — unit, integration, E2E, full suite
+- [x] CI/CD pipeline description
+- [x] Project structure — annotated directory tree
+- [x] Key design decisions (3–5 decisions with rationale)
+- [x] Links to `/docs` (Swagger UI) and `/redoc`
+- [x] README renders correctly on GitHub
 
 ### Environment Variables
 
-- [ ] `apps/api/.env.example` — all backend env vars with placeholder values
-- [ ] `apps/web/.env.example` — all frontend env vars (`VITE_API_URL`, etc.)
-- [ ] Every `ConfigService.getOrThrow` call in backend covered
-- [ ] Every `import.meta.env.VITE_*` reference in frontend covered
-- [ ] `.env` files confirmed in `.gitignore`
+- [x] `apps/api/.env.example` — all backend env vars with placeholder values
+- [x] `apps/web/.env.example` — all frontend env vars (`VITE_API_URL`, etc.)
+- [x] Every `ConfigService.getOrThrow` call in backend covered
+- [x] Every `import.meta.env.VITE_*` reference in frontend covered
+- [x] `.env` files confirmed in `.gitignore`
 
 ### Seed Script (`apps/api/prisma/seed.ts`)
 
-- [ ] Creates Admin user: `admin@example.com` / `Admin1234!`
-- [ ] Creates Editor user: `editor@example.com` / `Editor1234!`
-- [ ] Creates Author user: `author@example.com` / `Author1234!`
-- [ ] Creates one published Article with full SEO fields
-- [ ] Creates one published Page
-- [ ] Creates one API key for testing the public API (prints raw key to console on seed)
-- [ ] Idempotent: safe to run multiple times without duplicating data
-- [ ] Command: `pnpm --filter @cms/api prisma db seed`
+- [x] Creates Admin user: `admin@example.com` / `Admin1234!`
+- [x] Creates Editor user: `editor@example.com` / `Editor1234!`
+- [x] Creates Author user: `author@example.com` / `Author1234!`
+- [x] Creates one published Article with full SEO fields
+- [x] Creates one published Page
+- [x] Creates one API key for testing the public API (prints raw key to console on seed)
+- [x] Idempotent: safe to run multiple times without duplicating data
+- [x] Command: `pnpm --filter @cms/api prisma db seed`
 
 ### Final Quality Pass
 
-- [ ] No `TODO` or `FIXME` comments in production code
-- [ ] No `console.log` statements in production code (structured logger backend; removed frontend)
-- [ ] `pnpm run test` (full suite) exits 0
-- [ ] `pnpm --filter @cms/api tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/web tsc --noEmit` exits 0
-- [ ] `pnpm --filter @cms/api lint` exits 0
-- [ ] `pnpm --filter @cms/web lint` exits 0
-- [ ] `pnpm --filter @cms/api run depcruise` exits 0
-- [ ] All GitHub Actions CI steps green
+- [x] No `TODO` or `FIXME` comments in production code
+- [x] No `console.log` statements in production code (structured logger backend; removed frontend)
+- [x] `pnpm run test` (full suite) exits 0
+- [x] `pnpm --filter @cms/api tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/web tsc --noEmit` exits 0
+- [x] `pnpm --filter @cms/api lint` exits 0
+- [x] `pnpm --filter @cms/web lint` exits 0
+- [x] `pnpm --filter @cms/api run depcruise` exits 0
+- [x] All GitHub Actions CI steps green
 
 ---
 

@@ -1,0 +1,10 @@
+{
+  "id": "redis-teardown-race-condition",
+  "date": "2026-05-20",
+  "ticket": "CMS-020",
+  "symptom": "Public-API integration test passed individually but failed intermittently when teardown ran while an assertion was still in flight",
+  "rootcause": "closeRedis() was called in afterAll before the final assertion await resolved, causing the Redis connection to close mid-assertion and throwing a connection-closed error",
+  "fix": "Added explicit await before the teardown call so all assertions complete before the Redis client is closed",
+  "recurrence_risk": "medium",
+  "tags": ["redis", "testing", "async", "integration", "public-api"]
+}
