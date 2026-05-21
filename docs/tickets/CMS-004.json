@@ -1,0 +1,15 @@
+{
+  "ticket": "CMS-004",
+  "slice": "slice-03-phase1",
+  "module": "content",
+  "status": "done",
+  "scope_note": "Content CRUD — Article and Page entities, draft creation, update, delete",
+  "acceptance_criteria": [
+    "POST /api/admin/content creates article or page in draft status",
+    "GET /api/admin/content lists content with pagination and type filter",
+    "GET /api/admin/content/:id returns single content item",
+    "PATCH /api/admin/content/:id updates fields while in draft",
+    "DELETE /api/admin/content/:id soft-deletes content",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

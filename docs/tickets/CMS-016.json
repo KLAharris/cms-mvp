@@ -1,0 +1,16 @@
+{
+  "ticket": "CMS-016",
+  "slice": "slice-08",
+  "module": "auth",
+  "status": "done",
+  "scope_note": "Complete password reset flow — one-time link valid 60 min, single-use, invalidates all refresh tokens on success",
+  "depends_on": ["CMS-015"],
+  "acceptance_criteria": [
+    "POST /api/admin/auth/password/forgot enqueues reset email (202, no user enumeration)",
+    "POST /api/admin/auth/password/reset validates token, hashes new password, invalidates token",
+    "Reset token expires after 60 minutes",
+    "Token is single-use — second use returns 410 Gone",
+    "Successful reset invalidates all existing refresh tokens via passwordChangedAt timestamp check",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

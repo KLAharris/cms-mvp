@@ -1,0 +1,14 @@
+{
+  "ticket": "CMS-009",
+  "slice": "slice-05-phase1",
+  "module": "public-api",
+  "status": "done",
+  "scope_note": "Public API key management — create, list, revoke keys scoped to public read-only access",
+  "acceptance_criteria": [
+    "POST /api/admin/public-api/keys creates a public API key",
+    "GET /api/admin/public-api/keys lists active keys",
+    "DELETE /api/admin/public-api/keys/:id revokes a key",
+    "ApiKeyGuard on public routes validates X-API-Key header",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

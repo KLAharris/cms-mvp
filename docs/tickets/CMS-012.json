@@ -1,0 +1,14 @@
+{
+  "ticket": "CMS-012",
+  "slice": "slice-06-phase1",
+  "module": "audit",
+  "status": "done",
+  "scope_note": "Append-only audit log module — AuditPort with save() and findMany() only, admin list/filter/export",
+  "acceptance_criteria": [
+    "AuditPort exposes only save() and findMany() — no update or delete at any layer",
+    "GET /api/admin/audit lists audit events with filters (actorId, action, resourceType, date range)",
+    "GET /api/admin/audit/export returns CSV of filtered events",
+    "Audit records are immutable — no endpoint or service modifies existing entries",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

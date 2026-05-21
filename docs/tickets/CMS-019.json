@@ -1,0 +1,17 @@
+{
+  "ticket": "CMS-019",
+  "slice": "slice-09-phase3",
+  "module": "web",
+  "status": "done",
+  "scope_note": "Admin SPA — media library screen (upload, browse, delete) and user management screen",
+  "depends_on": ["CMS-017"],
+  "acceptance_criteria": [
+    "Media library shows grid of uploaded files with status (processing/ready)",
+    "Drag-and-drop upload with progress indicator",
+    "Media detail shows all variant URLs",
+    "Delete media with confirmation dialog",
+    "User list screen with role badges",
+    "Invite user form (email + role)",
+    "pnpm --filter @cms/web typecheck and lint exit 0"
+  ]
+}

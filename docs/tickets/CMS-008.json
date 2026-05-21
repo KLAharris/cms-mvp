@@ -1,0 +1,14 @@
+{
+  "ticket": "CMS-008",
+  "slice": "slice-04-phase2",
+  "module": "media",
+  "status": "done",
+  "scope_note": "Media library — list, filter, delete, soft-delete with 30-day BullMQ cron cleanup",
+  "acceptance_criteria": [
+    "GET /api/admin/media lists media with pagination and mimeType filter",
+    "GET /api/admin/media/:id returns media record with variant URLs",
+    "DELETE /api/admin/media/:id soft-deletes record",
+    "BullMQ cron hard-deletes soft-deleted records older than 30 days from MinIO and DB",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

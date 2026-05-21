@@ -1,0 +1,15 @@
+{
+  "ticket": "CMS-001",
+  "slice": "slice-01-phase1",
+  "module": "auth",
+  "status": "done",
+  "scope_note": "Authentication core — login, JWT access token, refresh token rotation, logout, account lockout after 5 failed attempts",
+  "acceptance_criteria": [
+    "POST /api/admin/auth/login returns 15-min JWT access token + 7-day HTTP-only refresh cookie",
+    "POST /api/admin/auth/refresh rotates refresh token on every use",
+    "POST /api/admin/auth/logout invalidates refresh token",
+    "Account locked after 5 consecutive failed login attempts",
+    "Passwords hashed with Argon2id",
+    "pnpm typecheck, lint, and vitest run src/modules/auth all exit 0"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "ticket": "CMS-006",
+  "slice": "slice-03-phase3",
+  "module": "content",
+  "status": "done",
+  "scope_note": "SEO fields, content versioning (snapshot on publish), full-text search",
+  "acceptance_criteria": [
+    "Content entity has slug, metaTitle, metaDescription fields",
+    "Slug is unique and auto-generated from title if not provided",
+    "Publish action snapshots the content version to content_versions table",
+    "GET /api/admin/content/:id/versions lists all versions",
+    "GET /api/admin/content with ?q= performs full-text search on title/body",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

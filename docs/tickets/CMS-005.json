@@ -1,0 +1,15 @@
+{
+  "ticket": "CMS-005",
+  "slice": "slice-03-phase2",
+  "module": "content",
+  "status": "done",
+  "scope_note": "Content lifecycle — draft → in_review → published transitions, scheduling, unpublish",
+  "acceptance_criteria": [
+    "POST /api/admin/content/:id/submit moves draft to in_review",
+    "POST /api/admin/content/:id/publish moves in_review to published",
+    "POST /api/admin/content/:id/unpublish moves published back to draft",
+    "PATCH /api/admin/content/:id/schedule sets a future publish date",
+    "BullMQ cron job publishes scheduled content at the correct time",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

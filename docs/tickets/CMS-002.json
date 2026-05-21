@@ -1,0 +1,14 @@
+{
+  "ticket": "CMS-002",
+  "slice": "slice-01-phase2",
+  "module": "auth",
+  "status": "done",
+  "scope_note": "API key management — create, list, revoke; sha256 hash stored, raw key returned once on creation",
+  "acceptance_criteria": [
+    "POST /api/admin/auth/api-keys creates a key and returns raw value once only",
+    "GET /api/admin/auth/api-keys lists keys (hashed, never raw)",
+    "DELETE /api/admin/auth/api-keys/:id revokes a key",
+    "ApiKeyGuard rejects invalid or revoked keys with 401",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

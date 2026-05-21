@@ -1,0 +1,13 @@
+{
+  "ticket": "CMS-014",
+  "slice": "slice-06-phase3",
+  "module": "audit",
+  "status": "done",
+  "scope_note": "Retrofit AuditPort into content and media modules — all mutations emit audit events",
+  "acceptance_criteria": [
+    "Content create, update, delete, submit, publish, unpublish, schedule emit audit events",
+    "Media upload, variant generation, delete emit audit events",
+    "All audit entries include actorId, actorIp, action, resourceType, resourceId, timestamp",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

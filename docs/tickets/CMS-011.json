@@ -1,0 +1,15 @@
+{
+  "ticket": "CMS-011",
+  "slice": "slice-05-phase3",
+  "module": "public-api",
+  "status": "done",
+  "scope_note": "Response envelope, rate limiting (60 req/min per API key), OpenAPI docs at /docs and /redoc",
+  "acceptance_criteria": [
+    "All public API responses wrapped in { data, meta } envelope",
+    "ApiKeyThrottlerGuard enforces 60 req/min per API key",
+    "429 returned with Retry-After header when limit exceeded",
+    "Swagger UI available at /docs",
+    "Redoc available at /redoc",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

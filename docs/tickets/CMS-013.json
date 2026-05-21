@@ -1,0 +1,14 @@
+{
+  "ticket": "CMS-013",
+  "slice": "slice-06-phase2",
+  "module": "audit",
+  "status": "done",
+  "scope_note": "Retrofit AuditPort into auth and users modules — all mutations emit audit events",
+  "acceptance_criteria": [
+    "Login, logout, refresh, lockout, API key create/revoke emit audit events",
+    "User create, update, delete, role change, invite emit audit events",
+    "AuditPort injected directly into use cases (no event bus)",
+    "Actor IP extracted from req.ip and stored as plain string in command objects",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

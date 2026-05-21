@@ -1,0 +1,21 @@
+{
+  "ticket": "CMS-015",
+  "slice": "slice-07",
+  "module": "notifications",
+  "status": "done",
+  "scope_note": "Email notifications via Resend — password reset and user invite emails dispatched async via BullMQ email.queue",
+  "depends_on": [],
+  "acceptance_criteria": [
+    "IEmailSenderPort in domain/ports/ with sendPasswordResetEmail(to, resetLink) and sendInviteEmail(to, inviteLink, role)",
+    "NotificationService assembles full link from FRONTEND_BASE_URL env var and enqueues job",
+    "EmailQueueProducer wraps BullMQ Queue with attempts:3, exponential backoff delay:5000ms",
+    "EmailWorkerProcessor routes password-reset and invite jobs to ResendEmailSenderAdapter",
+    "Unknown job type throws UnhandledEmailJobTypeError (exhaustiveness guard)",
+    "ResendEmailSenderAdapter reads RESEND_API_KEY and RESEND_FROM_ADDRESS via ConfigService — fails fast on startup if absent",
+    "AuthModule and UserModule import NotificationModule and inject NotificationService into ForgotPasswordUseCase and InviteUserUseCase",
+    "Unit tests for NotificationService using FakeEmailQueueProducer (no I/O)",
+    "Integration tests mock resend.emails.send and assert correct payload shape",
+    "pnpm typecheck, lint, vitest run src/modules/notification, and integration test all exit 0",
+    "Coverage >= 98% on notification module"
+  ]
+}

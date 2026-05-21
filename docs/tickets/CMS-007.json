@@ -1,0 +1,15 @@
+{
+  "ticket": "CMS-007",
+  "slice": "slice-04-phase1",
+  "module": "media",
+  "status": "done",
+  "scope_note": "Media upload pipeline — multipart upload to MinIO/S3, BullMQ variant generation job",
+  "acceptance_criteria": [
+    "POST /api/admin/media/upload accepts multipart/form-data and stores original in MinIO",
+    "BullMQ job generates image variants (thumbnail, medium) after upload",
+    "Upload returns media record with status 'processing' immediately",
+    "Media status transitions to 'ready' once variants are generated",
+    "Invalid file types rejected with 422",
+    "pnpm typecheck, lint, and vitest run apps/api/test/unit/media exit 0"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "ticket": "CMS-017",
+  "slice": "slice-09-phase1",
+  "module": "web",
+  "status": "done",
+  "scope_note": "Admin SPA foundation — React + MUI v6 Material Design 3, routing, global state, Login / Forgot Password / Reset Password screens",
+  "depends_on": ["CMS-015", "CMS-016"],
+  "acceptance_criteria": [
+    "apps/web bootstrapped with Vite + React + TypeScript strict",
+    "MUI v6 theme follows docs/03-DESIGN.md spec",
+    "React Router configured with protected routes (redirect to /login if no token)",
+    "Login screen: email + password, JWT stored in memory, refresh cookie handled automatically",
+    "Forgot Password screen: email input, calls POST /api/admin/auth/password/forgot",
+    "Reset Password screen: reads token from URL, calls POST /api/admin/auth/password/reset",
+    "pnpm --filter @cms/web typecheck and lint exit 0"
+  ]
+}

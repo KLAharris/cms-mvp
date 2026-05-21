@@ -1,0 +1,16 @@
+{
+  "ticket": "CMS-020",
+  "slice": "slice-09-phase4",
+  "module": "web",
+  "status": "done",
+  "scope_note": "E2E tests (Playwright), accessibility audit, README polish, production readiness",
+  "depends_on": ["CMS-018", "CMS-019"],
+  "acceptance_criteria": [
+    "Playwright E2E covers: login → create content → publish → view on public API",
+    "Playwright E2E covers: forgot password full flow (E2E-07)",
+    "Lighthouse accessibility score >= 90 on all screens",
+    "README updated with setup instructions, env vars, and architecture diagram",
+    "docker-compose.yml starts full stack (api + web + postgres + redis + minio) in one command",
+    "All CI checks green on main"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "ticket": "CMS-010",
+  "slice": "slice-05-phase2",
+  "module": "public-api",
+  "status": "done",
+  "scope_note": "Public API read endpoints with Redis caching — list 300s TTL, detail 600s TTL",
+  "acceptance_criteria": [
+    "GET /api/public/content lists published content (no auth, X-API-Key required)",
+    "GET /api/public/content/:slug returns published content by slug",
+    "Responses cached in Redis: list 300s, detail 600s",
+    "Cache invalidated on publish/unpublish",
+    "pnpm typecheck, lint, and vitest exit 0"
+  ]
+}

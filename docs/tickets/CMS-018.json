@@ -1,0 +1,16 @@
+{
+  "ticket": "CMS-018",
+  "slice": "slice-09-phase2",
+  "module": "web",
+  "status": "done",
+  "scope_note": "Admin SPA — dashboard and content management screens (list, create, edit, lifecycle actions)",
+  "depends_on": ["CMS-017"],
+  "acceptance_criteria": [
+    "Dashboard shows summary counts (published, draft, in_review, media items)",
+    "Content list screen with pagination, type filter, and search",
+    "Content create/edit form with title, body (rich text), slug, SEO fields",
+    "Lifecycle action buttons: Submit for Review, Publish, Unpublish, Schedule",
+    "Optimistic UI updates on lifecycle transitions",
+    "pnpm --filter @cms/web typecheck and lint exit 0"
+  ]
+}

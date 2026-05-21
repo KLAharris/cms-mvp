@@ -1,0 +1,15 @@
+{
+  "ticket": "CMS-003",
+  "slice": "slice-02",
+  "module": "users",
+  "status": "done",
+  "scope_note": "User management — CRUD, role assignment (admin/editor/viewer), invite flow",
+  "acceptance_criteria": [
+    "POST /api/admin/users creates user and sends invite email stub",
+    "GET /api/admin/users lists users with pagination",
+    "PATCH /api/admin/users/:id updates profile and role",
+    "DELETE /api/admin/users/:id soft-deletes user",
+    "Only admins can assign roles or invite users",
+    "pnpm typecheck, lint, and vitest run src/modules/users all exit 0"
+  ]
+}
