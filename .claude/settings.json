@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"$CLAUDE_TOOL_INPUT_FILE_PATH\" | grep -q \"apps/api/src/\" && cd /Users/kla/Desktop/cms-mvp && pnpm --filter @cms/api depcruise 2>&1 | grep -E \"error|violation\" && echo \"⚠️  depcruise violation detected — run /prevent for details\" || true'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"$CLAUDE_TOOL_INPUT_FILE_PATH\" | grep -q \"prisma/schema.prisma\" && echo \"⚠️  Schema changed — remember to run: pnpm --filter @cms/api prisma generate\" || true'"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --filter @cms/api depcruise*)",
+      "Bash(pnpm --filter @cms/api typecheck*)",
+      "Bash(pnpm --filter @cms/api lint*)",
+      "Bash(pnpm --filter @cms/web tsc*)",
+      "Bash(pnpm --filter @cms/web lint*)",
+      "Bash(pnpm --filter @cms/api exec vitest run*)",
+      "Bash(pnpm --filter @cms/web exec vitest run*)"
+    ]
+  }
+}
