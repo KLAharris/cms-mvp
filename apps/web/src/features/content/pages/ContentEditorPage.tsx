@@ -19,8 +19,6 @@ import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Heading from '@tiptap/extension-heading';
 import Link from '@tiptap/extension-link';
-import CodeBlock from '@tiptap/extension-code-block';
-import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Underline from '@tiptap/extension-underline';
 import { useQueryClient } from '@tanstack/react-query';
 import { type ReactElement, useState, useEffect, useCallback } from 'react';
@@ -248,11 +246,9 @@ export function ContentEditorPage({ type }: ContentEditorPageProps): ReactElemen
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ heading: false }),
       Heading.configure({ levels: [2, 3] }),
       Link.configure({ openOnClick: false }),
-      CodeBlock,
-      HorizontalRule,
       Underline,
     ],
     content: content?.body as Record<string, unknown> | undefined,
